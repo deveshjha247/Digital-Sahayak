@@ -76,6 +76,16 @@ function AppRoutes() {
           <MainLayout><DashboardPage /></MainLayout>
         </ProtectedRoute>
       } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <MainLayout><ProfilePreferencesPage /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/recommendations" element={
+        <ProtectedRoute>
+          <MainLayout><RecommendationsPage /></MainLayout>
+        </ProtectedRoute>
+      } />
       <Route path="/admin" element={
         <ProtectedRoute>
           <MainLayout><AdminPage /></MainLayout>
