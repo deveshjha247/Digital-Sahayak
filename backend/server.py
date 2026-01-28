@@ -20,6 +20,7 @@ import asyncio
 import re
 from bs4 import BeautifulSoup
 from openai import OpenAI
+import unicodedata
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
