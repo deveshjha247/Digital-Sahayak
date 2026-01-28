@@ -177,6 +177,12 @@ const AdminPage = () => {
               {scraping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
               Scrape Jobs
             </Button>
+            <Link to="/admin/content-drafts">
+              <Button variant="outline" className="rounded-full gap-2" data-testid="content-drafts-btn">
+                <FileEdit className="w-4 h-4" />
+                Content Drafts
+              </Button>
+            </Link>
             <Dialog open={jobDialogOpen} onOpenChange={setJobDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-full gap-2" data-testid="add-job-btn">
