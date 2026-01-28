@@ -1015,17 +1015,33 @@ async def get_yojana_list(
     yojanas = await db.yojana.find(query, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     return {"total": total, "yojanas": yojanas}
 
+@api_router.get("/yojana/slug/{slug:path}")
+async def get_yojana_by_slug(slug: str):
+    """Get yojana by SEO-friendly slug URL"""
+    yojana = await db.yojana.find_one({"slug": slug}, {"_id": 0})
+    if not yojana:
+        raise HTTPException(status_code=404, detail="Yojana not found")
+    await db.yojana.update_one({"slug": slug}, {"$inc": {"views": 1}})
+    return yojana
+
 @api_router.get("/yojana/{yojana_id}")
 async def get_yojana(yojana_id: str):
     yojana = await db.yojana.find_one({"id": yojana_id}, {"_id": 0})
     if not yojana:
+        # Try slug
+        yojana = await db.yojana.find_one({"slug": yojana_id}, {"_id": 0})
+    if not yojana:
         raise HTTPException(status_code=404, detail="Yojana not found")
-    await db.yojana.update_one({"id": yojana_id}, {"$inc": {"views": 1}})
+    await db.yojana.update_one({"id": yojana.get("id")}, {"$inc": {"views": 1}})
     return yojana
 
 @api_router.put("/yojana/{yojana_id}")
 async def update_yojana(yojana_id: str, yojana: YojanaCreate, admin: dict = Depends(get_admin_user)):
-    result = await db.yojana.update_one({"id": yojana_id}, {"$set": yojana.model_dump()})
+    update_data = yojana.model_dump()
+    if yojana.slug:
+        update_data["slug"] = await get_unique_slug(yojana.slug, "yojana")
+    
+    result = await db.yojana.update_one({"id": yojana_id}, {"$set": update_data})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Yojana not found")
     return {"message": "Yojana updated"}
