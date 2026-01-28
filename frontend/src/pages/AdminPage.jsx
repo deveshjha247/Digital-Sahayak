@@ -165,7 +165,17 @@ const AdminPage = () => {
             </h1>
             <p className="text-muted-foreground">Manage jobs, yojanas, and applications</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              variant="outline" 
+              className="rounded-full gap-2" 
+              onClick={handleScrapeJobs}
+              disabled={scraping}
+              data-testid="scrape-jobs-btn"
+            >
+              {scraping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+              Scrape Jobs
+            </Button>
             <Dialog open={jobDialogOpen} onOpenChange={setJobDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-full gap-2" data-testid="add-job-btn">
