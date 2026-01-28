@@ -2,23 +2,40 @@
 
 ## 🎯 Features
 
-### 1. **दूसरे AI से सीखना (Learn from External AI)**
-- GitHub Copilot, ChatGPT, या किसी भी AI का response paste करो
-- System उसे analyze करके बेहतर response बनाता है
-- Strengths, weaknesses, और improvements को identify करता है
+### 1. **Learn from External AI**
+- Paste responses from GitHub Copilot, ChatGPT, or any AI
+- System analyzes and creates better responses
+- Identifies strengths, weaknesses, and improvements
+- Optional web search for additional context
 
 ### 2. **Smart Generation**
-- Past learnings का use करके better responses generate करता है
-- जितना ज्यादा सीखता है, उतना बेहतर बनता है
-- Confidence score के साथ response देता है
+- Uses past learnings for better responses
+- Project-context aware (understands Digital Sahayak domain)
+- The more it learns, the better it gets
+- Confidence score with each response
+- Optional web search for real-time information
 
-### 3. **Batch Learning**
-- Multiple AI responses को compare करके patterns सीखता है
-- Best practices को automatically identify करता है
+### 3. **Web Search Capability**
+- Search the web for real-time information
+- Uses DuckDuckGo (no API key needed)
+- Cached results for efficiency
+- Can extract detailed content from webpages
 
-### 4. **Job Matching Improvement**
-- External AI suggestions से job matching को improve करता है
-- Digital Sahayak के job recommendations को better बनाता है
+### 4. **Project Understanding**
+- Automatically analyzes project structure
+- Understands codebase, routes, and models
+- Context-aware responses specific to Digital Sahayak
+- Knows about jobs, schemes, and Indian government systems
+
+### 5. **Batch Learning**
+- Compare multiple AI responses to learn patterns
+- Identifies best practices automatically
+- Project-specific insights
+
+### 6. **Job Matching Improvement**
+- Improves job recommendations using external AI suggestions
+- Can search web for job eligibility criteria
+- Learns from patterns to make better matches
 
 ---
 
