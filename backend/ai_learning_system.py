@@ -11,7 +11,7 @@ Features:
 
 from openai import OpenAI
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 import json
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -19,6 +19,9 @@ import httpx
 from bs4 import BeautifulSoup
 import re
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SelfLearningAI:
     """
@@ -27,6 +30,8 @@ class SelfLearningAI:
     2. Understands the project domain (Digital Sahayak - Jobs & Schemes)
     3. Searches web for real-time information
     4. Improves responses based on past learnings
+    5. Uses Rule + ML Hybrid approach for matching
+    6. Learns from interaction logs
     """
     
     def __init__(self, openai_client: OpenAI, db):
@@ -36,6 +41,43 @@ class SelfLearningAI:
         self.improvement_collection = db['ai_improvements']
         self.project_context_collection = db['ai_project_context']
         self.web_search_cache = db['ai_web_search_cache']
+        self.interaction_logs_collection = db['ai_interaction_logs']
+        self.rules_collection = db['ai_matching_rules']
+        
+        # Initialize field mapping rules for job matching
+        self.field_mapping_rules = {
+            "education": {
+                "10th": ["10th", "Matriculation", "High School", "10वीं"],
+                "12th": ["12th", "Intermediate", "+2", "12वीं"],
+                "Graduate": ["Graduate", "Graduation", "Bachelor", "BA", "BSc", "BCom", "स्नातक"],
+                "Post Graduate": ["Post Graduate", "PG", "Master", "MA", "MSc", "MCom", "स्नातकोत्तर"]
+            },
+            "state": {
+                "Bihar": ["BR", "bihar", "बिहार"],
+                "Jharkhand": ["JH", "jharkhand", "झारखंड"],
+                "Uttar Pradesh": ["UP", "uttar pradesh", "उत्तर प्रदेश"],
+                "All India": ["All India", "National", "सभी राज्य"]
+            },
+            "category": {
+                "Railway": ["railway", "रेलवे", "rail", "indian railway"],
+                "SSC": ["ssc", "staff selection", "एसएससी"],
+                "UPSC": ["upsc", "civil services", "यूपीएससी"],
+                "Bank": ["bank", "बैंक", "banking"],
+                "Police": ["police", "पुलिस", "constable"]
+            }
+        }
+        
+        # Heuristic scoring weights
+        self.heuristic_weights = {
+            "education_match": 30,
+            "age_match": 20,
+            "state_match": 25,
+            "category_match": 15,
+            "experience_match": 10
+        }
+        
+        # Load existing rules from database
+        self.custom_rules = []
         
         # Project domain knowledge
         self.project_domain = {
@@ -249,6 +291,340 @@ class SelfLearningAI:
                     
                     # Limit to 2000 characters
                     return text[:2000]
+    
+    async def normalize_field_value(self, field: str, value: str) -> str:
+        """
+        Normalize field values using field mapping rules
+        Handles variations, abbreviations, and Hindi translations
+        
+        Args:
+            field: Field name (education, state, category)
+            value: Raw value to normalize
+            
+        Returns:
+            Normalized standard value
+        """
+        if not value or field not in self.field_mapping_rules:
+            return value
+        
+        value_lower = value.lower().strip()
+        
+        # Check against mapping rules
+        for standard_value, variations in self.field_mapping_rules[field].items():
+            for variation in variations:
+                if variation.lower() in value_lower or value_lower in variation.lower():
+                    return standard_value
+        
+        return value  # Return original if no match
+    
+    async def apply_heuristic_matching(self, job_data: Dict, user_profile: Dict) -> Dict:
+        """
+        Apply rule-based heuristic matching for job recommendations
+        Uses weighted scoring system
+        
+        Args:
+            job_data: Job details
+            user_profile: User profile
+            
+        Returns:
+            Dict with score, breakdown, and matched fields
+        """
+        score_breakdown = {}
+        matched_fields = []
+        total_score = 0
+        
+        # 1. Education Match (30 points)
+        job_education = await self.normalize_field_value("education", job_data.get('education', ''))
+        user_education = await self.normalize_field_value("education", user_profile.get('education', ''))
+        
+        if job_education == user_education:
+            education_score = self.heuristic_weights['education_match']
+            matched_fields.append('education')
+        elif self._education_qualifies(user_education, job_education):
+            education_score = self.heuristic_weights['education_match'] * 0.7
+            matched_fields.append('education_partial')
+        else:
+            education_score = 0
+        
+        score_breakdown['education'] = education_score
+        total_score += education_score
+        
+        # 2. Age Match (20 points)
+        user_age = user_profile.get('age', 0)
+        min_age = job_data.get('min_age', 18)
+        max_age = job_data.get('max_age', 40)
+        
+        if min_age <= user_age <= max_age:
+            age_score = self.heuristic_weights['age_match']
+            matched_fields.append('age')
+        elif abs(user_age - min_age) <= 2 or abs(user_age - max_age) <= 2:
+            age_score = self.heuristic_weights['age_match'] * 0.5
+            matched_fields.append('age_close')
+        else:
+            age_score = 0
+        
+        score_breakdown['age'] = age_score
+        total_score += age_score
+        
+        # 3. State Match (25 points)
+        job_state = await self.normalize_field_value("state", job_data.get('state', ''))
+        user_state = await self.normalize_field_value("state", user_profile.get('state', ''))
+        
+        if job_state == user_state or job_state == "All India":
+            state_score = self.heuristic_weights['state_match']
+            matched_fields.append('state')
+        else:
+            state_score = 0
+        
+        score_breakdown['state'] = state_score
+        total_score += state_score
+        
+        # 4. Category Match (15 points)
+        job_category = job_data.get('category', '')
+        user_preferences = user_profile.get('preferred_categories', [])
+        
+        if job_category in user_preferences:
+            category_score = self.heuristic_weights['category_match']
+            matched_fields.append('category')
+        else:
+            category_score = 0
+        
+        score_breakdown['category'] = category_score
+        total_score += category_score
+        
+        # 5. Experience Match (10 points) - if applicable
+        job_experience = job_data.get('experience_required', 0)
+        user_experience = user_profile.get('experience_years', 0)
+        
+        if user_experience >= job_experience:
+            experience_score = self.heuristic_weights['experience_match']
+            matched_fields.append('experience')
+        else:
+            experience_score = max(0, self.heuristic_weights['experience_match'] * 0.3)
+        
+        score_breakdown['experience'] = experience_score
+        total_score += experience_score
+        
+        return {
+            "total_score": round(total_score, 2),
+            "max_score": sum(self.heuristic_weights.values()),
+            "score_breakdown": score_breakdown,
+            "matched_fields": matched_fields,
+            "match_percentage": round((total_score / sum(self.heuristic_weights.values())) * 100, 2)
+        }
+    
+    def _education_qualifies(self, user_education: str, required_education: str) -> bool:
+        """Check if user's education qualifies for job requirement"""
+        education_hierarchy = ["10th", "12th", "Graduate", "Post Graduate"]
+        
+        try:
+            user_level = education_hierarchy.index(user_education)
+            required_level = education_hierarchy.index(required_education)
+            return user_level >= required_level
+        except ValueError:
+            return False
+    
+    async def hybrid_job_matching(self, job_data: Dict, user_profile: Dict, 
+                                   use_ml: bool = True) -> Dict:
+        """
+        Hybrid approach: Combines rule-based heuristics with ML predictions
+        
+        Args:
+            job_data: Job details
+            user_profile: User profile
+            use_ml: Whether to use ML enhancement
+            
+        Returns:
+            Dict with final score, rule score, ML score, and reasoning
+        """
+        # Step 1: Apply rule-based heuristic matching
+        heuristic_result = await self.apply_heuristic_matching(job_data, user_profile)
+        
+        # Step 2: Apply ML enhancement if enabled
+        ml_enhancement = 0
+        ml_reasoning = ""
+        
+        if use_ml and self.openai_client:
+            ml_prompt = f"""
+            Analyze this job match and provide enhancement score (-10 to +10 points).
+            Consider soft factors not captured by rules.
+            
+            Job: {job_data.get('title', 'Unknown')}
+            User: {user_profile.get('education', '?')} educated, {user_profile.get('age', '?')} years old
+            
+            Rule-based score: {heuristic_result['match_percentage']}%
+            Matched fields: {', '.join(heuristic_result['matched_fields'])}
+            
+            Consider:
+            1. Job description relevance to user profile
+            2. Career progression alignment
+            3. Geographic suitability
+            4. Application deadline urgency
+            
+            Respond with JSON:
+            {{
+                "ml_score_adjustment": <-10 to +10>,
+                "reasoning": "brief explanation in Hindi"
+            }}
+            """
+            
+            try:
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": ml_prompt}],
+                    temperature=0.3
+                )
+                
+                ml_result = json.loads(response.choices[0].message.content)
+                ml_enhancement = ml_result.get('ml_score_adjustment', 0)
+                ml_reasoning = ml_result.get('reasoning', '')
+            except Exception as e:
+                logger.warning(f"ML enhancement failed: {e}")
+        
+        # Step 3: Combine scores
+        final_score = min(100, max(0, heuristic_result['match_percentage'] + ml_enhancement))
+        
+        # Step 4: Log this interaction for future learning
+        await self.log_interaction({
+            "type": "hybrid_job_matching",
+            "job_id": job_data.get('id'),
+            "user_id": user_profile.get('id'),
+            "heuristic_score": heuristic_result['match_percentage'],
+            "ml_adjustment": ml_enhancement,
+            "final_score": final_score,
+            "matched_fields": heuristic_result['matched_fields'],
+            "timestamp": datetime.now()
+        })
+        
+        return {
+            "final_score": final_score,
+            "rule_based_score": heuristic_result['match_percentage'],
+            "ml_enhancement": ml_enhancement,
+            "score_breakdown": heuristic_result['score_breakdown'],
+            "matched_fields": heuristic_result['matched_fields'],
+            "ml_reasoning": ml_reasoning,
+            "method": "hybrid",
+            "confidence": 0.85 if use_ml else 0.70
+        }
+    
+    async def log_interaction(self, interaction_data: Dict):
+        """
+        Log user interactions for learning from behavior patterns
+        
+        Args:
+            interaction_data: Interaction details
+        """
+        try:
+            await self.interaction_logs_collection.insert_one(interaction_data)
+        except Exception as e:
+            logger.error(f"Failed to log interaction: {e}")
+    
+    async def learn_from_logs(self, days: int = 7) -> Dict:
+        """
+        Analyze interaction logs to learn patterns and improve matching
+        
+        Args:
+            days: Number of days of logs to analyze
+            
+        Returns:
+            Dict with learned patterns and rule adjustments
+        """
+        cutoff_date = datetime.now().timestamp() - (days * 24 * 3600)
+        
+        # Fetch recent logs
+        logs = await self.interaction_logs_collection.find({
+            "timestamp": {"$gte": cutoff_date}
+        }).to_list(1000)
+        
+        if not logs:
+            return {"learned": False, "reason": "No recent logs available"}
+        
+        # Analyze patterns
+        analysis_prompt = f"""
+        Analyze these interaction logs to identify patterns and suggest improvements.
+        
+        Total interactions: {len(logs)}
+        Sample data: {json.dumps(logs[:10], default=str, ensure_ascii=False)}
+        
+        Identify:
+        1. Which fields are most predictive of good matches?
+        2. Are current weights optimal?
+        3. Are there patterns in user behavior?
+        4. Should we adjust heuristic weights?
+        
+        Respond with JSON:
+        {{
+            "patterns_found": ["pattern1", "pattern2"],
+            "weight_adjustments": {{"field": "new_weight"}},
+            "insights": ["insight1", "insight2"],
+            "recommended_rules": ["rule1", "rule2"]
+        }}
+        """
+        
+        try:
+            response = self.openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": analysis_prompt}],
+                temperature=0.2
+            )
+            
+            learned_patterns = json.loads(response.choices[0].message.content)
+            
+            # Apply weight adjustments if suggested
+            if learned_patterns.get('weight_adjustments'):
+                for field, new_weight in learned_patterns['weight_adjustments'].items():
+                    if field in self.heuristic_weights:
+                        old_weight = self.heuristic_weights[field]
+                        self.heuristic_weights[field] = new_weight
+                        logger.info(f"Adjusted weight for {field}: {old_weight} → {new_weight}")
+            
+            # Save learning
+            await self.improvement_collection.insert_one({
+                "timestamp": datetime.now(),
+                "type": "log_learning",
+                "logs_analyzed": len(logs),
+                "patterns": learned_patterns,
+                "days_analyzed": days
+            })
+            
+            return {
+                "learned": True,
+                "logs_analyzed": len(logs),
+                "patterns": learned_patterns,
+                "weights_updated": bool(learned_patterns.get('weight_adjustments'))
+            }
+            
+        except Exception as e:
+            logger.error(f"Log learning failed: {e}")
+            return {"learned": False, "error": str(e)}
+    
+    async def add_custom_rule(self, rule: Dict) -> bool:
+        """
+        Add a custom matching rule learned from patterns
+        
+        Args:
+            rule: Rule definition with conditions and actions
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            rule['created_at'] = datetime.now()
+            rule['active'] = True
+            await self.rules_collection.insert_one(rule)
+            self.custom_rules.append(rule)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to add rule: {e}")
+            return False
+    
+    async def get_active_rules(self) -> List[Dict]:
+        """Get all active custom matching rules"""
+        if not self.custom_rules:
+            self.custom_rules = await self.rules_collection.find(
+                {"active": True}
+            ).to_list(100)
+        return self.custom_rules
         except:
             return ""
         
