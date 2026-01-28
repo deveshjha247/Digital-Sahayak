@@ -158,6 +158,20 @@ class YojanaCreate(BaseModel):
     govt_fee: float = 0
     service_fee: float = 20
     is_active: bool = True
+    is_draft: bool = False
+    source_url: Optional[str] = None
+    is_rewritten: bool = False
+
+class ScrapedContent(BaseModel):
+    """Model for scraped content awaiting review"""
+    title: str
+    title_hi: Optional[str] = None
+    organization: Optional[str] = None
+    description: Optional[str] = None
+    source_url: str
+    category: str = "government"
+    state: str = "all"
+    content_type: str = "job"  # job, result, admit_card, syllabus, yojana
 
 class ApplicationCreate(BaseModel):
     item_type: str  # "job" or "yojana"
