@@ -134,7 +134,7 @@ const AdminPage = () => {
     setScraping(true);
     try {
       await axios.post(`${API}/admin/scrape-jobs`);
-      toast.success('Job scraping शुरू हो गई! कुछ समय बाद रिफ्रेश करें।');
+      toast.success('Job scraping शुरू हो गई! Content Drafts में देखें।');
       // Wait a bit and refresh
       setTimeout(() => {
         fetchData();
