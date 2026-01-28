@@ -111,10 +111,13 @@ class TokenResponse(BaseModel):
 class JobAlertCreate(BaseModel):
     title: str
     title_hi: Optional[str] = None
+    slug: Optional[str] = None  # Custom URL slug
     organization: str
     organization_hi: Optional[str] = None
     description: str
     description_hi: Optional[str] = None
+    meta_description: Optional[str] = None  # SEO meta description
+    highlights: List[str] = []  # Key highlights/bullet points
     vacancies: int = 0
     qualification: str
     qualification_hi: Optional[str] = None
@@ -122,17 +125,28 @@ class JobAlertCreate(BaseModel):
     salary: str = ""
     last_date: str
     apply_link: str
+    notification_pdf: Optional[str] = None  # PDF link
+    syllabus_link: Optional[str] = None
+    admit_card_link: Optional[str] = None
+    result_link: Optional[str] = None
     category: str = "government"
     state: str = "all"
+    content_type: str = "job"  # job, result, admit_card, syllabus
     is_active: bool = True
+    is_draft: bool = False  # Draft mode for editing before publish
+    source_url: Optional[str] = None  # Original source for reference
+    is_rewritten: bool = False  # Flag if content was rewritten
 
 class YojanaCreate(BaseModel):
     name: str
     name_hi: Optional[str] = None
+    slug: Optional[str] = None
     ministry: str
     ministry_hi: Optional[str] = None
     description: str
     description_hi: Optional[str] = None
+    meta_description: Optional[str] = None
+    highlights: List[str] = []
     benefits: str
     benefits_hi: Optional[str] = None
     eligibility: str
