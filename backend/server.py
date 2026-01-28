@@ -21,6 +21,7 @@ import re
 from bs4 import BeautifulSoup
 from openai import OpenAI
 import unicodedata
+from ai_learning_system import SelfLearningAI
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -55,6 +56,9 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 app = FastAPI(title="Digital Sahayak API", version="1.0.0")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
+
+# Initialize Self-Learning AI System
+self_learning_ai = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -1790,8 +1794,179 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ===================== SELF-LEARNING AI ENDPOINTS =====================
+
+@api_router.post("/ai/learn-from-external")
+async def learn_from_external_ai(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    दूसरे AI (Copilot, ChatGPT, etc.) से सीखने के लिए endpoint
+    
+    Example:
+    {
+        "prompt": "कैसे job match करें?",
+        "other_ai_response": "Copilot/ChatGPT का response",
+        "ai_name": "GitHub Copilot"
+    }
+    """
+    try:
+        data = await request.json()
+        prompt = data.get('prompt')
+        other_response = data.get('other_ai_response')
+        ai_name = data.get('ai_name', 'External AI')
+        
+        if not prompt or not other_response:
+            raise HTTPException(400, "prompt और other_ai_response required हैं")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System available नहीं है")
+        
+        # दूसरे AI से सीखो
+        result = await self_learning_ai.learn_from_other_ai(prompt, other_response, ai_name)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(500, f"Learning error: {str(e)}")
+
+
+@api_router.post("/ai/generate-smart")
+async def generate_with_learning(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Past learnings के साथ smart response generate करो
+    
+    Example:
+    {
+        "prompt": "User को job recommendations दो",
+        "context": "User profile data"
+    }
+    """
+    try:
+        data = await request.json()
+        prompt = data.get('prompt')
+        context = data.get('context', '')
+        
+        if not prompt:
+            raise HTTPException(400, "prompt required है")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System available नहीं है")
+        
+        # Learning के साथ generate करो
+        result = await self_learning_ai.generate_with_learning(prompt, context)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(500, f"Generation error: {str(e)}")
+
+
+@api_router.post("/ai/batch-compare")
+async def batch_compare_learning(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Multiple AI responses को compare करके patterns सीखो
+    
+    Example:
+    {
+        "comparisons": [
+            {"ai_name": "Copilot", "prompt": "xyz", "response": "abc"},
+            {"ai_name": "ChatGPT", "prompt": "xyz", "response": "def"}
+        ]
+    }
+    """
+    try:
+        data = await request.json()
+        comparisons = data.get('comparisons', [])
+        
+        if not comparisons:
+            raise HTTPException(400, "comparisons required हैं")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System available नहीं है")
+        
+        # Batch learning
+        result = await self_learning_ai.compare_and_learn_batch(comparisons)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(500, f"Batch learning error: {str(e)}")
+
+
+@api_router.get("/ai/learning-stats")
+async def get_learning_statistics(current_user: dict = Depends(get_current_user)):
+    """
+    AI की learning statistics देखो
+    """
+    try:
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System available नहीं है")
+        
+        stats = await self_learning_ai.get_learning_stats()
+        
+        return stats
+        
+    except Exception as e:
+        raise HTTPException(500, f"Stats error: {str(e)}")
+
+
+@api_router.post("/ai/improve-job-matching")
+async def improve_job_matching_with_ai(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Job matching को AI learning से improve करो
+    
+    Example:
+    {
+        "job_id": "job123",
+        "external_suggestions": {...}  // Optional: दूसरे AI के suggestions
+    }
+    """
+    try:
+        data = await request.json()
+        job_id = data.get('job_id')
+        external_suggestions = data.get('external_suggestions')
+        
+        if not job_id:
+            raise HTTPException(400, "job_id required है")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System available नहीं है")
+        
+        # Job data fetch करो
+        job = await db.jobs.find_one({"id": job_id})
+        if not job:
+            raise HTTPException(404, "Job not found")
+        
+        # User profile fetch करो
+        user_profile = {
+            "education": current_user.get('education'),
+            "age": current_user.get('age'),
+            "state": current_user.get('state'),
+            "preferred_categories": current_user.get('preferred_categories', [])
+        }
+        
+        # Improved matching
+        result = await self_learning_ai.auto_improve_job_matching(
+            job, user_profile, external_suggestions
+        )
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(500, f"Job matching error: {str(e)}")
+
+
+# ===================== STARTUP & SHUTDOWN =====================
+
 @app.on_event("startup")
 async def startup():
+    global self_learning_ai
+    
+    # Initialize Self-Learning AI System
+    if openai_client:
+        self_learning_ai = SelfLearningAI(openai_client, db)
+        logger.info("Self-Learning AI System initialized")
+    
     # Create indexes
     await db.users.create_index("phone", unique=True)
     await db.users.create_index("id", unique=True)

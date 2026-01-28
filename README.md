@@ -8,6 +8,7 @@ A comprehensive platform connecting citizens with government schemes and job opp
 - **Yojana Discovery**: Browse and search government schemes (Yojanas)
 - **Job Listings**: Explore available job opportunities
 - **AI Job Matching**: Intelligent job recommendations based on user profile
+- **Self-Learning AI**: AI that learns from other AIs (Copilot, ChatGPT) and improves itself
 - **Admin Dashboard**: Manage schemes and jobs content
 - **User Authentication**: Secure login and registration
 - **Profile Management**: User preferences and profile settings
@@ -99,6 +100,17 @@ FLASK_ENV=development
 - UI components are built with Shadcn and styled with Tailwind CSS
 - Backend provides RESTful endpoints for data management
 - AI matching uses OpenAI's GPT models for intelligent recommendations
+- **Self-Learning AI System**: Learn from external AI responses and continuously improve
+
+## Self-Learning AI System
+
+Digital Sahayak includes a unique **Self-Learning AI** that:
+- 🧠 **Learns from other AIs** (GitHub Copilot, ChatGPT, etc.)
+- 📈 **Continuously improves** its responses
+- 🎯 **Better job matching** over time
+- 📊 **Tracks learning statistics**
+
+See [AI_LEARNING_GUIDE.md](AI_LEARNING_GUIDE.md) for detailed documentation.
 
 ## Contributors
 
