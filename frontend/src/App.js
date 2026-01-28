@@ -64,8 +64,10 @@ function AppRoutes() {
       <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
       <Route path="/jobs" element={<MainLayout><JobsPage /></MainLayout>} />
       <Route path="/jobs/:id" element={<MainLayout><JobDetailPage /></MainLayout>} />
+      <Route path="/job/:slug/*" element={<MainLayout><JobDetailPage /></MainLayout>} />
       <Route path="/yojana" element={<MainLayout><YojanaPage /></MainLayout>} />
       <Route path="/yojana/:id" element={<MainLayout><YojanaDetailPage /></MainLayout>} />
+      <Route path="/scheme/:slug/*" element={<MainLayout><YojanaDetailPage /></MainLayout>} />
       
       {/* Auth Routes without Navbar */}
       <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
