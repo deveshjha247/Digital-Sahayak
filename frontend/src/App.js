@@ -18,6 +18,8 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import ProfilePreferencesPage from './pages/ProfilePreferencesPage';
+import RecommendationsPage from './pages/RecommendationsPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
