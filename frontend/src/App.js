@@ -92,6 +92,11 @@ function AppRoutes() {
           <MainLayout><AdminPage /></MainLayout>
         </ProtectedRoute>
       } />
+      <Route path="/admin/content-drafts" element={
+        <ProtectedRoute>
+          <MainLayout><ContentDraftsPage /></MainLayout>
+        </ProtectedRoute>
+      } />
       <Route path="/payment-success" element={
         <ProtectedRoute>
           <MainLayout><PaymentSuccessPage /></MainLayout>
