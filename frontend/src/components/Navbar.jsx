@@ -90,6 +90,18 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer" data-testid="menu-profile">
+                      <UserCircle className="w-4 h-4" />
+                      <span>प्रोफ़ाइल सेटिंग्स</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/recommendations" className="flex items-center gap-2 cursor-pointer" data-testid="menu-recommendations">
+                      <Sparkles className="w-4 h-4" />
+                      <span>AI सुझाव</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/documents" className="flex items-center gap-2 cursor-pointer" data-testid="menu-documents">
                       <FileText className="w-4 h-4" />
                       <span>मेरे दस्तावेज़</span>
