@@ -2,16 +2,39 @@
 Job Matching Data Collector
 Collects job postings, user profiles, and interaction data for training ranking models
 Labels: relevant/not_relevant based on clicks, applications, time spent
+
+Best Practices Implemented:
+- Deduplication to avoid redundant data
+- Diversity tracking (state, category, education level)
+- Metadata storage for RAG and validation
+- Class balance analysis
+- Train/val/test split support
 """
 
 import json
 import logging
 import hashlib
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
+from collections import Counter
 
 logger = logging.getLogger(__name__)
+
+try:
+    from .data_quality import (
+        Deduplicator,
+        ClassBalanceAnalyzer,
+        DiversityAnalyzer,
+        DatasetSplitter,
+        FeedbackLoop,
+    )
+except ImportError:
+    Deduplicator = None
+    ClassBalanceAnalyzer = None
+    DiversityAnalyzer = None
+    DatasetSplitter = None
+    FeedbackLoop = None
 
 
 class JobMatchingCollector:
@@ -47,10 +70,24 @@ class JobMatchingCollector:
         self.users_file = self.data_dir / "users.jsonl"
         self.interactions_file = self.data_dir / "interactions.jsonl"
         self.labels_file = self.data_dir / "labeled_pairs.jsonl"
+        self.metadata_file = self.data_dir / "collection_metadata.json"
+        
+        # Quality tools
+        self.deduplicator = Deduplicator() if Deduplicator else None
+        self.feedback_loop = FeedbackLoop(str(self.data_dir / "feedback")) if FeedbackLoop else None
+        
+        # Diversity tracking
+        self.diversity_counters = {
+            "states": Counter(),
+            "categories": Counter(),
+            "education_levels": Counter(),
+            "age_groups": Counter(),
+        }
         
         # Stats
         self.stats = {
             "jobs_collected": 0,
+            "jobs_deduplicated": 0,
             "users_collected": 0,
             "interactions_collected": 0,
             "labeled_pairs": 0,
@@ -68,8 +105,23 @@ class JobMatchingCollector:
         - state: Location state
         - salary_min, salary_max: Salary range
         - age_min, age_max: Age requirements
+        
+        Returns: job_id or None if duplicate
         """
+        # Deduplication check
+        job_text = job.get("title", "") + job.get("description", "")[:500]
+        if self.deduplicator and self.deduplicator.is_duplicate(job_text):
+            self.stats["jobs_deduplicated"] += 1
+            logger.debug(f"Duplicate job skipped: {job.get('title', '')[:50]}")
+            return None
+        
         job_id = self._generate_id(job.get("title", "") + job.get("source_url", ""))
+        
+        # Track diversity
+        state = job.get("state", "unknown")
+        category = job.get("category", "unknown")
+        self.diversity_counters["states"][state] += 1
+        self.diversity_counters["categories"][category] += 1
         
         job_record = {
             "job_id": job_id,
@@ -87,6 +139,15 @@ class JobMatchingCollector:
             "deadline": job.get("deadline", ""),
             "source_url": job.get("source_url", ""),
             "collected_at": datetime.now().isoformat(),
+            
+            # Metadata for RAG and validation
+            "metadata": {
+                "source": job.get("source", "scraper"),
+                "publication_date": job.get("publication_date", ""),
+                "department": job.get("department", ""),
+                "organization": job.get("organization", ""),
+                "language": job.get("language", "en"),
+            },
             
             # Features for ML
             "features": self._extract_job_features(job),
@@ -345,6 +406,99 @@ class JobMatchingCollector:
                 "labels": str(self.labels_file),
             }
         }
+    
+    def get_diversity_report(self) -> Dict:
+        """Get diversity analysis for collected data"""
+        return {
+            "state_distribution": dict(self.diversity_counters["states"].most_common(20)),
+            "category_distribution": dict(self.diversity_counters["categories"].most_common(20)),
+            "education_distribution": dict(self.diversity_counters["education_levels"].most_common()),
+            "recommendations": self._diversity_recommendations(),
+        }
+    
+    def _diversity_recommendations(self) -> List[str]:
+        """Generate recommendations for improving diversity"""
+        recs = []
+        
+        states = self.diversity_counters["states"]
+        if len(states) < 10:
+            recs.append(f"Low state diversity ({len(states)} states). Collect from more regions.")
+        
+        categories = self.diversity_counters["categories"]
+        if categories:
+            top_count = categories.most_common(1)[0][1]
+            bottom_count = categories.most_common()[-1][1]
+            if top_count > bottom_count * 5:
+                recs.append("Category imbalance detected. Collect more from underrepresented categories.")
+        
+        return recs
+    
+    def get_class_balance(self) -> Dict:
+        """Analyze label class balance"""
+        labels = self._read_jsonl(self.labels_file)
+        label_values = [l["label"] for l in labels]
+        
+        if ClassBalanceAnalyzer and label_values:
+            analyzer = ClassBalanceAnalyzer(label_values)
+            return analyzer.recommend_strategy()
+        
+        return {"distribution": Counter(label_values)}
+    
+    def split_dataset(
+        self,
+        train_ratio: float = 0.7,
+        val_ratio: float = 0.15,
+        test_ratio: float = 0.15,
+        stratify: bool = True
+    ) -> Dict[str, str]:
+        """
+        Split dataset into train/val/test sets
+        Returns paths to split files
+        """
+        labels = self._read_jsonl(self.labels_file)
+        
+        if not DatasetSplitter or not labels:
+            return {"error": "No data or splitter unavailable"}
+        
+        if stratify:
+            train, val, test = DatasetSplitter.stratified_split(
+                labels, "label", train_ratio, val_ratio, test_ratio
+            )
+        else:
+            train, val, test = DatasetSplitter.random_split(
+                labels, train_ratio, val_ratio, test_ratio
+            )
+        
+        # Save splits
+        paths = {}
+        for name, data in [("train", train), ("val", val), ("test", test)]:
+            path = self.data_dir / f"{name}_labels.jsonl"
+            with open(path, "w", encoding="utf-8") as f:
+                for record in data:
+                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            paths[name] = str(path)
+        
+        return {
+            "paths": paths,
+            "sizes": {"train": len(train), "val": len(val), "test": len(test)},
+        }
+    
+    def log_operator_correction(
+        self,
+        user_id: str,
+        job_id: str,
+        original_label: str,
+        corrected_label: str,
+        operator_id: str
+    ):
+        """Log when an operator corrects a prediction"""
+        if self.feedback_loop:
+            self.feedback_loop.log_operator_correction(
+                original_prediction=original_label,
+                corrected_value=corrected_label,
+                context={"user_id": user_id, "job_id": job_id},
+                operator_id=operator_id
+            )
     
     def export_training_data(self, output_file: str = None) -> str:
         """

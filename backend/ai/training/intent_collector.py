@@ -2,6 +2,13 @@
 Intent Classification Data Collector
 Collects WhatsApp/chat messages with intent labels
 For training intent classifier from scratch
+
+Best Practices:
+- Native speaker context for Hindi/English mixed messages
+- Clear intent definitions with examples
+- Ambiguous case handling
+- Inter-annotator agreement tracking
+- Privacy protection (PII anonymization)
 """
 
 import json
@@ -12,8 +19,22 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 from enum import Enum
+from collections import Counter
 
 logger = logging.getLogger(__name__)
+
+try:
+    from .data_quality import (
+        Deduplicator,
+        ClassBalanceAnalyzer,
+        AnnotatorAgreement,
+        DatasetSplitter,
+    )
+except ImportError:
+    Deduplicator = None
+    ClassBalanceAnalyzer = None
+    AnnotatorAgreement = None
+    DatasetSplitter = None
 
 
 class UserIntent(Enum):
@@ -151,7 +172,26 @@ class IntentCollector:
     1. Rule-based auto-labeling for initial dataset
     2. Human verification and correction
     3. Confidence scoring for quality filtering
+    4. Inter-annotator agreement tracking
+    5. Ambiguous case documentation
     """
+    
+    # Intent definitions for annotators
+    INTENT_DEFINITIONS = {
+        "search_job": "User wants to find/browse job listings",
+        "apply_job": "User wants to apply for a specific job",
+        "job_status": "User checking status of job application",
+        "search_yojana": "User wants to find government schemes",
+        "apply_yojana": "User wants to apply for a scheme",
+        "yojana_eligibility": "User asking if they qualify for a scheme",
+        "greeting": "Simple greeting (hi, hello, namaste)",
+        "help": "User asking for assistance/guidance",
+        "fill_form": "User needs help filling a form",
+        "upload_document": "User wants to upload documents",
+        "complaint": "User has a complaint or problem",
+        "unclear": "Intent cannot be determined confidently",
+        "out_of_scope": "Not related to our services",
+    }
     
     def __init__(self, data_dir: str = "data/training/intent"):
         self.data_dir = Path(data_dir)
@@ -162,12 +202,22 @@ class IntentCollector:
         self.labeled_file = self.data_dir / "labeled_messages.jsonl"
         self.corrections_file = self.data_dir / "corrections.jsonl"
         self.conversations_file = self.data_dir / "conversations.jsonl"
+        self.ambiguous_file = self.data_dir / "ambiguous_cases.jsonl"
+        self.agreement_file = self.data_dir / "annotator_agreement.jsonl"
+        
+        # Quality tools
+        self.deduplicator = Deduplicator() if Deduplicator else None
+        
+        # Track annotations for agreement calculation
+        self.dual_annotations: Dict[str, Dict[str, str]] = {}  # msg_id -> {annotator: label}
         
         self.stats = {
             "messages_collected": 0,
+            "messages_deduplicated": 0,
             "auto_labeled": 0,
             "human_verified": 0,
             "corrections": 0,
+            "ambiguous_cases": 0,
         }
     
     def collect_message(
@@ -459,4 +509,149 @@ class IntentCollector:
                 {"auto": k[0], "correct": k[1], "count": v}
                 for k, v in sorted(confusion.items(), key=lambda x: -x[1])
             ]
+        }
+    
+    def mark_ambiguous(
+        self,
+        message_id: str,
+        possible_intents: List[str],
+        annotator_id: str,
+        reason: str = None
+    ):
+        """
+        Mark a message as ambiguous (unclear intent)
+        Important for identifying cases needing clearer guidelines
+        """
+        record = {
+            "message_id": message_id,
+            "possible_intents": possible_intents,
+            "annotator_id": annotator_id,
+            "reason": reason,
+            "marked_at": datetime.now().isoformat(),
+        }
+        self._append_jsonl(self.ambiguous_file, record)
+        self.stats["ambiguous_cases"] += 1
+    
+    def add_dual_annotation(
+        self,
+        message_id: str,
+        intent: str,
+        annotator_id: str
+    ):
+        """
+        Add annotation for inter-annotator agreement calculation
+        Each message should be labeled by 2+ annotators
+        """
+        if message_id not in self.dual_annotations:
+            self.dual_annotations[message_id] = {}
+        
+        self.dual_annotations[message_id][annotator_id] = intent
+    
+    def calculate_agreement(self) -> Dict:
+        """
+        Calculate inter-annotator agreement (Cohen's Kappa)
+        """
+        if not AnnotatorAgreement:
+            return {"error": "Agreement module not available"}
+        
+        # Find messages with exactly 2 annotators
+        dual_labeled = [
+            (anns, msg_id) for msg_id, anns in self.dual_annotations.items()
+            if len(anns) >= 2
+        ]
+        
+        if not dual_labeled:
+            return {"error": "Need messages with 2+ annotations"}
+        
+        # Extract annotations from first 2 annotators
+        ann1_labels = []
+        ann2_labels = []
+        
+        for anns, _ in dual_labeled:
+            annotators = list(anns.keys())[:2]
+            ann1_labels.append(anns[annotators[0]])
+            ann2_labels.append(anns[annotators[1]])
+        
+        kappa = AnnotatorAgreement.cohens_kappa(ann1_labels, ann2_labels)
+        interpretation = AnnotatorAgreement.interpret_kappa(kappa)
+        
+        result = {
+            "cohens_kappa": kappa,
+            "interpretation": interpretation,
+            "num_samples": len(dual_labeled),
+        }
+        
+        # Save agreement record
+        self._append_jsonl(self.agreement_file, {
+            **result,
+            "calculated_at": datetime.now().isoformat(),
+        })
+        
+        return result
+    
+    def get_class_balance(self) -> Dict:
+        """Analyze intent class balance"""
+        labels = self._read_jsonl(self.labeled_file)
+        intent_values = [l["intent"] for l in labels]
+        
+        if ClassBalanceAnalyzer and intent_values:
+            analyzer = ClassBalanceAnalyzer(intent_values)
+            return analyzer.recommend_strategy()
+        
+        return {"distribution": dict(Counter(intent_values))}
+    
+    def split_dataset(
+        self,
+        train_ratio: float = 0.7,
+        val_ratio: float = 0.15,
+        test_ratio: float = 0.15
+    ) -> Dict[str, str]:
+        """Split into train/val/test with stratification"""
+        labels = self._read_jsonl(self.labeled_file)
+        
+        if not DatasetSplitter or not labels:
+            return {"error": "No data or splitter unavailable"}
+        
+        train, val, test = DatasetSplitter.stratified_split(
+            labels, "intent", train_ratio, val_ratio, test_ratio
+        )
+        
+        paths = {}
+        for name, data in [("train", train), ("val", val), ("test", test)]:
+            path = self.data_dir / f"{name}_messages.jsonl"
+            with open(path, "w", encoding="utf-8") as f:
+                for record in data:
+                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            paths[name] = str(path)
+        
+        return {"paths": paths, "sizes": {"train": len(train), "val": len(val), "test": len(test)}}
+    
+    def get_guidelines(self) -> Dict:
+        """Return annotation guidelines for labelers"""
+        return {
+            "intent_definitions": self.INTENT_DEFINITIONS,
+            "examples": self._get_intent_examples(),
+            "rules": [
+                "Label based on user's primary intent",
+                "For mixed-language messages, focus on action words",
+                "Mark as 'unclear' if intent cannot be determined",
+                "Mark as 'out_of_scope' for non-service queries",
+                "If multiple intents, choose the primary one",
+            ],
+            "corner_cases": [
+                "Q: 'job batao aur scheme bhi' -> Label as search_job (first intent)",
+                "Q: 'kya hal hai, job chahiye' -> Label as search_job (main intent)",
+                "Q: 'aadhar upload kaise karu form ke liye' -> fill_form (goal is form)",
+            ]
+        }
+    
+    def _get_intent_examples(self) -> Dict[str, List[str]]:
+        """Get example messages for each intent"""
+        return {
+            "search_job": ["naukri batao", "job chahiye", "railway vacancy hai kya"],
+            "apply_job": ["is job me apply karna hai", "form bharna hai"],
+            "search_yojana": ["yojana batao", "scheme dhundho", "PM yojana"],
+            "greeting": ["hi", "hello", "namaste"],
+            "help": ["kaise karu", "madad chahiye", "samajh nahi aaya"],
+            "complaint": ["kaam nahi ho raha", "problem hai", "dikkat aa rahi"],
         }

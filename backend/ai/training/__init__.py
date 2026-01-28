@@ -8,6 +8,14 @@ Collects and labels datasets for training AI models from scratch
 3. ContentRewritingCollector - Raw text to summary corpus
 4. IntentCollector - Chat messages with intent labels
 5. DocumentCollector - Document images with annotations
+
+Quality & Analysis Tools:
+- Deduplicator - Remove duplicate entries
+- ClassBalanceAnalyzer - Detect class imbalances
+- DiversityAnalyzer - Track data diversity
+- DatasetSplitter - Train/val/test splits
+- AnnotatorAgreement - Cohen's Kappa, Fleiss' Kappa
+- FeedbackLoop - Continuous improvement from operator corrections
 """
 
 from .job_matching_collector import JobMatchingCollector
@@ -19,6 +27,16 @@ from .document_collector import (
     DocumentType,
     QualityIssue,
     DOCUMENT_FIELDS,
+)
+from .data_quality import (
+    Deduplicator,
+    ClassBalanceAnalyzer,
+    DiversityAnalyzer,
+    DatasetSplitter,
+    AnnotatorAgreement,
+    DatasheetGenerator,
+    TextNormalizer,
+    FeedbackLoop,
 )
 
 __all__ = [
@@ -36,4 +54,14 @@ __all__ = [
     "QualityIssue",
     "INTENT_PATTERNS",
     "DOCUMENT_FIELDS",
+    
+    # Quality tools
+    "Deduplicator",
+    "ClassBalanceAnalyzer",
+    "DiversityAnalyzer",
+    "DatasetSplitter",
+    "AnnotatorAgreement",
+    "DatasheetGenerator",
+    "TextNormalizer",
+    "FeedbackLoop",
 ]

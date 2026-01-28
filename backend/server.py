@@ -1785,6 +1785,14 @@ async def get_categories():
 # Include router
 app.include_router(api_router)
 
+# Include Training Data Collection Routes
+try:
+    from routes.training_routes import router as training_router
+    app.include_router(training_router)
+    logging.info("Training data collection routes loaded")
+except ImportError as e:
+    logging.warning(f"Training routes not available: {e}")
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
