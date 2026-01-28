@@ -47,6 +47,10 @@ WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
 WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
 WHATSAPP_VERIFY_TOKEN = os.environ.get('WHATSAPP_VERIFY_TOKEN', 'digital_sahayak_verify_token')
 
+# OpenAI Configuration (Emergent LLM Key)
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+openai_client = OpenAI(api_key=EMERGENT_LLM_KEY) if EMERGENT_LLM_KEY else None
+
 app = FastAPI(title="Digital Sahayak API", version="1.0.0")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
