@@ -4,6 +4,19 @@
 
 **Digital Sahayak** apna khud ka AI system hai jo **scratch se bana hai**. Yeh kisi external AI service (OpenAI, ChatGPT, etc.) par depend nahi karta.
 
+### 🚀 Apply AI Engine v1
+
+Digital Sahayak ka AI ab **productized** hai as **"Apply AI Engine v1"** - ek standalone API jo use ho sakta hai:
+
+- **Internal Use**: Digital Sahayak platform power karne ke liye
+- **SaaS API**: Doosre platforms ko API service offer karne ke liye  
+- **White-label**: Enterprise clients ke liye deploy karne ke liye
+
+**Documentation:**
+- Product Details: [APPLY_AI_ENGINE.md](APPLY_AI_ENGINE.md)
+- API Docs: [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
+- Deployment Guide: [SAAS_DEPLOYMENT_GUIDE.md](SAAS_DEPLOYMENT_GUIDE.md)
+
 ## 🎯 Core Features (Bina External AI Ke)
 
 ### 1. **Hybrid Matching Engine** 
