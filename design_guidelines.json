@@ -1,0 +1,174 @@
+{
+  "brand_identity": {
+    "name": "Digital Sahayak",
+    "tagline": "India's First AI-Assisted One-Click Job & Yojana Ecosystem",
+    "archetype": "The Performance Pro (Efficiency) + Organic Trust (Accessibility)",
+    "emotional_tone": "Empowering, Fast, Native, Trustworthy",
+    "visual_metaphor": "Digital Passport / Official Document meets Modern Fintech"
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Outfit, sans-serif",
+      "body": "Noto Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "heading": "700",
+      "subheading": "600",
+      "body": "400",
+      "bold": "700"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-6xl tracking-tight leading-tight",
+      "h2": "text-3xl md:text-4xl tracking-tight",
+      "h3": "text-2xl md:text-3xl font-semibold",
+      "body_lg": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "caption": "text-sm text-muted-foreground uppercase tracking-wider"
+    },
+    "vernacular_rules": {
+      "hindi_line_height": "leading-loose",
+      "hindi_font_weight_adjustment": "font-medium"
+    }
+  },
+  "colors": {
+    "light": {
+      "background": "hsl(30, 20%, 99%)",
+      "foreground": "hsl(222, 47%, 10%)",
+      "card": "hsl(0, 0%, 100%)",
+      "card_foreground": "hsl(222, 47%, 10%)",
+      "popover": "hsl(0, 0%, 100%)",
+      "popover_foreground": "hsl(222, 47%, 10%)",
+      "primary": "hsl(24, 95%, 53%)",
+      "primary_foreground": "hsl(0, 0%, 100%)",
+      "secondary": "hsl(222, 47%, 11%)",
+      "secondary_foreground": "hsl(0, 0%, 100%)",
+      "muted": "hsl(30, 10%, 94%)",
+      "muted_foreground": "hsl(215, 16%, 47%)",
+      "accent": "hsl(142, 71%, 45%)",
+      "accent_foreground": "hsl(0, 0%, 100%)",
+      "destructive": "hsl(0, 84%, 60%)",
+      "destructive_foreground": "hsl(0, 0%, 98%)",
+      "border": "hsl(214, 32%, 91%)",
+      "input": "hsl(214, 32%, 91%)",
+      "ring": "hsl(24, 95%, 53%)"
+    },
+    "dark": {
+      "background": "hsl(222, 47%, 5%)",
+      "foreground": "hsl(210, 40%, 98%)",
+      "card": "hsl(222, 47%, 7%)",
+      "card_foreground": "hsl(210, 40%, 98%)",
+      "popover": "hsl(222, 47%, 7%)",
+      "popover_foreground": "hsl(210, 40%, 98%)",
+      "primary": "hsl(24, 95%, 53%)",
+      "primary_foreground": "hsl(0, 0%, 100%)",
+      "secondary": "hsl(217, 32%, 17%)",
+      "secondary_foreground": "hsl(210, 40%, 98%)",
+      "muted": "hsl(217, 32%, 17%)",
+      "muted_foreground": "hsl(215, 20%, 65%)",
+      "accent": "hsl(142, 71%, 45%)",
+      "accent_foreground": "hsl(0, 0%, 100%)",
+      "destructive": "hsl(0, 62%, 30%)",
+      "destructive_foreground": "hsl(0, 0%, 98%)",
+      "border": "hsl(217, 32%, 17%)",
+      "input": "hsl(217, 32%, 17%)",
+      "ring": "hsl(24, 95%, 53%)"
+    },
+    "palette_names": {
+      "primary": "Sahayak Saffron",
+      "secondary": "Ashoka Navy",
+      "accent": "Kisan Green"
+    }
+  },
+  "layout": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing_scale": {
+      "section_gap": "py-16 md:py-24",
+      "component_gap": "gap-6 md:gap-8",
+      "internal_padding": "p-6 md:p-8"
+    },
+    "radius": {
+      "default": "0.75rem",
+      "button": "9999px",
+      "card": "1rem"
+    },
+    "grid_strategies": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4",
+      "marketing": "grid grid-cols-1 md:grid-cols-12 gap-8"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full px-8 py-6 text-lg font-bold",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full px-6 py-4",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/10 rounded-full px-6 py-4 font-semibold",
+      "whatsapp": "bg-[#25D366] text-white hover:bg-[#25D366]/90 shadow-lg hover:shadow-[#25D366]/20 rounded-full flex items-center gap-2 px-6 py-3 font-bold"
+    },
+    "cards": {
+      "job_card": "bg-card border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl overflow-hidden relative group",
+      "yojana_card": "bg-card border-l-4 border-l-primary shadow-sm hover:shadow-md transition-all duration-300 rounded-r-xl p-6",
+      "glass_panel": "bg-background/60 backdrop-blur-xl border border-white/20 shadow-xl"
+    },
+    "inputs": {
+      "default": "h-12 bg-muted/50 border-transparent focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg transition-all"
+    }
+  },
+  "visual_enhancers": {
+    "textures": {
+      "noise": "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E\")",
+      "guilloche": "Use subtle SVG geometric patterns in backgrounds (opacity 0.03) to mimic official documents."
+    },
+    "gradients": {
+      "hero_glow": "bg-gradient-to-tr from-primary/20 via-accent/10 to-transparent blur-3xl",
+      "card_hover": "bg-gradient-to-br from-white/5 to-white/0"
+    },
+    "animations": {
+      "hover_lift": "hover:-translate-y-1 transition-transform duration-300",
+      "fade_in": "animate-in fade-in duration-500 slide-in-from-bottom-4"
+    }
+  },
+  "image_urls": {
+    "hero": {
+      "url": "https://images.unsplash.com/photo-1604177091072-b7b677a077f6?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Indian student using laptop for education",
+      "category": "hero_main"
+    },
+    "rural_tech": {
+      "url": "https://images.pexels.com/photos/16349336/pexels-photo-16349336.jpeg",
+      "alt": "Digital adoption in rural India",
+      "category": "feature_section"
+    },
+    "government_abstract": {
+      "url": "https://images.unsplash.com/photo-1735933109524-52d7f05dc7c1?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Modern Indian Architecture Abstract",
+      "category": "auth_background"
+    },
+    "placeholders": {
+      "logo": "https://placehold.co/200x80/FF9933/FFFFFF?text=Digital+Sahayak",
+      "user_avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+    }
+  },
+  "accessibility": {
+    "contrast_check": "Ensure all text on 'Sahayak Saffron' is White or extremely dark Navy. Never use grey on saffron.",
+    "focus_states": "ring-2 ring-offset-2 ring-primary",
+    "reduced_motion": "Respect prefers-reduced-motion media query"
+  },
+  "instructions_to_main_agent": [
+    "INSTALL FONTS: Add 'Outfit' and 'Noto Sans' from Google Fonts in index.html immediately.",
+    "HINDI SUPPORT: Ensure all input fields and text rendering support UTF-8 Devanagari script properly.",
+    "WHATSAPP FIRST: The WhatsApp integration is the USP. Make the WhatsApp floating action button (FAB) visible on ALL pages.",
+    "DIGILOCKER VIBE: Use the 'Guilloché' texture subtly in the 'My Documents' section to build trust.",
+    "MOBILE OPTIMIZATION: Test all grids on mobile. Job cards must be full width on mobile, 3-col on desktop.",
+    "NO BORING TABLES: For Job Lists, use 'Ticket' style cards, not standard HTML tables.",
+    "USE SONNER: Replace all alerts with 'sonner' toasts.",
+    "DATA-TESTID: Add data-testid to all interactive elements (buttons, inputs, cards)."
+  ],
+  "universal_guidelines": [
+    "Do not use generic centered layouts.",
+    "Create depth through layered design elements.",
+    "Use glass-morphism effects with backdrop filters.",
+    "Every interaction needs micro-animations.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Never use AI assistant Emoji characters."
+  ]
+}
