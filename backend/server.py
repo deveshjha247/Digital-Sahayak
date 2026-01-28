@@ -175,6 +175,124 @@ def create_access_token(data: dict) -> str:
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+# ===================== SLUG GENERATION =====================
+
+def generate_slug(text: str, state: str = "") -> str:
+    """Generate SEO-friendly URL slug from title"""
+    if not text:
+        return str(uuid.uuid4())[:8]
+    
+    # Remove Hindi characters and convert to lowercase
+    text = text.lower()
+    
+    # Replace Hindi/Devanagari with transliteration or remove
+    # Keep only alphanumeric and spaces
+    slug = re.sub(r'[^\w\s-]', '', text)
+    slug = re.sub(r'[-\s]+', '-', slug).strip('-')
+    
+    # Add state prefix if available
+    state_prefixes = {
+        'bihar': 'br',
+        'jharkhand': 'jh',
+        'up': 'up',
+        'mp': 'mp',
+        'rajasthan': 'rj',
+        'maharashtra': 'mh',
+        'wb': 'wb',
+        'all': ''
+    }
+    
+    prefix = state_prefixes.get(state.lower(), '')
+    if prefix:
+        slug = f"{prefix}/{slug}"
+    
+    # Limit length
+    if len(slug) > 100:
+        slug = slug[:100].rsplit('-', 1)[0]
+    
+    return slug
+
+async def get_unique_slug(base_slug: str, collection_name: str) -> str:
+    """Ensure slug is unique in the collection"""
+    collection = db[collection_name]
+    slug = base_slug
+    counter = 1
+    
+    while await collection.find_one({"slug": slug}):
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+    
+    return slug
+
+# ===================== AI CONTENT REWRITER =====================
+
+async def rewrite_content_with_ai(original_content: dict, content_type: str = "job") -> dict:
+    """Use AI to rewrite scraped content in original format - Copyright Safe"""
+    if not openai_client:
+        return original_content
+    
+    try:
+        if content_type == "job":
+            prompt = f"""आप एक सरकारी नौकरी पोर्टल के content writer हैं। 
+नीचे दी गई जानकारी के आधार पर, मूल और unique content लिखें।
+NOTE: Copy मत करें, अपने शब्दों में लिखें।
+
+मूल जानकारी:
+- Title: {original_content.get('title', '')}
+- Organization: {original_content.get('organization', '')}
+- Description: {original_content.get('description', '')[:300]}
+- Qualification: {original_content.get('qualification', '')}
+
+कृपया JSON format में जवाब दें:
+{{
+    "title": "आकर्षक शीर्षक",
+    "title_hi": "हिंदी शीर्षक",
+    "description": "विस्तृत विवरण (100-150 शब्द)",
+    "description_hi": "हिंदी में विवरण",
+    "meta_description": "SEO meta description (150 characters)",
+    "highlights": ["मुख्य बिंदु 1", "मुख्य बिंदु 2", "मुख्य बिंदु 3"]
+}}"""
+        else:
+            prompt = f"""आप एक सरकारी योजना पोर्टल के content writer हैं।
+नीचे दी गई जानकारी के आधार पर, मूल और unique content लिखें।
+NOTE: Copy मत करें, अपने शब्दों में लिखें।
+
+मूल जानकारी:
+- Name: {original_content.get('name', '')}
+- Ministry: {original_content.get('ministry', '')}
+- Description: {original_content.get('description', '')[:300]}
+- Benefits: {original_content.get('benefits', '')}
+
+कृपया JSON format में जवाब दें:
+{{
+    "name": "योजना का नाम",
+    "name_hi": "हिंदी नाम",
+    "description": "विस्तृत विवरण",
+    "description_hi": "हिंदी में विवरण",
+    "meta_description": "SEO meta description",
+    "highlights": ["लाभ 1", "लाभ 2", "लाभ 3"]
+}}"""
+
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=800,
+            temperature=0.7
+        )
+        
+        ai_response = response.choices[0].message.content
+        
+        try:
+            # Parse JSON response
+            rewritten = json.loads(ai_response)
+            return {**original_content, **rewritten, "is_rewritten": True}
+        except json.JSONDecodeError:
+            return original_content
+            
+    except Exception as e:
+        logger.error(f"AI rewrite error: {e}")
+        return original_content
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials:
         raise HTTPException(status_code=401, detail="Not authenticated")
