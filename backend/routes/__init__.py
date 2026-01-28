@@ -11,7 +11,8 @@ from . import (
     ai_routes,
     scraper_routes,
     whatsapp_routes,
-    form_routes
+    form_routes,
+    apply_ai_v1_routes
 )
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "ai_routes",
     "scraper_routes",
     "whatsapp_routes",
-    "form_routes"
+    "form_routes",
+    "apply_ai_v1_routes"
 ]

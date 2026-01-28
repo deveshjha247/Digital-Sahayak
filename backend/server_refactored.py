@@ -23,7 +23,8 @@ from routes import (
     ai_routes,
     scraper_routes,
     whatsapp_routes,
-    form_routes
+    form_routes,
+    apply_ai_v1_routes
 )
 
 # Import AI systems
@@ -75,6 +76,7 @@ async def lifespan(app: FastAPI):
     # Set AI instances in routes
     ai_routes.set_ai_instances(self_learning_ai, hybrid_matcher)
     form_routes.set_form_engine(form_engine)
+    apply_ai_v1_routes.set_engines(hybrid_matcher, form_engine)
     
     print("✅ Server ready!")
     
@@ -134,6 +136,9 @@ app.include_router(ai_routes.router, prefix="/api")
 app.include_router(scraper_routes.router, prefix="/api")
 app.include_router(whatsapp_routes.router, prefix="/api")
 app.include_router(form_routes.router, prefix="/api")
+
+# Apply AI Engine v1 - Productized API
+app.include_router(apply_ai_v1_routes.router)
 
 if __name__ == "__main__":
     import uvicorn

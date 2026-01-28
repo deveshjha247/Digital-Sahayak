@@ -143,6 +143,26 @@ See [REFACTORING_GUIDE.md](backend/REFACTORING_GUIDE.md) and [FORM_INTELLIGENCE_
 
 **📖 Complete AI Documentation:** See [DIGITAL_SAHAYAK_AI.md](DIGITAL_SAHAYAK_AI.md) for how our custom AI works without external dependencies.
 
+## Apply AI Engine v1 🚀
+
+**Digital Sahayak's AI is now productized as "Apply AI Engine v1"** - a standalone API that can be used for:
+
+- **Internal Use**: Power Digital Sahayak platform
+- **API Service**: Offer as SaaS to other platforms
+- **White-label**: Deploy for enterprise clients
+
+### Key Features:
+- ✅ Job/Scheme matching API
+- ✅ Form field classification
+- ✅ Error prediction & validation
+- ✅ Auto-fill suggestions
+- ✅ Behavioral learning
+- ✅ RESTful API with authentication
+- ✅ Usage tracking & analytics
+
+**API Documentation:** [API_DOCUMENTATION.md](API_DOCUMENTATION.md)  
+**Product Details:** [APPLY_AI_ENGINE.md](APPLY_AI_ENGINE.md)
+
 ## Contributors
 
 This project is a collaborative effort by:
