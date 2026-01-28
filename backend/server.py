@@ -839,8 +839,17 @@ async def get_me(user: dict = Depends(get_current_user)):
 @api_router.post("/jobs", status_code=201)
 async def create_job(job: JobAlertCreate, admin: dict = Depends(get_admin_user)):
     job_id = str(uuid.uuid4())
+    
+    # Generate slug if not provided
+    if not job.slug:
+        base_slug = generate_slug(job.title, job.state)
+        slug = await get_unique_slug(base_slug, "jobs")
+    else:
+        slug = await get_unique_slug(job.slug, "jobs")
+    
     job_doc = {
         "id": job_id,
+        "slug": slug,
         **job.model_dump(),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": admin["id"],
