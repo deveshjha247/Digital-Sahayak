@@ -100,6 +100,14 @@ FLASK_ENV=development
 - Backend provides RESTful endpoints for data management
 - AI matching uses OpenAI's GPT models for intelligent recommendations
 
+## Contributors
+
+This project is a collaborative effort by:
+- **Devesh Kumar Jha** (@deveshkumarjha1)
+- **Devesh Jha** (@deveshjha247)
+
+We welcome contributions from the community!
+
 ## License
 
 This project is developed for public benefit.
