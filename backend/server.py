@@ -88,6 +88,19 @@ class UserProfile(BaseModel):
     documents: List[Dict] = []
     whatsapp_connected: bool = False
     created_at: datetime
+    # New fields for AI matching
+    education_level: Optional[str] = None
+    state: Optional[str] = None
+    age: Optional[int] = None
+    preferred_categories: List[str] = []
+
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    education_level: Optional[str] = None
+    state: Optional[str] = None
+    age: Optional[int] = None
+    preferred_categories: Optional[List[str]] = None
 
 class TokenResponse(BaseModel):
     access_token: str
