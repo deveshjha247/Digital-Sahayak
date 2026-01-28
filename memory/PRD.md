@@ -40,7 +40,7 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
   - Auto-categorization of jobs
   - State detection
   - Duplicate prevention
-- ✅ **AI Job Matching** with OpenAI (Emergent LLM Key)
+- ✅ **AI Job Matching** with OpenAI
   - Education level matching (10th, 12th, Graduate, PG)
   - Age-appropriate job filtering
   - State-based job recommendations
@@ -90,7 +90,7 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
 ### Integrations
 - ✅ Cashfree Payment Gateway (PRODUCTION)
 - ✅ WhatsApp Cloud API (MOCK - ready for real integration)
-- ✅ OpenAI GPT via Emergent LLM Key (for AI matching)
+- ✅ OpenAI GPT API (for AI matching)
 
 ---
 
@@ -129,7 +129,7 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
 - **Frontend**: React 19, shadcn/ui, Tailwind CSS
 - **Payment**: Cashfree (Production)
 - **Messaging**: WhatsApp Cloud API (MOCK)
-- **AI**: OpenAI GPT via Emergent LLM Key
+- **AI**: OpenAI GPT API
 - **Hosting**: Digital Ocean Droplet
 
 ## Admin Credentials
