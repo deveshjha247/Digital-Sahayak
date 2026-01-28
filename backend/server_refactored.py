@@ -21,7 +21,7 @@ from routes import (
     application_routes,
     payment_routes,
     ai_routes,
-    scraper_routes,
+    scraper_routes_v2,
     whatsapp_routes,
     form_routes,
     apply_ai_v1_routes
@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
     """
     Startup and shutdown events
     """
-    global self_learning_ai, hybrid_matcher, form_engine
+    global self_learning_ai, hybrid_matcher, form_engine, scheduler
     
     # Startup
     print("🚀 Starting Digital Sahayak Server...")
@@ -75,6 +75,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️ Form Engine initialization failed: {e}")
     
+    # Initialize and start Scraper Scheduler
+    try:
+        scheduler = get_scheduler()
+        await scheduler.start()
+        print("✅ Scraper Scheduler started (auto-scraping enabled)")
+    except Exception as e:
+        print(f"⚠️ Scheduler initialization failed: {e}")
+    
     # Set AI instances in routes
     ai_routes.set_ai_instances(self_learning_ai, hybrid_matcher)
     form_routes.set_form_engine(form_engine)
@@ -86,6 +94,12 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     print("🛑 Shutting down server...")
+    
+    # Stop scheduler
+    if scheduler:
+        await scheduler.stop()
+        print("✅ Scheduler stopped")
+    
     await db_instance.disconnect()
     print("✅ Database disconnected")
 
@@ -135,7 +149,7 @@ app.include_router(yojana_routes.router, prefix="/api")
 app.include_router(application_routes.router, prefix="/api")
 app.include_router(payment_routes.router, prefix="/api")
 app.include_router(ai_routes.router, prefix="/api")
-app.include_router(scraper_routes.router, prefix="/api")
+app.include_router(scraper_routes_v2.router, prefix="/api")
 app.include_router(whatsapp_routes.router, prefix="/api")
 app.include_router(form_routes.router, prefix="/api")
 
