@@ -31,12 +31,14 @@ from routes import (
 from ai_learning_system import SelfLearningAI
 from services.hybrid_matching import HybridMatchingEngine
 from services.form_intelligence import FormIntelligenceEngine
+from services.scheduler import get_scheduler
 
 # Global instances
 db_instance = Database()
 self_learning_ai = None
 hybrid_matcher = None
 form_engine = None
+scheduler = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
