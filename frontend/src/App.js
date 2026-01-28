@@ -20,6 +20,7 @@ import AdminPage from './pages/AdminPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import ProfilePreferencesPage from './pages/ProfilePreferencesPage';
 import RecommendationsPage from './pages/RecommendationsPage';
+import ContentDraftsPage from './pages/ContentDraftsPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
