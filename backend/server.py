@@ -2043,6 +2043,156 @@ async def get_project_context(current_user: dict = Depends(get_current_user)):
         raise HTTPException(500, f"Context error: {str(e)}")
 
 
+@api_router.post("/ai/hybrid-match")
+async def hybrid_job_matching(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Hybrid Rule + ML based job matching
+    Combines heuristic rules with ML predictions
+    
+    Example:
+    {
+        "job_id": "job123",
+        "use_ml": true
+    }
+    """
+    try:
+        data = await request.json()
+        job_id = data.get('job_id')
+        use_ml = data.get('use_ml', True)
+        
+        if not job_id:
+            raise HTTPException(400, "job_id is required")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        # Fetch job data
+        job = await db.jobs.find_one({"id": job_id})
+        if not job:
+            raise HTTPException(404, "Job not found")
+        
+        # Get user profile
+        user_profile = {
+            "id": current_user.get('id'),
+            "education": current_user.get('education'),
+            "age": current_user.get('age'),
+            "state": current_user.get('state'),
+            "preferred_categories": current_user.get('preferred_categories', []),
+            "experience_years": current_user.get('experience_years', 0)
+        }
+        
+        # Apply hybrid matching
+        result = await self_learning_ai.hybrid_job_matching(job, user_profile, use_ml)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(500, f"Hybrid matching error: {str(e)}")
+
+
+@api_router.post("/ai/learn-from-logs")
+async def learn_from_interaction_logs(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Analyze interaction logs to learn patterns and improve matching
+    Admin only
+    
+    Example:
+    {
+        "days": 7
+    }
+    """
+    try:
+        if not current_user.get('is_admin'):
+            raise HTTPException(403, "Admin access required")
+        
+        data = await request.json()
+        days = data.get('days', 7)
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        # Learn from logs
+        result = await self_learning_ai.learn_from_logs(days)
+        
+        return result
+        
+    except Exception as e:
+        raise HTTPException(500, f"Log learning error: {str(e)}")
+
+
+@api_router.post("/ai/add-rule")
+async def add_custom_matching_rule(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Add a custom matching rule
+    Admin only
+    
+    Example:
+    {
+        "name": "Bihar Police Preference",
+        "condition": {"state": "Bihar", "category": "Police"},
+        "action": {"boost_score": 15},
+        "description": "Boost Bihar police jobs for Bihar residents"
+    }
+    """
+    try:
+        if not current_user.get('is_admin'):
+            raise HTTPException(403, "Admin access required")
+        
+        data = await request.json()
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        # Add rule
+        success = await self_learning_ai.add_custom_rule(data)
+        
+        if success:
+            return {"success": True, "message": "Rule added successfully"}
+        else:
+            raise HTTPException(500, "Failed to add rule")
+        
+    except Exception as e:
+        raise HTTPException(500, f"Add rule error: {str(e)}")
+
+
+@api_router.get("/ai/rules")
+async def get_matching_rules(current_user: dict = Depends(get_current_user)):
+    """
+    Get all active matching rules
+    """
+    try:
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        rules = await self_learning_ai.get_active_rules()
+        
+        return {
+            "rules": rules,
+            "count": len(rules)
+        }
+        
+    except Exception as e:
+        raise HTTPException(500, f"Get rules error: {str(e)}")
+
+
+@api_router.get("/ai/heuristic-weights")
+async def get_heuristic_weights(current_user: dict = Depends(get_current_user)):
+    """
+    Get current heuristic matching weights
+    """
+    try:
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        return {
+            "weights": self_learning_ai.heuristic_weights,
+            "total": sum(self_learning_ai.heuristic_weights.values())
+        }
+        
+    except Exception as e:
+        raise HTTPException(500, f"Get weights error: {str(e)}")
+
+
 # ===================== STARTUP & SHUTDOWN =====================
 
 @app.on_event("startup")
