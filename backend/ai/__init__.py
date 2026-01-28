@@ -15,8 +15,8 @@ try:
     from .job_recommender import JobRecommender
     from .field_classifier import FieldClassifier
     from .summarizer import ContentSummarizer
-    from .intent_classifier import IntentClassifier
-    from .validator import DocumentValidator
+    from .intent_classifier import IntentClassifier, IntentType
+    from .validator import DocumentValidator, DocumentType, ValidationStatus
     
     logger.info("All AI modules loaded successfully")
 except Exception as e:
