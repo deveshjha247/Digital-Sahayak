@@ -1800,13 +1800,15 @@ app.add_middleware(
 @api_router.post("/ai/learn-from-external")
 async def learn_from_external_ai(request: Request, current_user: dict = Depends(get_current_user)):
     """
-    दूसरे AI (Copilot, ChatGPT, etc.) से सीखने के लिए endpoint
+    Learn from external AI (Copilot, ChatGPT, etc.) responses
+    Can optionally use web search for additional context
     
     Example:
     {
-        "prompt": "कैसे job match करें?",
-        "other_ai_response": "Copilot/ChatGPT का response",
-        "ai_name": "GitHub Copilot"
+        "prompt": "How to match jobs?",
+        "other_ai_response": "Response from Copilot/ChatGPT",
+        "ai_name": "GitHub Copilot",
+        "use_web_search": true
     }
     """
     try:
@@ -1814,15 +1816,18 @@ async def learn_from_external_ai(request: Request, current_user: dict = Depends(
         prompt = data.get('prompt')
         other_response = data.get('other_ai_response')
         ai_name = data.get('ai_name', 'External AI')
+        use_web_search = data.get('use_web_search', False)
         
         if not prompt or not other_response:
-            raise HTTPException(400, "prompt और other_ai_response required हैं")
+            raise HTTPException(400, "prompt and other_ai_response are required")
         
         if not self_learning_ai:
-            raise HTTPException(503, "AI Learning System available नहीं है")
+            raise HTTPException(503, "AI Learning System not available")
         
-        # दूसरे AI से सीखो
-        result = await self_learning_ai.learn_from_other_ai(prompt, other_response, ai_name)
+        # Learn from external AI
+        result = await self_learning_ai.learn_from_other_ai(
+            prompt, other_response, ai_name, use_web_search
+        )
         
         return result
         

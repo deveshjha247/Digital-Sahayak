@@ -601,30 +601,92 @@ class SelfLearningAI:
         }
     
     async def auto_improve_job_matching(self, job_data: Dict, user_profile: Dict,
-                                       other_ai_suggestions: Optional[Dict] = None) -> Dict:
+                                       other_ai_suggestions: Optional[Dict] = None,
+                                       use_web_search: bool = False) -> Dict:
         """
-        Job matching को automatically improve करो by learning from patterns
+        Automatically improve job matching using AI learning
+        Specific to Digital Sahayak's job recommendation system
         
-        Digital Sahayak specific feature
+        Args:
+            job_data: Job details (title, education, age, state, etc.)
+            user_profile: User profile (education, age, state, preferences)
+            other_ai_suggestions: Optional suggestions from external AI
+            use_web_search: Whether to search for job-related info
+            
+        Returns:
+            Dict with match score and reasoning
         """
-        # Existing matching logic
+        # Calculate base match score
         base_match = await self._calculate_base_match(job_data, user_profile)
         
-        # अगर other AI ने suggestions दी हैं तो उनसे सीखो
+        # Web search for job details if requested
+        web_context = ""
+        if use_web_search and job_data.get('title'):
+            search_query = f"{job_data['title']} eligibility criteria requirements"
+            search_results = await self.web_search(search_query, max_results=2)
+            web_context = "Web Info: " + "; ".join([r['snippet'] for r in search_results])
+        
+        # If external AI provided suggestions, learn from them
         if other_ai_suggestions:
+            learning_prompt = f"""
+            Job Matching Task for Digital Sahayak
+            
+            Job: {job_data.get('title', 'Unknown')}
+            - Education: {job_data.get('education', 'Any')}
+            - Age Range: {job_data.get('min_age', 18)}-{job_data.get('max_age', 40)}
+            - State: {job_data.get('state', 'All India')}
+            
+            User Profile:
+            - Education: {user_profile.get('education', 'Not specified')}
+            - Age: {user_profile.get('age', 'Not specified')}
+            - State: {user_profile.get('state', 'Not specified')}
+            
+            Base Match Score: {base_match}%
+            
+            {web_context}
+            """
+            
             improved_match = await self.learn_from_other_ai(
-                prompt=f"Match user {user_profile} with job {job_data}",
+                prompt=learning_prompt,
                 other_ai_response=str(other_ai_suggestions),
-                ai_name="External Job Matcher"
+                ai_name="External Job Matcher",
+                use_web_search=False  # Already searched if needed
             )
             
             return {
                 "base_match": base_match,
-                "improved_match": improved_match.get('improved_response'),
-                "learned": True
+                "improved_analysis": improved_match.get('improved_response'),
+                "learned": True,
+                "web_search_used": use_web_search
             }
         
-        return {"match": base_match, "learned": False}
+        # Generate AI reasoning for the match
+        reasoning_prompt = f"""
+        Explain why this job matches (or doesn't match) this user profile.
+        Provide reasoning in Hindi for better user understanding.
+        
+        Job: {job_data.get('title', 'Unknown')}
+        Match Score: {base_match}%
+        
+        User: Age {user_profile.get('age', '?')}, {user_profile.get('education', '?')} educated, from {user_profile.get('state', '?')}
+        
+        {web_context}
+        
+        Provide brief, clear reasoning (2-3 points in Hindi).
+        """
+        
+        reasoning_response = self.openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": reasoning_prompt}],
+            temperature=0.5
+        )
+        
+        return {
+            "match_score": base_match,
+            "reasoning": reasoning_response.choices[0].message.content,
+            "learned": False,
+            "web_search_used": use_web_search
+        }
     
     async def _calculate_base_match(self, job_data: Dict, user_profile: Dict) -> float:
         """Basic matching logic"""
