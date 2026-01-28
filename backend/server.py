@@ -67,6 +67,11 @@ class UserCreate(BaseModel):
     phone: str
     password: str
     language: str = "hi"
+    # New fields for AI matching
+    education_level: Optional[str] = None  # 10th, 12th, graduate, post_graduate
+    state: Optional[str] = None
+    age: Optional[int] = None
+    preferred_categories: List[str] = []
 
 class UserLogin(BaseModel):
     phone: str
