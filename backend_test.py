@@ -464,6 +464,10 @@ def main():
         ("Admin Stats", tester.test_admin_stats),
         ("Applications Flow", tester.test_applications_flow),
         ("WhatsApp Endpoints", tester.test_whatsapp_endpoints),
+        ("Job Scraping", tester.test_job_scraping),
+        ("Profile Preferences", tester.test_profile_preferences),
+        ("AI Recommendations", tester.test_ai_recommendations),
+        ("Matching Jobs", tester.test_matching_jobs),
     ]
     
     for test_name, test_func in tests:
