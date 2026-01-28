@@ -27,5 +27,8 @@ __all__ = [
     "FieldClassifier",
     "ContentSummarizer",
     "IntentClassifier",
+    "IntentType",
     "DocumentValidator",
+    "DocumentType",
+    "ValidationStatus",
 ]
