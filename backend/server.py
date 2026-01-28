@@ -1301,47 +1301,6 @@ async def update_user_preferences(
     updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
     return {"message": "Profile updated", "user": updated_user}
 
-@api_router.get("/jobs/matching")
-async def get_matching_jobs(
-    user: dict = Depends(get_current_user),
-    category: Optional[str] = None,
-    state: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 20
-):
-    """Get jobs matching user's profile with scores"""
-    
-    # Build query
-    query = {"is_active": True}
-    if category:
-        query["category"] = category
-    if state and state != "all":
-        query["state"] = {"$in": [state, "all"]}
-    
-    # Fetch jobs
-    jobs = await db.jobs.find(query, {"_id": 0}).to_list(100)
-    
-    # Calculate match scores
-    scored_jobs = []
-    for job in jobs:
-        score = ai_job_matcher.calculate_match_score(user, job)
-        job["match_score"] = score
-        job["match_reason"] = ai_job_matcher._generate_reason(user, job, score)
-        scored_jobs.append(job)
-    
-    # Sort by match score
-    scored_jobs.sort(key=lambda x: x["match_score"], reverse=True)
-    
-    # Paginate
-    total = len(scored_jobs)
-    paginated = scored_jobs[skip:skip + limit]
-    
-    return {
-        "total": total,
-        "jobs": paginated,
-        "user_profile_complete": bool(user.get("education_level") and user.get("state") and user.get("age"))
-    }
-
 # ===================== DOCUMENT ENDPOINTS =====================
 
 @api_router.post("/documents/upload")
