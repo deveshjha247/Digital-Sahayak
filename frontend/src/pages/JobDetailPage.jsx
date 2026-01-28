@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
@@ -15,20 +15,32 @@ import {
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 const JobDetailPage = () => {
-  const { id } = useParams();
+  const { id, slug, '*': restSlug } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
 
+  // Determine the identifier (id or slug)
+  const identifier = id || (slug ? (restSlug ? `${slug}/${restSlug}` : slug) : '');
+
   useEffect(() => {
-    fetchJob();
-  }, [id]);
+    if (identifier) {
+      fetchJob();
+    }
+  }, [identifier]);
 
   const fetchJob = async () => {
     try {
-      const res = await axios.get(`${API}/jobs/${id}`);
+      // Try by slug first if it looks like a slug (contains /)
+      let res;
+      if (identifier.includes('/')) {
+        res = await axios.get(`${API}/jobs/slug/${identifier}`);
+      } else {
+        res = await axios.get(`${API}/jobs/${identifier}`);
+      }
       setJob(res.data);
     } catch (err) {
       console.error('Error fetching job:', err);
