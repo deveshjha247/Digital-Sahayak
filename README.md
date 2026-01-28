@@ -1,14 +1,16 @@
 # Digital Sahayak - Government Schemes & Job Portal
 
-A comprehensive platform connecting citizens with government schemes and job opportunities through intelligent matching powered by AI.
+A comprehensive platform connecting citizens with government schemes and job opportunities through intelligent matching powered by **Digital Sahayak AI** - our custom-built AI system developed from scratch.
 
 ## Features
 
 ### 🎯 Core Functionalities
 - **Yojana Discovery**: Browse and search government schemes (Yojanas)
 - **Job Listings**: Explore available job opportunities
-- **AI Job Matching**: Intelligent job recommendations based on user profile
-- **Self-Learning AI**: AI that learns from other AIs (Copilot, ChatGPT) and improves itself
+- **Digital Sahayak AI**: Custom-built AI for intelligent job matching and recommendations
+- **Hybrid Matching Engine**: Rule-based + ML approach for accurate matching
+- **Form Intelligence**: Smart form filling and error prediction
+- **Self-Learning System**: Continuously improves from user interactions
 - **Admin Dashboard**: Manage schemes and jobs content
 - **User Authentication**: Secure login and registration
 - **Profile Management**: User preferences and profile settings
@@ -22,8 +24,11 @@ A comprehensive platform connecting citizens with government schemes and job opp
 - React Router for navigation
 
 **Backend**
-- Python Flask server
-- OpenAI GPT API for AI-powered matching
+- Python FastAPI server
+- **Digital Sahayak AI** - Custom ML engine built from scratch
+- MongoDB for data persistence
+- Hybrid Matching Engine (Rule-based + Heuristics + ML)
+- Form Intelligence System (Field classification & error prediction)
 - RESTful API architecture
 
 **Tools & Libraries**
@@ -44,9 +49,16 @@ Digital-Sahayak/
 │   │   ├── hooks/        # Custom React hooks
 │   │   └── lib/          # Utility functions
 │   └── plugins/          # Webpack and build plugins
-├── backend/              # Python Flask server
-│   ├── server.py        # Main application
-│   └── requirements.txt  # Python dependencies
+├── backend/              # Python FastAPI server
+│   ├── server_refactored.py  # Main application (modular)
+│   ├── ai_learning_system.py # Digital Sahayak AI core
+│   ├── config/          # Configuration files
+│   ├── models/          # Data models
+│   ├── routes/          # API endpoints
+│   ├── services/        # Business logic (AI engines)
+│   ├── middleware/      # Authentication
+│   ├── utils/           # Helper functions
+│   └── requirements.txt # Python dependencies
 ├── memory/              # Documentation and PRD
 └── tests/              # Test files
 ```
@@ -79,8 +91,10 @@ python server.py
 Create a `.env` file in the backend directory:
 
 ```
-OPENAI_API_KEY=your_openai_key_here
-FLASK_ENV=development
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET_KEY=your_secret_key_here
+CASHFREE_APP_ID=your_cashfree_app_id
+CASHFREE_SECRET_KEY=your_cashfree_secret
 ```
 
 ## Pages & Routes
@@ -99,18 +113,33 @@ FLASK_ENV=development
 - The project uses Context API for state management (Authentication)
 - UI components are built with Shadcn and styled with Tailwind CSS
 - Backend provides RESTful endpoints for data management
-- AI matching uses OpenAI's GPT models for intelligent recommendations
-- **Self-Learning AI System**: Learn from external AI responses and continuously improve
+- **Digital Sahayak AI**: Custom-built matching engine with rule-based + ML hybrid approach
+- **Self-Learning System**: Learns from user behavior (applications, interactions) to improve recommendations
+- Modular architecture for scalability and maintainability
 
-## Self-Learning AI System
+## Digital Sahayak AI System
 
-Digital Sahayak includes a unique **Self-Learning AI** that:
-- 🧠 **Learns from other AIs** (GitHub Copilot, ChatGPT, etc.)
-- 📈 **Continuously improves** its responses
-- 🎯 **Better job matching** over time
-- 📊 **Tracks learning statistics**
+Our custom-built **Digital Sahayak AI** is developed from scratch and includes:
 
-See [AI_LEARNING_GUIDE.md](AI_LEARNING_GUIDE.md) for detailed documentation.
+### 🤖 Hybrid Matching Engine
+- **Rule-based Matching**: Deterministic field mappings (education, age, state, category)
+- **Heuristic Scoring**: Pattern-based matching with learned weights
+- **Log-based Learning**: Learns from user behavior (applications, saves, ignores)
+- **Confidence Scoring**: Provides match confidence with explanations in Hindi & English
+
+### 📋 Form Intelligence
+- **Field Classification**: Auto-detects form field types (name, email, Aadhar, PAN, etc.)
+- **Error Prediction**: Validates forms before submission
+- **Smart Auto-fill**: Suggests values based on user profile
+- **Portal Training**: Learns from portal-specific form datasets
+
+### 📊 Continuous Learning
+- Tracks user interactions (applied, ignored, saved jobs/schemes)
+- Updates matching patterns based on successful applications
+- Improves recommendations over time
+- No dependency on external AI APIs - built completely in-house
+
+See [REFACTORING_GUIDE.md](backend/REFACTORING_GUIDE.md) and [FORM_INTELLIGENCE_GUIDE.md](backend/FORM_INTELLIGENCE_GUIDE.md) for detailed documentation.
 
 ## Contributors
 

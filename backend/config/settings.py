@@ -30,8 +30,11 @@ WHATSAPP_PHONE_NUMBER_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
 WHATSAPP_ACCESS_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
 WHATSAPP_VERIFY_TOKEN = os.environ.get('WHATSAPP_VERIFY_TOKEN', 'digital_sahayak_verify_token')
 
-# OpenAI Configuration
+# OpenAI Configuration (OPTIONAL - not required for core functionality)
+# Digital Sahayak works completely without external AI APIs
+# Core features use rule-based + pattern matching + log-based learning
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+USE_EXTERNAL_AI = bool(OPENAI_API_KEY)
 
 # Application Settings
 APP_TITLE = "Digital Sahayak API"

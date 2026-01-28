@@ -25,10 +25,12 @@ backend/
 │   ├── payment_routes.py      # Payment integration
 │   ├── ai_routes.py           # AI learning endpoints
 │   ├── scraper_routes.py      # Web scraping
-│   └── whatsapp_routes.py     # WhatsApp webhooks
+│   ├── whatsapp_routes.py     # WhatsApp webhooks
+│   └── form_routes.py         # Form intelligence (ML)
 │
 ├── services/                   # Business logic
-│   └── hybrid_matching.py     # Hybrid Rule+ML matching engine
+│   ├── hybrid_matching.py     # Hybrid Rule+ML matching engine
+│   └── form_intelligence.py   # ML field classification & error prediction
 │
 ├── middleware/                 # Middleware
 │   └── auth.py                # JWT authentication
@@ -53,6 +55,16 @@ Located in `services/hybrid_matching.py`:
 - **ML enhancement**: OpenAI API for semantic similarity
 - **Log-based learning**: Learns from user behavior (applied, ignored, saved)
 
+See [FORM_INTELLIGENCE_GUIDE.md](FORM_INTELLIGENCE_GUIDE.md) for detailed Form Intelligence documentation.
+Form Intelligence System**
+Located in `services/form_intelligence.py`:
+- **Field Classification**: ML-based field type detection (name, email, phone, Aadhar, PAN, etc.)
+- **Error Prediction**: Predicts form errors before submission using validation + ML
+- **Auto-fill**: Smart form filling based on user profile
+- **Portal Training**: Learns from portal-specific datasets to improve accuracy
+- **Batch Validation**: Validate multiple forms simultaneously
+
+### 4. **
 ### 3. **Modular Routes**
 Each route file is focused and independent:
 - Easy to add new endpoints
@@ -179,7 +191,44 @@ The self-learning AI is integrated through `ai_routes.py`:
 **Endpoints:**
 - `POST /api/ai/learn-from-external` - Learn from other AIs
 - `POST /api/ai/generate-smart` - Generate with learnings
-- `POST /api/ai/web-search` - Search web for info
+- `POST /api/ai/web-search` - Search web for inf
+
+## Form Intelligence System
+
+ML-based form assistance integrated through `form_routes.py`:
+
+**Endpoints:**
+- `POST /api/forms/classify-field` - Classify field type (name, email, Aadhar, etc.)
+- `POST /api/forms/predict-errors` - Predict form errors before submission
+- `POST /api/forms/auto-fill` - Get auto-fill suggestions from user profile
+- `POST /api/forms/train` - Train on portal datasets (Admin)
+- `POST /api/forms/smart-form-fill` - Complete form assistance in one call
+- `POST /api/forms/validate-batch` - Validate multiple forms
+- `GET /api/forms/training-stats` - View training statistics (Admin)
+
+**Use Case Example:**
+```python
+# User filling NREGA form
+form_data = {
+    "applicant_name": "rajesh",
+    "mobile_no": "98765",
+    "aadhaar_no": "123"
+}
+
+# Predict errors
+errors = await form_engine.predict_errors(form_data)
+# Returns: [
+#   {"field": "mobile_no", "error": "Invalid phone format", "severity": "high"},
+#   {"field": "aadhaar_no", "error": "Invalid aadhar format", "severity": "high"}
+# ]
+
+# Get auto-fill suggestions
+suggestions = await form_engine.auto_fill_suggestions(
+    ["Name", "Email", "Mobile"],
+    user_profile
+)
+# Pre-fills known user data
+```o
 - `POST /api/ai/hybrid-match` - Hybrid job matching
 - `GET /api/ai/learning-stats` - View statistics
 

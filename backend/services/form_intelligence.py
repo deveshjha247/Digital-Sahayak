@@ -4,14 +4,18 @@ ML-based field classification, auto-fill, and error prediction for portal forms
 """
 
 from config.database import get_database
-from config.settings import OPENAI_API_KEY
+from config.settings import OPENAI_API_KEY, USE_EXTERNAL_AI
 from utils.helpers import get_current_timestamp, extract_keywords
-from openai import AsyncOpenAI
 import re
 from typing import Dict, List, Any, Optional
 import json
 
-client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+# OpenAI is OPTIONAL - form intelligence works without it
+if USE_EXTERNAL_AI:
+    from openai import AsyncOpenAI
+    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+else:
+    client = None
 
 class FormIntelligenceEngine:
     """
@@ -85,10 +89,15 @@ class FormIntelligenceEngine:
         # ML enhancement for ambiguous cases
         ml_type = None
         if confidence < 0.8 or not rule_based_type:
-            ml_type = await self._ml_classify_field(field_label, field_value)
-            if ml_type:
-                rule_based_type = ml_type.get("type")
-                confidence = max(confidence, ml_type.get("confidence", 0.6))
+            if USE_EXTERNAL_AI and client:
+                ml_type = await self._ml_classify_field(field_label, field_value)
+                if ml_type:
+                    rule_based_type = ml_type.get("type")
+                    confidence = max(confidence, ml_type.get("confidence", 0.6))
+            else:
+                # Use advanced pattern matching instead
+                rule_based_type = rule_based_type or self._advanced_pattern_match(field_label, field_value)
+                confidence = 0.7
         
         return {
             "field_label": field_label,
@@ -99,8 +108,12 @@ class FormIntelligenceEngine:
     
     async def _ml_classify_field(self, field_label: str, field_value: str = None) -> Optional[Dict]:
         """
-        Use OpenAI to classify ambiguous fields
+        Optional ML classification using external AI
+        Digital Sahayak works without this!
         """
+        if not USE_EXTERNAL_AI or not client:
+            return None
+        
         try:
             context = f"Field label: {field_label}"
             if field_value:
@@ -119,8 +132,46 @@ Respond with JSON: {{"type": "field_type", "confidence": 0.0-1.0, "reasoning": "
                 temperature=0.3
             )
             
-            result = json.loads(response.choices[0].message.content)
-            return result
+            result = json.loads(response.ch (optional feature): {e}")
+            return None
+    
+    def _advanced_pattern_match(self, field_label: str, field_value: str = None) -> str:
+        """
+        Advanced pattern matching for field classification
+        Custom Digital Sahayak logic (no external AI)
+        """
+        label_lower = field_label.lower()
+        
+        # Multi-word matching
+        if any(word in label_lower for word in ["full name", "complete name", "पूरा नाम"]):
+            return "name"
+        
+        if any(word in label_lower for word in ["contact", "mobile", "cell"]):
+            return "phone"
+        
+        if any(word in label_lower for word in ["correspondence", "residential"]):
+            return "address"
+        
+        if any(word in label_lower for word in ["birth date", "dob", "जन्म"]):
+            return "age"
+        
+        # Value-based detection
+        if field_value:
+            value_str = str(field_value)
+            
+            # Check patterns
+            if re.match(r'^\d{12}$', value_str):
+                return "aadhar"
+            elif re.match(r'^[A-Z]{5}\d{4}[A-Z]$', value_str):
+                return "pan"
+            elif re.match(r'^[6-9]\d{9}$', value_str):
+                return "phone"
+            elif re.match(r'^\d{6}$', value_str):
+                return "pincode"
+            elif '@' in value_str:
+                return "email"
+        
+        return "unknown"lt
         
         except Exception as e:
             print(f"ML classification error: {e}")
@@ -165,10 +216,11 @@ Respond with JSON: {{"type": "field_type", "confidence": 0.0-1.0, "reasoning": "
                 "placeholder": "Age in years",
                 "validation": "Number between 1-120",
                 "example": "25"
-            }
-        }
-        
-        return suggestions.get(field_type, {
+            } (optional)
+        if USE_EXTERNAL_AI and client:
+            ml_errors = await self._ml_predict_errors(form_data)
+            if ml_errors:
+            return suggestions.get(field_type, {
             "placeholder": f"Enter {field_type}",
             "validation": "Valid input required",
             "example": ""
@@ -177,8 +229,12 @@ Respond with JSON: {{"type": "field_type", "confidence": 0.0-1.0, "reasoning": "
     async def predict_errors(self, form_data: Dict[str, str]) -> List[Dict[str, Any]]:
         """
         Predict potential errors in form submission
+        Optional ML-based error prediction
+        Digital Sahayak works without this!
         """
-        errors = []
+        if not USE_EXTERNAL_AI or not client:
+            return []
+        ors = []
         
         for field_name, field_value in form_data.items():
             # Classify field
@@ -200,7 +256,7 @@ Respond with JSON: {{"type": "field_type", "confidence": 0.0-1.0, "reasoning": "
             # Check for common patterns
             for error_pattern in self.error_patterns:
                 if re.search(error_pattern["pattern"], str(field_value)):
-                    errors.append({
+                    errors.append({ (optional feature)
                         "field": field_name,
                         "error": error_pattern["message"],
                         "severity": error_pattern["severity"],
