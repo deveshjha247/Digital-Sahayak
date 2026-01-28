@@ -283,7 +283,7 @@ export default function AILearningPage() {
               <CardHeader>
                 <CardTitle>Smart Generation</CardTitle>
                 <CardDescription>
-                  Past learnings के साथ better response generate करें
+                  Generate better responses using past learnings and project context
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -293,9 +293,22 @@ export default function AILearningPage() {
                     id="smartprompt"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="क्या करना है?"
+                    placeholder="What do you want to do?"
                     rows={4}
                   />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="useWebSearchGen"
+                    checked={useWebSearch}
+                    onChange={(e) => setUseWebSearch(e.target.checked)}
+                    className="rounded"
+                  />
+                  <Label htmlFor="useWebSearchGen">
+                    Search web for real-time information
+                  </Label>
                 </div>
 
                 <Button
@@ -303,7 +316,7 @@ export default function AILearningPage() {
                   disabled={loading}
                   className="w-full"
                 >
-                  {loading ? 'Generate कर रहा हूँ...' : '🚀 Smart Generate'}
+                  {loading ? 'Generating...' : '🚀 Smart Generate'}
                 </Button>
 
                 {result && result.response && (
@@ -318,6 +331,9 @@ export default function AILearningPage() {
                           <Badge variant="default">
                             {Math.round(result.confidence * 100)}% Confidence
                           </Badge>
+                          {result.used_web_search && (
+                            <Badge variant="outline">🌐 Web Search Used</Badge>
+                          )}
                         </div>
                       </div>
                     </CardHeader>
@@ -332,13 +348,77 @@ export default function AILearningPage() {
             </Card>
           </TabsContent>
 
+          {/* Web Search */}
+          <TabsContent value="websearch">
+            <Card>
+              <CardHeader>
+                <CardTitle>Web Search</CardTitle>
+                <CardDescription>
+                  Search the web for real-time information (uses DuckDuckGo)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="websearchquery">Search Query</Label>
+                  <Input
+                    id="websearchquery"
+                    value={webSearchQuery}
+                    onChange={(e) => setWebSearchQuery(e.target.value)}
+                    placeholder="e.g., UPSC 2026 exam eligibility criteria"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleWebSearch}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? 'Searching...' : '🔍 Search Web'}
+                </Button>
+
+                {webSearchResults && (
+                  <div className="space-y-3 mt-4">
+                    <Alert>
+                      <AlertDescription>
+                        Found {webSearchResults.count} results
+                      </AlertDescription>
+                    </Alert>
+                    
+                    {webSearchResults.results.map((result, idx) => (
+                      <Card key={idx} className="border-l-4 border-l-blue-500">
+                        <CardContent className="pt-4">
+                          <h3 className="font-semibold text-blue-600 mb-1">
+                            {result.title}
+                          </h3>
+                          {result.url && (
+                            <a 
+                              href={result.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-gray-500 hover:underline block mb-2"
+                            >
+                              {result.url}
+                            </a>
+                          )}
+                          <p className="text-sm text-gray-700">
+                            {result.snippet}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Learning Stats */}
           <TabsContent value="stats">
             <Card>
               <CardHeader>
                 <CardTitle>Learning Statistics</CardTitle>
                 <CardDescription>
-                  AI कितना सीख चुका है
+                  How much the AI has learned
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
