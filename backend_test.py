@@ -341,6 +341,111 @@ class DigitalSahayakAPITester:
         
         return success
 
+    def test_job_scraping(self):
+        """Test job scraping endpoint"""
+        if not self.admin_token:
+            print("❌ Skipping job scraping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Trigger Job Scraping",
+            "POST",
+            "admin/scrape-jobs",
+            200,
+            use_admin=True
+        )
+        
+        if success:
+            print(f"   Scraping status: {response.get('status')}")
+            print(f"   Message: {response.get('message')}")
+        
+        return success
+
+    def test_profile_preferences(self):
+        """Test profile preferences update"""
+        if not self.token:
+            print("❌ Skipping profile preferences - No user token")
+            return False
+        
+        # Update user preferences
+        preferences_data = {
+            "education_level": "graduate",
+            "state": "bihar",
+            "age": 25,
+            "preferred_categories": ["government", "railway", "bank"]
+        }
+        
+        success, response = self.run_test(
+            "Update Profile Preferences",
+            "PUT",
+            "profile/preferences",
+            200,
+            data=preferences_data
+        )
+        
+        if success:
+            print(f"   Profile updated successfully")
+            user_data = response.get('user', {})
+            print(f"   Education: {user_data.get('education_level')}")
+            print(f"   State: {user_data.get('state')}")
+            print(f"   Age: {user_data.get('age')}")
+            print(f"   Categories: {len(user_data.get('preferred_categories', []))}")
+        
+        return success
+
+    def test_ai_recommendations(self):
+        """Test AI job recommendations"""
+        if not self.token:
+            print("❌ Skipping AI recommendations - No user token")
+            return False
+        
+        success, response = self.run_test(
+            "Get AI Job Recommendations",
+            "GET",
+            "recommendations?limit=5",
+            200
+        )
+        
+        if success:
+            recommendations = response.get('recommendations', [])
+            print(f"   Found {len(recommendations)} recommendations")
+            user_profile = response.get('user_profile', {})
+            print(f"   User profile: Education={user_profile.get('education_level')}, State={user_profile.get('state')}, Age={user_profile.get('age')}")
+            
+            # Check if recommendations have match scores
+            if recommendations:
+                first_rec = recommendations[0]
+                print(f"   First recommendation: {first_rec.get('title', 'N/A')}")
+                print(f"   Match score: {first_rec.get('match_score', 'N/A')}%")
+                if first_rec.get('ai_reason'):
+                    print(f"   AI reason: {first_rec.get('ai_reason')[:50]}...")
+        
+        return success
+
+    def test_matching_jobs(self):
+        """Test matching jobs with scores"""
+        if not self.token:
+            print("❌ Skipping matching jobs - No user token")
+            return False
+        
+        success, response = self.run_test(
+            "Get Matching Jobs with Scores",
+            "GET",
+            "jobs/matching?limit=3",
+            200
+        )
+        
+        if success:
+            jobs = response.get('jobs', [])
+            print(f"   Found {len(jobs)} matching jobs")
+            print(f"   Profile complete: {response.get('user_profile_complete', False)}")
+            
+            if jobs:
+                for i, job in enumerate(jobs[:2]):
+                    print(f"   Job {i+1}: {job.get('title', 'N/A')} - Score: {job.get('match_score', 'N/A')}%")
+        
+        return success
+
 def main():
     print("🚀 Starting Digital Sahayak API Tests")
     print("=" * 50)
