@@ -14,8 +14,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { toast } from 'sonner';
 import { 
   Briefcase, Building2, Users, IndianRupee, Plus, Loader2, 
-  BarChart3, FileText, Settings, Trash2, Edit, RefreshCw, Globe
+  BarChart3, FileText, Settings, Trash2, Edit, RefreshCw, Globe, FileEdit
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
