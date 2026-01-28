@@ -10,7 +10,8 @@ from . import (
     payment_routes,
     ai_routes,
     scraper_routes,
-    whatsapp_routes
+    whatsapp_routes,
+    form_routes
 )
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "payment_routes",
     "ai_routes",
     "scraper_routes",
-    "whatsapp_routes"
+    "whatsapp_routes",
+    "form_routes"
 ]

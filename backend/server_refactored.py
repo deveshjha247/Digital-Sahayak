@@ -22,24 +22,27 @@ from routes import (
     payment_routes,
     ai_routes,
     scraper_routes,
-    whatsapp_routes
+    whatsapp_routes,
+    form_routes
 )
 
 # Import AI systems
 from ai_learning_system import SelfLearningAI
 from services.hybrid_matching import HybridMatchingEngine
+from services.form_intelligence import FormIntelligenceEngine
 
 # Global instances
 db_instance = Database()
 self_learning_ai = None
 hybrid_matcher = None
+form_engine = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Startup and shutdown events
     """
-    global self_learning_ai, hybrid_matcher
+    global self_learning_ai, hybrid_matcher, form_engine
     
     # Startup
     print("🚀 Starting Digital Sahayak Server...")
@@ -62,8 +65,16 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️ Hybrid Matcher initialization failed: {e}")
     
+    # Initialize Form Intelligence Engine
+    try:
+        form_engine = FormIntelligenceEngine()
+        print("✅ Form Intelligence Engine initialized")
+    except Exception as e:
+        print(f"⚠️ Form Engine initialization failed: {e}")
+    
     # Set AI instances in routes
     ai_routes.set_ai_instances(self_learning_ai, hybrid_matcher)
+    form_routes.set_form_engine(form_engine)
     
     print("✅ Server ready!")
     
@@ -109,7 +120,8 @@ async def health_check():
         "status": "healthy",
         "database": "connected" if db_instance.db else "disconnected",
         "ai_system": "active" if self_learning_ai else "inactive",
-        "hybrid_matcher": "active" if hybrid_matcher else "inactive"
+        "hybrid_matcher": "active" if hybrid_matcher else "inactive",
+        "form_intelligence": "active" if form_engine else "inactive"
     }
 
 # Mount routers
@@ -121,6 +133,7 @@ app.include_router(payment_routes.router, prefix="/api")
 app.include_router(ai_routes.router, prefix="/api")
 app.include_router(scraper_routes.router, prefix="/api")
 app.include_router(whatsapp_routes.router, prefix="/api")
+app.include_router(form_routes.router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn
