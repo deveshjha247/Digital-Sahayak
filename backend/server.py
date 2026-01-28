@@ -652,6 +652,10 @@ async def register(user_data: UserCreate):
         "is_operator": False,
         "documents": [],
         "whatsapp_connected": False,
+        "education_level": user_data.education_level,
+        "state": user_data.state,
+        "age": user_data.age,
+        "preferred_categories": user_data.preferred_categories,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
