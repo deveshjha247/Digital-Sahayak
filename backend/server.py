@@ -925,17 +925,35 @@ async def get_matching_jobs(
         "user_profile_complete": bool(user.get("education_level") and user.get("state") and user.get("age"))
     }
 
-@api_router.get("/jobs/{job_id}")
-async def get_job(job_id: str):
-    job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+@api_router.get("/jobs/slug/{slug:path}")
+async def get_job_by_slug(slug: str):
+    """Get job by SEO-friendly slug URL"""
+    job = await db.jobs.find_one({"slug": slug}, {"_id": 0})
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    await db.jobs.update_one({"id": job_id}, {"$inc": {"views": 1}})
+    await db.jobs.update_one({"slug": slug}, {"$inc": {"views": 1}})
+    return job
+
+@api_router.get("/jobs/{job_id}")
+async def get_job(job_id: str):
+    # Try finding by ID first, then by slug
+    job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    if not job:
+        # Try slug
+        job = await db.jobs.find_one({"slug": job_id}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    await db.jobs.update_one({"id": job.get("id")}, {"$inc": {"views": 1}})
     return job
 
 @api_router.put("/jobs/{job_id}")
 async def update_job(job_id: str, job: JobAlertCreate, admin: dict = Depends(get_admin_user)):
-    result = await db.jobs.update_one({"id": job_id}, {"$set": job.model_dump()})
+    # Update slug if title changed
+    update_data = job.model_dump()
+    if job.slug:
+        update_data["slug"] = await get_unique_slug(job.slug, "jobs")
+    
+    result = await db.jobs.update_one({"id": job_id}, {"$set": update_data})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Job not found")
     return {"message": "Job updated"}
@@ -952,8 +970,17 @@ async def delete_job(job_id: str, admin: dict = Depends(get_admin_user)):
 @api_router.post("/yojana", status_code=201)
 async def create_yojana(yojana: YojanaCreate, admin: dict = Depends(get_admin_user)):
     yojana_id = str(uuid.uuid4())
+    
+    # Generate slug if not provided
+    if not yojana.slug:
+        base_slug = generate_slug(yojana.name, yojana.state)
+        slug = await get_unique_slug(base_slug, "yojana")
+    else:
+        slug = await get_unique_slug(yojana.slug, "yojana")
+    
     yojana_doc = {
         "id": yojana_id,
+        "slug": slug,
         **yojana.model_dump(),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "created_by": admin["id"],
