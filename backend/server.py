@@ -1838,27 +1838,32 @@ async def learn_from_external_ai(request: Request, current_user: dict = Depends(
 @api_router.post("/ai/generate-smart")
 async def generate_with_learning(request: Request, current_user: dict = Depends(get_current_user)):
     """
-    Past learnings के साथ smart response generate करो
+    Generate smart responses using past learnings and project context
+    Can optionally search web for real-time information
     
     Example:
     {
-        "prompt": "User को job recommendations दो",
-        "context": "User profile data"
+        "prompt": "Recommend jobs for user",
+        "context": "User profile data",
+        "use_web_search": true
     }
     """
     try:
         data = await request.json()
         prompt = data.get('prompt')
         context = data.get('context', '')
+        use_web_search = data.get('use_web_search', False)
         
         if not prompt:
-            raise HTTPException(400, "prompt required है")
+            raise HTTPException(400, "prompt is required")
         
         if not self_learning_ai:
-            raise HTTPException(503, "AI Learning System available नहीं है")
+            raise HTTPException(503, "AI Learning System not available")
         
-        # Learning के साथ generate करो
-        result = await self_learning_ai.generate_with_learning(prompt, context)
+        # Generate with learning
+        result = await self_learning_ai.generate_with_learning(
+            prompt, context, use_web_search
+        )
         
         return result
         
@@ -1869,7 +1874,7 @@ async def generate_with_learning(request: Request, current_user: dict = Depends(
 @api_router.post("/ai/batch-compare")
 async def batch_compare_learning(request: Request, current_user: dict = Depends(get_current_user)):
     """
-    Multiple AI responses को compare करके patterns सीखो
+    Compare multiple AI responses to learn best patterns
     
     Example:
     {
@@ -1884,10 +1889,10 @@ async def batch_compare_learning(request: Request, current_user: dict = Depends(
         comparisons = data.get('comparisons', [])
         
         if not comparisons:
-            raise HTTPException(400, "comparisons required हैं")
+            raise HTTPException(400, "comparisons are required")
         
         if not self_learning_ai:
-            raise HTTPException(503, "AI Learning System available नहीं है")
+            raise HTTPException(503, "AI Learning System not available")
         
         # Batch learning
         result = await self_learning_ai.compare_and_learn_batch(comparisons)
@@ -1901,11 +1906,11 @@ async def batch_compare_learning(request: Request, current_user: dict = Depends(
 @api_router.get("/ai/learning-stats")
 async def get_learning_statistics(current_user: dict = Depends(get_current_user)):
     """
-    AI की learning statistics देखो
+    Get AI learning statistics and progress
     """
     try:
         if not self_learning_ai:
-            raise HTTPException(503, "AI Learning System available नहीं है")
+            raise HTTPException(503, "AI Learning System not available")
         
         stats = await self_learning_ai.get_learning_stats()
         
@@ -1918,31 +1923,33 @@ async def get_learning_statistics(current_user: dict = Depends(get_current_user)
 @api_router.post("/ai/improve-job-matching")
 async def improve_job_matching_with_ai(request: Request, current_user: dict = Depends(get_current_user)):
     """
-    Job matching को AI learning से improve करो
+    Improve job matching using AI learning and optional web search
     
     Example:
     {
         "job_id": "job123",
-        "external_suggestions": {...}  // Optional: दूसरे AI के suggestions
+        "external_suggestions": {...},  // Optional: External AI suggestions
+        "use_web_search": true         // Optional: Search web for job info
     }
     """
     try:
         data = await request.json()
         job_id = data.get('job_id')
         external_suggestions = data.get('external_suggestions')
+        use_web_search = data.get('use_web_search', False)
         
         if not job_id:
-            raise HTTPException(400, "job_id required है")
+            raise HTTPException(400, "job_id is required")
         
         if not self_learning_ai:
-            raise HTTPException(503, "AI Learning System available नहीं है")
+            raise HTTPException(503, "AI Learning System not available")
         
-        # Job data fetch करो
+        # Fetch job data
         job = await db.jobs.find_one({"id": job_id})
         if not job:
             raise HTTPException(404, "Job not found")
         
-        # User profile fetch करो
+        # Get user profile
         user_profile = {
             "education": current_user.get('education'),
             "age": current_user.get('age'),
@@ -1952,13 +1959,88 @@ async def improve_job_matching_with_ai(request: Request, current_user: dict = De
         
         # Improved matching
         result = await self_learning_ai.auto_improve_job_matching(
-            job, user_profile, external_suggestions
+            job, user_profile, external_suggestions, use_web_search
         )
         
         return result
         
     except Exception as e:
         raise HTTPException(500, f"Job matching error: {str(e)}")
+
+
+@api_router.post("/ai/web-search")
+async def web_search_endpoint(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Search the web for real-time information
+    
+    Example:
+    {
+        "query": "UPSC exam 2026 eligibility",
+        "max_results": 3
+    }
+    """
+    try:
+        data = await request.json()
+        query = data.get('query')
+        max_results = data.get('max_results', 3)
+        
+        if not query:
+            raise HTTPException(400, "query is required")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        # Perform web search
+        results = await self_learning_ai.web_search(query, max_results)
+        
+        return {
+            "query": query,
+            "results": results,
+            "count": len(results)
+        }
+        
+    except Exception as e:
+        raise HTTPException(500, f"Web search error: {str(e)}")
+
+
+@api_router.get("/ai/analyze-project")
+async def analyze_project_structure(current_user: dict = Depends(get_current_user)):
+    """
+    Analyze the project structure for better AI context
+    Only admins can trigger this
+    """
+    try:
+        if not current_user.get('is_admin'):
+            raise HTTPException(403, "Admin access required")
+        
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        # Analyze project
+        analysis = await self_learning_ai.analyze_project_structure()
+        
+        return analysis
+        
+    except Exception as e:
+        raise HTTPException(500, f"Project analysis error: {str(e)}")
+
+
+@api_router.get("/ai/project-context")
+async def get_project_context(current_user: dict = Depends(get_current_user)):
+    """
+    Get current project context known by AI
+    """
+    try:
+        if not self_learning_ai:
+            raise HTTPException(503, "AI Learning System not available")
+        
+        return {
+            "domain": self_learning_ai.project_domain,
+            "analyzed": self_learning_ai.project_files_analyzed
+        }
+        
+    except Exception as e:
+        raise HTTPException(500, f"Context error: {str(e)}")
 
 
 # ===================== STARTUP & SHUTDOWN =====================

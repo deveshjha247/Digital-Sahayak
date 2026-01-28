@@ -12,14 +12,17 @@ export default function AILearningPage() {
   const [prompt, setPrompt] = useState('');
   const [externalResponse, setExternalResponse] = useState('');
   const [aiName, setAiName] = useState('GitHub Copilot');
+  const [useWebSearch, setUseWebSearch] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
+  const [webSearchQuery, setWebSearchQuery] = useState('');
+  const [webSearchResults, setWebSearchResults] = useState(null);
 
   // Learn from External AI
   const handleLearnFromExternal = async () => {
     if (!prompt || !externalResponse) {
-      alert('Prompt और External AI Response दोनों भरें');
+      alert('Prompt and External AI Response both are required');
       return;
     }
 
@@ -34,7 +37,8 @@ export default function AILearningPage() {
         body: JSON.stringify({
           prompt,
           other_ai_response: externalResponse,
-          ai_name: aiName
+          ai_name: aiName,
+          use_web_search: useWebSearch
         })
       });
 
@@ -51,7 +55,7 @@ export default function AILearningPage() {
   // Generate with Learning
   const handleSmartGenerate = async () => {
     if (!prompt) {
-      alert('Prompt भरें');
+      alert('Prompt is required');
       return;
     }
 
@@ -63,11 +67,45 @@ export default function AILearningPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ 
+          prompt,
+          use_web_search: useWebSearch 
+        })
       });
 
       const data = await response.json();
       setResult(data);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Web Search
+  const handleWebSearch = async () => {
+    if (!webSearchQuery) {
+      alert('Search query is required');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/ai/web-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          query: webSearchQuery,
+          max_results: 5
+        })
+      });
+
+      const data = await response.json();
+      setWebSearchResults(data);
     } catch (error) {
       console.error('Error:', error);
       alert('Error: ' + error.message);
@@ -103,15 +141,16 @@ export default function AILearningPage() {
           <CardHeader>
             <CardTitle className="text-3xl">🧠 Self-Learning AI System</CardTitle>
             <CardDescription>
-              एक AI जो दूसरे AI से सीखता है और खुद को बेहतर बनाता है
+              An AI that learns from other AIs and improves itself with web search capability
             </CardDescription>
           </CardHeader>
         </Card>
 
         <Tabs defaultValue="learn" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="learn">Learn from AI</TabsTrigger>
             <TabsTrigger value="generate">Smart Generate</TabsTrigger>
+            <TabsTrigger value="websearch">Web Search</TabsTrigger>
             <TabsTrigger value="stats">Learning Stats</TabsTrigger>
           </TabsList>
 
@@ -119,14 +158,14 @@ export default function AILearningPage() {
           <TabsContent value="learn">
             <Card>
               <CardHeader>
-                <CardTitle>दूसरे AI से सीखें</CardTitle>
+                <CardTitle>Learn from External AI</CardTitle>
                 <CardDescription>
-                  GitHub Copilot, ChatGPT या किसी भी AI का response paste करें
+                  Paste responses from GitHub Copilot, ChatGPT, or any AI
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="ainame">AI का नाम</Label>
+                  <Label htmlFor="ainame">AI Name</Label>
                   <Input
                     id="ainame"
                     value={aiName}
@@ -141,20 +180,33 @@ export default function AILearningPage() {
                     id="prompt"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="आपने क्या पूछा था?"
+                    placeholder="What did you ask?"
                     rows={3}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="external">External AI का Response</Label>
+                  <Label htmlFor="external">External AI's Response</Label>
                   <Textarea
                     id="external"
                     value={externalResponse}
                     onChange={(e) => setExternalResponse(e.target.value)}
-                    placeholder="दूसरे AI ने क्या जवाब दिया?"
+                    placeholder="What did the other AI respond?"
                     rows={6}
                   />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="useWebSearch"
+                    checked={useWebSearch}
+                    onChange={(e) => setUseWebSearch(e.target.checked)}
+                    className="rounded"
+                  />
+                  <Label htmlFor="useWebSearch">
+                    Use web search for additional context
+                  </Label>
                 </div>
 
                 <Button
@@ -162,7 +214,7 @@ export default function AILearningPage() {
                   disabled={loading}
                   className="w-full"
                 >
-                  {loading ? 'सीख रहा हूँ...' : '✨ Learn & Improve'}
+                  {loading ? 'Learning...' : '✨ Learn & Improve'}
                 </Button>
 
                 {result && result.success && (
