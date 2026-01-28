@@ -130,6 +130,22 @@ const AdminPage = () => {
     }
   };
 
+  const handleScrapeJobs = async () => {
+    setScraping(true);
+    try {
+      await axios.post(`${API}/admin/scrape-jobs`);
+      toast.success('Job scraping शुरू हो गई! कुछ समय बाद रिफ्रेश करें।');
+      // Wait a bit and refresh
+      setTimeout(() => {
+        fetchData();
+      }, 5000);
+    } catch (err) {
+      toast.error('Scraping में त्रुटि हुई');
+    } finally {
+      setScraping(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
