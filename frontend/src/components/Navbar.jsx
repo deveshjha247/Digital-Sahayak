@@ -21,6 +21,7 @@ const Navbar = () => {
   const navLinks = [
     { href: '/jobs', label: 'नौकरी अलर्ट', labelEn: 'Job Alerts', icon: Briefcase },
     { href: '/yojana', label: 'योजनाएं', labelEn: 'Schemes', icon: Building2 },
+    { href: '/recommendations', label: 'AI सुझाव', labelEn: 'For You', icon: Sparkles },
   ];
 
   const handleLogout = () => {
