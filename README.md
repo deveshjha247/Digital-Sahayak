@@ -141,6 +141,8 @@ Our custom-built **Digital Sahayak AI** is developed from scratch and includes:
 
 See [REFACTORING_GUIDE.md](backend/REFACTORING_GUIDE.md) and [FORM_INTELLIGENCE_GUIDE.md](backend/FORM_INTELLIGENCE_GUIDE.md) for detailed documentation.
 
+**📖 Complete AI Documentation:** See [DIGITAL_SAHAYAK_AI.md](DIGITAL_SAHAYAK_AI.md) for how our custom AI works without external dependencies.
+
 ## Contributors
 
 This project is a collaborative effort by:
