@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { toast } from 'sonner';
 import { 
   Briefcase, Building2, Users, IndianRupee, Plus, Loader2, 
-  BarChart3, FileText, Settings, Trash2, Edit
+  BarChart3, FileText, Settings, Trash2, Edit, RefreshCw, Globe
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
@@ -25,6 +25,7 @@ const AdminPage = () => {
   const [stats, setStats] = useState(null);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scraping, setScraping] = useState(false);
   const [jobDialogOpen, setJobDialogOpen] = useState(false);
   const [yojanaDialogOpen, setYojanaDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
