@@ -1143,6 +1143,164 @@ async def make_admin(phone: str = Body(..., embed=True), admin: dict = Depends(g
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User is now admin"}
 
+# ===================== SCRAPER ENDPOINTS =====================
+
+@api_router.post("/admin/scrape-jobs")
+async def trigger_job_scraping(background_tasks: BackgroundTasks, admin: dict = Depends(get_admin_user)):
+    """Trigger job scraping from configured sources"""
+    
+    async def scrape_and_save():
+        try:
+            jobs = await job_scraper.scrape_all()
+            saved_count = 0
+            
+            for job_data in jobs:
+                # Check if job already exists (by title + apply_link)
+                existing = await db.jobs.find_one({
+                    "title": job_data["title"],
+                    "apply_link": job_data["apply_link"]
+                })
+                
+                if not existing:
+                    job_id = str(uuid.uuid4())
+                    job_doc = {
+                        "id": job_id,
+                        **job_data,
+                        "is_active": True,
+                        "created_at": datetime.now(timezone.utc).isoformat(),
+                        "created_by": "scraper",
+                        "views": 0,
+                        "applications": 0
+                    }
+                    await db.jobs.insert_one(job_doc)
+                    saved_count += 1
+            
+            logger.info(f"Scraper saved {saved_count} new jobs")
+            
+            # Log scrape result
+            await db.scrape_logs.insert_one({
+                "id": str(uuid.uuid4()),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "total_scraped": len(jobs),
+                "new_saved": saved_count,
+                "status": "success"
+            })
+            
+        except Exception as e:
+            logger.error(f"Scraping error: {e}")
+            await db.scrape_logs.insert_one({
+                "id": str(uuid.uuid4()),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "error": str(e),
+                "status": "failed"
+            })
+    
+    background_tasks.add_task(scrape_and_save)
+    return {"message": "Job scraping started in background", "status": "processing"}
+
+@api_router.get("/admin/scrape-logs")
+async def get_scrape_logs(admin: dict = Depends(get_admin_user), limit: int = 10):
+    """Get recent scrape logs"""
+    logs = await db.scrape_logs.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
+    return {"logs": logs}
+
+# ===================== AI JOB RECOMMENDATIONS =====================
+
+@api_router.get("/recommendations")
+async def get_job_recommendations(user: dict = Depends(get_current_user), limit: int = 10):
+    """Get AI-powered job recommendations based on user profile"""
+    
+    # Fetch all active jobs
+    jobs = await db.jobs.find({"is_active": True}, {"_id": 0}).to_list(100)
+    
+    if not jobs:
+        return {"recommendations": [], "message": "No jobs available"}
+    
+    # Get AI recommendations
+    recommendations = await ai_job_matcher.get_ai_recommendations(user, jobs, limit)
+    
+    return {
+        "recommendations": recommendations,
+        "total": len(recommendations),
+        "user_profile": {
+            "education_level": user.get("education_level"),
+            "state": user.get("state"),
+            "age": user.get("age"),
+            "preferred_categories": user.get("preferred_categories", [])
+        }
+    }
+
+@api_router.put("/profile/preferences")
+async def update_user_preferences(
+    preferences: UserProfileUpdate,
+    user: dict = Depends(get_current_user)
+):
+    """Update user profile preferences for better job matching"""
+    update_data = {}
+    
+    if preferences.name:
+        update_data["name"] = preferences.name
+    if preferences.email:
+        update_data["email"] = preferences.email
+    if preferences.education_level:
+        update_data["education_level"] = preferences.education_level
+    if preferences.state:
+        update_data["state"] = preferences.state
+    if preferences.age is not None:
+        update_data["age"] = preferences.age
+    if preferences.preferred_categories is not None:
+        update_data["preferred_categories"] = preferences.preferred_categories
+    
+    if update_data:
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": update_data}
+        )
+    
+    updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
+    return {"message": "Profile updated", "user": updated_user}
+
+@api_router.get("/jobs/matching")
+async def get_matching_jobs(
+    user: dict = Depends(get_current_user),
+    category: Optional[str] = None,
+    state: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 20
+):
+    """Get jobs matching user's profile with scores"""
+    
+    # Build query
+    query = {"is_active": True}
+    if category:
+        query["category"] = category
+    if state and state != "all":
+        query["state"] = {"$in": [state, "all"]}
+    
+    # Fetch jobs
+    jobs = await db.jobs.find(query, {"_id": 0}).to_list(100)
+    
+    # Calculate match scores
+    scored_jobs = []
+    for job in jobs:
+        score = ai_job_matcher.calculate_match_score(user, job)
+        job["match_score"] = score
+        job["match_reason"] = ai_job_matcher._generate_reason(user, job, score)
+        scored_jobs.append(job)
+    
+    # Sort by match score
+    scored_jobs.sort(key=lambda x: x["match_score"], reverse=True)
+    
+    # Paginate
+    total = len(scored_jobs)
+    paginated = scored_jobs[skip:skip + limit]
+    
+    return {
+        "total": total,
+        "jobs": paginated,
+        "user_profile_complete": bool(user.get("education_level") and user.get("state") and user.get("age"))
+    }
+
 # ===================== DOCUMENT ENDPOINTS =====================
 
 @api_router.post("/documents/upload")
