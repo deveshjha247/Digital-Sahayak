@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class DigitalSahayakAPITester:
-    def __init__(self, base_url="https://digitalsahayak.preview.emergentagent.com/api"):
+    def __init__(self, base_url="http://localhost:8000/api"):
         self.base_url = base_url
         self.token = None
         self.admin_token = None
