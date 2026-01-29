@@ -291,6 +291,9 @@ class SelfLearningAI:
                     
                     # Limit to 2000 characters
                     return text[:2000]
+        except Exception as e:
+            logger.error(f"Error extracting content from {url}: {e}")
+            return ""
     
     async def normalize_field_value(self, field: str, value: str) -> str:
         """
@@ -620,15 +623,15 @@ class SelfLearningAI:
     
     async def get_active_rules(self) -> List[Dict]:
         """Get all active custom matching rules"""
-        if not self.custom_rules:
-            self.custom_rules = await self.rules_collection.find(
-                {"active": True}
-            ).to_list(100)
-        return self.custom_rules
-        except:
-            return ""
-        
-        return ""
+        try:
+            if not self.custom_rules:
+                self.custom_rules = await self.rules_collection.find(
+                    {"active": True}
+                ).to_list(100)
+            return self.custom_rules
+        except Exception as e:
+            logger.error(f"Error getting active rules: {e}")
+            return []
         
     async def learn_from_other_ai(self, prompt: str, other_ai_response: str, 
                                    ai_name: str = "External AI", use_web_search: bool = False) -> Dict:
