@@ -61,6 +61,7 @@ class SearchResponse:
     search_score: float
     intent: str
     metadata: Dict
+    facts: Optional[Dict] = None  # Extracted facts
     
     def to_dict(self) -> Dict:
         return {
@@ -71,7 +72,8 @@ class SearchResponse:
             "source": self.source,
             "search_score": self.search_score,
             "intent": self.intent,
-            "metadata": self.metadata
+            "metadata": self.metadata,
+            "facts": self.facts
         }
 
 
@@ -79,9 +81,10 @@ class DSSearch:
     """
     Main DS-Search orchestrator.
     Coordinates policy, query generation, crawling, ranking, and caching.
+    Now with Evidence Extractor and DS-Talk for structured facts & NLG.
     """
     
-    VERSION = "1.0.0"
+    VERSION = "2.0.0"
     
     def __init__(self, db=None):
         self.db = db
@@ -94,6 +97,10 @@ class DSSearch:
         self._api_manager: Optional[SearchAPIManager] = None
         self._ranker: Optional[ResultRanker] = None
         self._cache: Optional[SearchCache] = None
+        
+        # Evidence Extractor and DS-Talk
+        self._evidence_extractor: Optional['EvidenceExtractor'] = None
+        self._ds_talk: Optional['DSTalk'] = None
         
         self._initialized = False
         
@@ -113,6 +120,24 @@ class DSSearch:
         # Initialize components
         self._policy = get_policy_instance(self.db)
         self._querygen = get_querygen_instance()
+        self._sources = await get_sources_instance(self.db)
+        self._crawler = await get_crawler_instance(self._sources)
+        self._api_manager = get_api_manager()
+        self._ranker = get_ranker_instance(self._sources)
+        self._cache = await get_cache_instance(self.db)
+        
+        # Initialize Evidence Extractor
+        if EVIDENCE_AVAILABLE:
+            self._evidence_extractor = EvidenceExtractor()
+            logger.info("Evidence Extractor initialized")
+        
+        # Initialize DS-Talk
+        if NLG_AVAILABLE:
+            self._ds_talk = DSTalk(style="default")
+            logger.info("DS-Talk NLG initialized")
+        
+        self._initialized = True
+        logger.info(f"DS-Search v{self.VERSION} initialized")
         self._sources = await get_sources_instance(self.db)
         self._crawler = await get_crawler_instance(self._sources)
         self._api_manager = get_api_manager()
