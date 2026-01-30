@@ -1,0 +1,425 @@
+{
+  "config": {
+    "primary_language": "en",
+    "secondary_language": "hi",
+    "fallback_language": "en",
+    "auto_detect": true,
+    "include_both_languages": true
+  },
+  "languages": {
+    "en": {
+      "code": "en",
+      "name": "English",
+      "native_name": "English",
+      "priority": 1
+    },
+    "hi": {
+      "code": "hi", 
+      "name": "Hindi",
+      "native_name": "हिंदी",
+      "priority": 2
+    },
+    "hinglish": {
+      "code": "hinglish",
+      "name": "Hinglish",
+      "native_name": "Hinglish",
+      "priority": 3,
+      "note": "Hindi-English mixed"
+    }
+  },
+  "labels": {
+    "education": {
+      "10th_pass": {"en": "10th Pass", "hi": "दसवीं पास"},
+      "12th_pass": {"en": "12th Pass", "hi": "बारहवीं पास"},
+      "diploma": {"en": "Diploma", "hi": "डिप्लोमा"},
+      "graduate": {"en": "Graduate", "hi": "स्नातक"},
+      "post_graduate": {"en": "Post-Graduate", "hi": "स्नातकोत्तर"},
+      "doctorate": {"en": "Doctorate", "hi": "डॉक्टरेट"},
+      "any": {"en": "Any", "hi": "कोई भी"}
+    },
+    "categories": {
+      "railway": {"en": "Railway", "hi": "रेलवे"},
+      "ssc": {"en": "SSC", "hi": "एसएससी"},
+      "upsc": {"en": "UPSC", "hi": "यूपीएससी"},
+      "bank": {"en": "Bank", "hi": "बैंक"},
+      "police": {"en": "Police", "hi": "पुलिस"},
+      "teaching": {"en": "Teaching", "hi": "शिक्षण"},
+      "defence": {"en": "Defence", "hi": "रक्षा"},
+      "psc": {"en": "State PSC", "hi": "राज्य पीएससी"},
+      "court": {"en": "Court", "hi": "न्यायालय"},
+      "government": {"en": "Government", "hi": "सरकारी"}
+    },
+    "states": {
+      "bihar": {"en": "Bihar", "hi": "बिहार"},
+      "jharkhand": {"en": "Jharkhand", "hi": "झारखंड"},
+      "uttar_pradesh": {"en": "Uttar Pradesh", "hi": "उत्तर प्रदेश"},
+      "madhya_pradesh": {"en": "Madhya Pradesh", "hi": "मध्य प्रदेश"},
+      "rajasthan": {"en": "Rajasthan", "hi": "राजस्थान"},
+      "delhi": {"en": "Delhi", "hi": "दिल्ली"},
+      "maharashtra": {"en": "Maharashtra", "hi": "महाराष्ट्र"},
+      "west_bengal": {"en": "West Bengal", "hi": "पश्चिम बंगाल"},
+      "all_india": {"en": "All India", "hi": "अखिल भारतीय"}
+    },
+    "caste_categories": {
+      "general": {"en": "General", "hi": "सामान्य"},
+      "obc": {"en": "OBC", "hi": "ओबीसी"},
+      "sc": {"en": "SC", "hi": "अनुसूचित जाति"},
+      "st": {"en": "ST", "hi": "अनुसूचित जनजाति"},
+      "ews": {"en": "EWS", "hi": "आर्थिक रूप से कमजोर"}
+    },
+    "gender": {
+      "male": {"en": "Male", "hi": "पुरुष"},
+      "female": {"en": "Female", "hi": "महिला"},
+      "other": {"en": "Other", "hi": "अन्य"}
+    },
+    "marital_status": {
+      "unmarried": {"en": "Unmarried", "hi": "अविवाहित"},
+      "married": {"en": "Married", "hi": "विवाहित"},
+      "divorced": {"en": "Divorced", "hi": "तलाकशुदा"},
+      "widowed": {"en": "Widowed", "hi": "विधवा/विधुर"}
+    },
+    "interaction_labels": {
+      "applied": {"en": "Applied", "hi": "आवेदन किया"},
+      "saved": {"en": "Saved", "hi": "सेव किया"},
+      "clicked": {"en": "Viewed", "hi": "देखा"},
+      "skipped": {"en": "Skipped", "hi": "छोड़ा"},
+      "rejected": {"en": "Not Interested", "hi": "रुचि नहीं"}
+    }
+  },
+  "intents": {
+    "job_search": {
+      "en": {"name": "Job Search", "description": "User wants to find jobs"},
+      "hi": {"name": "नौकरी खोज", "description": "उपयोगकर्ता नौकरी खोजना चाहता है"},
+      "keywords": {
+        "en": ["job", "jobs", "vacancy", "vacancies", "opening", "recruitment", "hiring", "career", "employment", "work", "position"],
+        "hi": ["नौकरी", "भर्ती", "रिक्ति", "काम", "पद", "रोजगार"]
+      }
+    },
+    "job_apply": {
+      "en": {"name": "Apply for Job", "description": "User wants to apply for a job"},
+      "hi": {"name": "नौकरी आवेदन", "description": "उपयोगकर्ता नौकरी के लिए आवेदन करना चाहता है"},
+      "keywords": {
+        "en": ["apply", "application", "submit", "register", "enroll", "form"],
+        "hi": ["आवेदन", "अप्लाई", "फॉर्म", "भरना"]
+      }
+    },
+    "job_status": {
+      "en": {"name": "Check Job Status", "description": "User wants to check application status"},
+      "hi": {"name": "आवेदन स्थिति", "description": "उपयोगकर्ता आवेदन की स्थिति जांचना चाहता है"},
+      "keywords": {
+        "en": ["status", "result", "progress", "update", "track", "selected", "rejected"],
+        "hi": ["स्थिति", "परिणाम", "रिजल्ट", "अपडेट"]
+      }
+    },
+    "job_details": {
+      "en": {"name": "Job Details", "description": "User wants job information"},
+      "hi": {"name": "नौकरी विवरण", "description": "उपयोगकर्ता नौकरी की जानकारी चाहता है"},
+      "keywords": {
+        "en": ["details", "information", "info", "about", "salary", "eligibility", "qualification", "age limit", "syllabus"],
+        "hi": ["विवरण", "जानकारी", "वेतन", "योग्यता", "पात्रता", "आयु सीमा", "सिलेबस"]
+      }
+    },
+    "scheme_search": {
+      "en": {"name": "Search Schemes", "description": "User wants to find government schemes"},
+      "hi": {"name": "योजना खोज", "description": "उपयोगकर्ता सरकारी योजना खोजना चाहता है"},
+      "keywords": {
+        "en": ["scheme", "yojana", "program", "benefit", "welfare", "subsidy", "assistance"],
+        "hi": ["योजना", "स्कीम", "लाभ", "सब्सिडी", "सहायता"]
+      }
+    },
+    "scheme_apply": {
+      "en": {"name": "Apply for Scheme", "description": "User wants to apply for a scheme"},
+      "hi": {"name": "योजना आवेदन", "description": "उपयोगकर्ता योजना के लिए आवेदन करना चाहता है"},
+      "keywords": {
+        "en": ["apply scheme", "register scheme", "enroll", "benefit apply"],
+        "hi": ["योजना आवेदन", "लाभ लेना"]
+      }
+    },
+    "scheme_eligibility": {
+      "en": {"name": "Check Eligibility", "description": "User wants to check scheme eligibility"},
+      "hi": {"name": "पात्रता जांच", "description": "उपयोगकर्ता योजना पात्रता जांचना चाहता है"},
+      "keywords": {
+        "en": ["eligible", "eligibility", "qualify", "requirement", "criteria", "can i apply"],
+        "hi": ["पात्र", "पात्रता", "योग्य", "शर्त"]
+      }
+    },
+    "greeting": {
+      "en": {"name": "Greeting", "description": "User is greeting"},
+      "hi": {"name": "अभिवादन", "description": "उपयोगकर्ता अभिवादन कर रहा है"},
+      "keywords": {
+        "en": ["hi", "hello", "hey", "good morning", "good evening", "good afternoon"],
+        "hi": ["नमस्ते", "हेलो", "सुप्रभात", "शुभ संध्या"]
+      }
+    },
+    "help": {
+      "en": {"name": "Need Help", "description": "User needs assistance"},
+      "hi": {"name": "मदद चाहिए", "description": "उपयोगकर्ता को सहायता चाहिए"},
+      "keywords": {
+        "en": ["help", "support", "assist", "how to", "what is", "guide", "confused"],
+        "hi": ["मदद", "सहायता", "कैसे", "क्या है", "समझ नहीं"]
+      }
+    },
+    "thanks": {
+      "en": {"name": "Gratitude", "description": "User is thanking"},
+      "hi": {"name": "धन्यवाद", "description": "उपयोगकर्ता धन्यवाद कर रहा है"},
+      "keywords": {
+        "en": ["thanks", "thank you", "appreciated", "helpful"],
+        "hi": ["धन्यवाद", "शुक्रिया", "थैंक्स"]
+      }
+    },
+    "goodbye": {
+      "en": {"name": "Goodbye", "description": "User is ending conversation"},
+      "hi": {"name": "अलविदा", "description": "उपयोगकर्ता बातचीत समाप्त कर रहा है"},
+      "keywords": {
+        "en": ["bye", "goodbye", "see you", "later", "take care"],
+        "hi": ["अलविदा", "फिर मिलेंगे", "बाय"]
+      }
+    },
+    "fill_form": {
+      "en": {"name": "Fill Form", "description": "User wants to fill a form"},
+      "hi": {"name": "फॉर्म भरें", "description": "उपयोगकर्ता फॉर्म भरना चाहता है"},
+      "keywords": {
+        "en": ["form", "fill", "complete", "submit form"],
+        "hi": ["फॉर्म", "भरना", "भरें"]
+      }
+    },
+    "upload_document": {
+      "en": {"name": "Upload Document", "description": "User wants to upload documents"},
+      "hi": {"name": "दस्तावेज़ अपलोड", "description": "उपयोगकर्ता दस्तावेज़ अपलोड करना चाहता है"},
+      "keywords": {
+        "en": ["upload", "document", "file", "certificate", "aadhar", "pan", "photo", "signature"],
+        "hi": ["अपलोड", "दस्तावेज़", "फाइल", "प्रमाणपत्र", "आधार", "पैन"]
+      }
+    },
+    "payment": {
+      "en": {"name": "Make Payment", "description": "User wants to make payment"},
+      "hi": {"name": "भुगतान", "description": "उपयोगकर्ता भुगतान करना चाहता है"},
+      "keywords": {
+        "en": ["pay", "payment", "fee", "charge", "rupee", "money", "upi"],
+        "hi": ["भुगतान", "पेमेंट", "फीस", "पैसा", "रुपया"]
+      }
+    },
+    "profile_update": {
+      "en": {"name": "Update Profile", "description": "User wants to update profile"},
+      "hi": {"name": "प्रोफाइल अपडेट", "description": "उपयोगकर्ता प्रोफाइल अपडेट करना चाहता है"},
+      "keywords": {
+        "en": ["profile", "update", "edit", "change", "modify"],
+        "hi": ["प्रोफाइल", "अपडेट", "बदलें", "संपादित"]
+      }
+    },
+    "complaint": {
+      "en": {"name": "Complaint", "description": "User has a complaint"},
+      "hi": {"name": "शिकायत", "description": "उपयोगकर्ता की शिकायत है"},
+      "keywords": {
+        "en": ["complaint", "issue", "problem", "bug", "error", "not working", "wrong"],
+        "hi": ["शिकायत", "समस्या", "गलत", "काम नहीं"]
+      }
+    },
+    "feedback": {
+      "en": {"name": "Feedback", "description": "User wants to give feedback"},
+      "hi": {"name": "प्रतिक्रिया", "description": "उपयोगकर्ता प्रतिक्रिया देना चाहता है"},
+      "keywords": {
+        "en": ["feedback", "review", "rating", "good", "bad", "suggestion"],
+        "hi": ["प्रतिक्रिया", "रिव्यू", "सुझाव"]
+      }
+    },
+    "unclear": {
+      "en": {"name": "Unclear", "description": "Intent could not be determined"},
+      "hi": {"name": "अस्पष्ट", "description": "इरादा समझ नहीं आया"}
+    },
+    "out_of_scope": {
+      "en": {"name": "Out of Scope", "description": "Request is not related to our service"},
+      "hi": {"name": "दायरे से बाहर", "description": "अनुरोध हमारी सेवा से संबंधित नहीं है"}
+    }
+  },
+  "form_fields": {
+    "personal": {
+      "applicant_name": {"en": "Applicant Name", "hi": "आवेदक का नाम"},
+      "father_name": {"en": "Father's Name", "hi": "पिता का नाम"},
+      "mother_name": {"en": "Mother's Name", "hi": "माता का नाम"},
+      "spouse_name": {"en": "Spouse Name", "hi": "पति/पत्नी का नाम"},
+      "date_of_birth": {"en": "Date of Birth", "hi": "जन्म तिथि"},
+      "age": {"en": "Age", "hi": "आयु"},
+      "gender": {"en": "Gender", "hi": "लिंग"},
+      "marital_status": {"en": "Marital Status", "hi": "वैवाहिक स्थिति"}
+    },
+    "identity": {
+      "aadhar_number": {"en": "Aadhar Number", "hi": "आधार नंबर"},
+      "pan_number": {"en": "PAN Number", "hi": "पैन नंबर"},
+      "voter_id": {"en": "Voter ID", "hi": "मतदाता पहचान पत्र"},
+      "driving_license": {"en": "Driving License", "hi": "ड्राइविंग लाइसेंस"},
+      "passport_number": {"en": "Passport Number", "hi": "पासपोर्ट नंबर"}
+    },
+    "contact": {
+      "mobile_number": {"en": "Mobile Number", "hi": "मोबाइल नंबर"},
+      "alternate_mobile": {"en": "Alternate Mobile", "hi": "वैकल्पिक मोबाइल"},
+      "email": {"en": "Email ID", "hi": "ईमेल आईडी"}
+    },
+    "address": {
+      "address_line1": {"en": "Address Line 1", "hi": "पता पंक्ति 1"},
+      "address_line2": {"en": "Address Line 2", "hi": "पता पंक्ति 2"},
+      "village": {"en": "Village/Town", "hi": "गाँव/शहर"},
+      "post_office": {"en": "Post Office", "hi": "डाकघर"},
+      "tehsil": {"en": "Tehsil/Block", "hi": "तहसील/प्रखंड"},
+      "district": {"en": "District", "hi": "जिला"},
+      "state": {"en": "State", "hi": "राज्य"},
+      "pincode": {"en": "PIN Code", "hi": "पिन कोड"}
+    },
+    "education": {
+      "qualification": {"en": "Qualification", "hi": "शैक्षिक योग्यता"},
+      "degree": {"en": "Degree", "hi": "डिग्री"},
+      "university": {"en": "University/Board", "hi": "विश्वविद्यालय/बोर्ड"},
+      "passing_year": {"en": "Passing Year", "hi": "उत्तीर्ण वर्ष"},
+      "percentage": {"en": "Percentage/CGPA", "hi": "प्रतिशत/सीजीपीए"}
+    },
+    "bank": {
+      "bank_name": {"en": "Bank Name", "hi": "बैंक का नाम"},
+      "account_number": {"en": "Account Number", "hi": "खाता संख्या"},
+      "ifsc_code": {"en": "IFSC Code", "hi": "आईएफएससी कोड"},
+      "branch_name": {"en": "Branch Name", "hi": "शाखा का नाम"}
+    }
+  },
+  "recommendation_reasons": {
+    "education_match": {
+      "en": "Your education qualifies for this position",
+      "hi": "आपकी शिक्षा इस पद के लिए योग्य है"
+    },
+    "education_overqualified": {
+      "en": "You are overqualified for this position",
+      "hi": "आप इस पद के लिए अधिक योग्य हैं"
+    },
+    "education_underqualified": {
+      "en": "Higher education required for this position",
+      "hi": "इस पद के लिए उच्च शिक्षा आवश्यक है"
+    },
+    "age_match": {
+      "en": "Your age is within the eligible range",
+      "hi": "आपकी आयु पात्रता सीमा में है"
+    },
+    "age_too_young": {
+      "en": "You are below the minimum age requirement",
+      "hi": "आप न्यूनतम आयु सीमा से कम हैं"
+    },
+    "age_too_old": {
+      "en": "You exceed the maximum age limit",
+      "hi": "आप अधिकतम आयु सीमा से अधिक हैं"
+    },
+    "state_match": {
+      "en": "This job is available in your state",
+      "hi": "यह नौकरी आपके राज्य में उपलब्ध है"
+    },
+    "state_all_india": {
+      "en": "This is an All India level job",
+      "hi": "यह अखिल भारतीय स्तर की नौकरी है"
+    },
+    "category_match": {
+      "en": "Matches your preferred job category",
+      "hi": "आपकी पसंदीदा श्रेणी से मेल खाता है"
+    },
+    "salary_good": {
+      "en": "Salary meets your expectations",
+      "hi": "वेतन आपकी अपेक्षाओं के अनुरूप है"
+    },
+    "high_vacancies": {
+      "en": "Many vacancies available, good chances",
+      "hi": "कई पद उपलब्ध, अच्छे मौके"
+    },
+    "deadline_soon": {
+      "en": "Apply soon, deadline approaching",
+      "hi": "जल्दी आवेदन करें, समय सीमा नज़दीक है"
+    },
+    "reservation_benefit": {
+      "en": "Reservation benefits available for your category",
+      "hi": "आपकी श्रेणी के लिए आरक्षण लाभ उपलब्ध"
+    }
+  },
+  "error_messages": {
+    "invalid_aadhar": {
+      "en": "Invalid Aadhar number. Please enter 12 digits.",
+      "hi": "अमान्य आधार नंबर। कृपया 12 अंक दर्ज करें।"
+    },
+    "invalid_pan": {
+      "en": "Invalid PAN format. Example: ABCDE1234F",
+      "hi": "अमान्य पैन प्रारूप। उदाहरण: ABCDE1234F"
+    },
+    "invalid_phone": {
+      "en": "Invalid phone number. Enter 10 digit mobile number.",
+      "hi": "अमान्य फोन नंबर। 10 अंकों का मोबाइल नंबर दर्ज करें।"
+    },
+    "invalid_pincode": {
+      "en": "Invalid PIN code. Enter 6 digit PIN.",
+      "hi": "अमान्य पिन कोड। 6 अंकों का पिन दर्ज करें।"
+    },
+    "invalid_email": {
+      "en": "Invalid email format.",
+      "hi": "अमान्य ईमेल प्रारूप।"
+    },
+    "field_required": {
+      "en": "This field is required.",
+      "hi": "यह फ़ील्ड आवश्यक है।"
+    },
+    "age_limit_exceeded": {
+      "en": "You do not meet the age criteria for this job.",
+      "hi": "आप इस नौकरी के लिए आयु मानदंड पूरा नहीं करते।"
+    },
+    "education_not_matched": {
+      "en": "Your education does not match the requirement.",
+      "hi": "आपकी शिक्षा आवश्यकता से मेल नहीं खाती।"
+    }
+  },
+  "success_messages": {
+    "application_submitted": {
+      "en": "Your application has been submitted successfully!",
+      "hi": "आपका आवेदन सफलतापूर्वक जमा हो गया है!"
+    },
+    "profile_updated": {
+      "en": "Profile updated successfully!",
+      "hi": "प्रोफाइल सफलतापूर्वक अपडेट हो गई!"
+    },
+    "document_uploaded": {
+      "en": "Document uploaded successfully!",
+      "hi": "दस्तावेज़ सफलतापूर्वक अपलोड हो गया!"
+    },
+    "payment_success": {
+      "en": "Payment successful! Thank you.",
+      "hi": "भुगतान सफल! धन्यवाद।"
+    }
+  },
+  "ui_labels": {
+    "buttons": {
+      "apply_now": {"en": "Apply Now", "hi": "अभी आवेदन करें"},
+      "view_details": {"en": "View Details", "hi": "विवरण देखें"},
+      "submit": {"en": "Submit", "hi": "जमा करें"},
+      "cancel": {"en": "Cancel", "hi": "रद्द करें"},
+      "save": {"en": "Save", "hi": "सहेजें"},
+      "search": {"en": "Search", "hi": "खोजें"},
+      "filter": {"en": "Filter", "hi": "फ़िल्टर"},
+      "clear": {"en": "Clear", "hi": "साफ़ करें"},
+      "back": {"en": "Back", "hi": "वापस"},
+      "next": {"en": "Next", "hi": "आगे"},
+      "login": {"en": "Login", "hi": "लॉगिन"},
+      "register": {"en": "Register", "hi": "रजिस्टर करें"},
+      "logout": {"en": "Logout", "hi": "लॉगआउट"}
+    },
+    "sections": {
+      "latest_jobs": {"en": "Latest Jobs", "hi": "नई नौकरियां"},
+      "government_schemes": {"en": "Government Schemes", "hi": "सरकारी योजनाएं"},
+      "results": {"en": "Results", "hi": "रिजल्ट"},
+      "admit_card": {"en": "Admit Card", "hi": "एडमिट कार्ड"},
+      "answer_key": {"en": "Answer Key", "hi": "आंसर की"},
+      "syllabus": {"en": "Syllabus", "hi": "सिलेबस"},
+      "profile": {"en": "Profile", "hi": "प्रोफाइल"},
+      "dashboard": {"en": "Dashboard", "hi": "डैशबोर्ड"},
+      "settings": {"en": "Settings", "hi": "सेटिंग्स"}
+    },
+    "status": {
+      "pending": {"en": "Pending", "hi": "लंबित"},
+      "approved": {"en": "Approved", "hi": "स्वीकृत"},
+      "rejected": {"en": "Rejected", "hi": "अस्वीकृत"},
+      "processing": {"en": "Processing", "hi": "प्रक्रियाधीन"},
+      "completed": {"en": "Completed", "hi": "पूर्ण"},
+      "active": {"en": "Active", "hi": "सक्रिय"},
+      "expired": {"en": "Expired", "hi": "समाप्त"}
+    }
+  }
+}
