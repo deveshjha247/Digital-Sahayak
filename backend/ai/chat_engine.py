@@ -30,6 +30,14 @@ try:
 except ImportError:
     WEB_SEARCH_AVAILABLE = False
 
+# Try to use duckduckgo-search library (more reliable)
+try:
+    from duckduckgo_search import DDGS
+    DDGS_AVAILABLE = True
+except ImportError:
+    DDGS_AVAILABLE = False
+    WEB_SEARCH_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 # ===================== DATA CLASSES =====================
@@ -276,18 +284,23 @@ class WebSearchEngine:
             return cached
         
         try:
-            # DuckDuckGo HTML search (no API needed)
-            search_url = f"https://html.duckduckgo.com/html/?q={query.replace(' ', '+')}"
+            # DuckDuckGo HTML search (no API needed) - Use POST method
+            search_url = "https://html.duckduckgo.com/html/"
             
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(
+            async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+                # POST with form data
+                response = await client.post(
                     search_url,
+                    data={"q": query},
                     headers={
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Referer": "https://html.duckduckgo.com/"
                     }
                 )
                 
-                if response.status_code != 200:
+                if response.status_code not in [200, 202]:
                     logger.error(f"Search failed with status {response.status_code}")
                     return []
                 
@@ -295,20 +308,49 @@ class WebSearchEngine:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 results = []
                 
-                for result in soup.select('.result')[:num_results]:
-                    title_elem = result.select_one('.result__title')
-                    snippet_elem = result.select_one('.result__snippet')
-                    url_elem = result.select_one('.result__url')
+                # Try multiple selector patterns for DuckDuckGo
+                result_elements = soup.select('.result') or soup.select('.web-result') or soup.select('.results_links')
+                
+                for result in result_elements[:num_results]:
+                    title_elem = result.select_one('.result__title') or result.select_one('.result__a') or result.select_one('a.result__url')
+                    snippet_elem = result.select_one('.result__snippet') or result.select_one('.result__body')
+                    url_elem = result.select_one('.result__url') or result.select_one('.result__extras__url')
                     
+                    title = ""
                     if title_elem:
+                        title = title_elem.get_text(strip=True)
+                    
+                    # Also try to get link text
+                    if not title:
+                        link = result.find('a')
+                        if link:
+                            title = link.get_text(strip=True)
+                    
+                    if title:
                         results.append({
-                            "title": title_elem.get_text(strip=True),
+                            "title": title,
                             "url": url_elem.get_text(strip=True) if url_elem else "",
                             "snippet": snippet_elem.get_text(strip=True) if snippet_elem else ""
                         })
                 
+                # If no results from selectors, try alternative parsing
+                if not results:
+                    # Find all links with result data
+                    for link in soup.find_all('a', {'class': lambda x: x and 'result' in x.lower() if x else False}):
+                        title = link.get_text(strip=True)
+                        href = link.get('href', '')
+                        if title and len(title) > 10:
+                            results.append({
+                                "title": title[:100],
+                                "url": href[:100] if href else "",
+                                "snippet": ""
+                            })
+                        if len(results) >= num_results:
+                            break
+                
                 # Cache results
-                await self._cache_results(query, results)
+                if results:
+                    await self._cache_results(query, results)
                 
                 logger.info(f"Web search found {len(results)} results for: {query}")
                 return results
