@@ -2,6 +2,25 @@
 
 A portable, reusable AI package for job/scheme recommendations, intent detection, document validation, and more.
 
+## �️ Architecture Overview
+
+### Advanced ML Models (v2.0)
+
+| Task | Model | Architecture | Fallback |
+|------|-------|--------------|----------|
+| **Job Recommendation** | LambdaMART | Gradient-boosted ranking + Two-Tower retrieval | Rule-based scoring |
+| **Form Field Classification** | BERT + CNN | Transformer (labels) + CNN (field detection) | Regex patterns |
+| **Content Summarization** | T5/mT5 | Seq2Seq abstractive summarization | Template-based |
+| **Intent Classification** | DistilBERT | 40% smaller, 60% faster than BERT | Keywords + BoW |
+| **Document Validation** | CNN + OCR | ResNet (doc type) + Tesseract/EasyOCR | Pattern matching |
+
+### Why These Models?
+
+- **LambdaMART**: "Considered state-of-the-art for learning-to-rank on tabular data" - widely used in search/recommendations
+- **DistilBERT**: "40% smaller, 60% faster while retaining 97% of BERT's capabilities" - ideal for real-time intent detection
+- **T5/mT5**: "Particularly well-suited for summarization" - generates new sentences for copyright-safe rewrites
+- **CNN + Transformer**: Industrial best practice for form processing - CNNs capture visual layout, transformers understand semantics
+
 ## 🌐 Language Support
 
 **Primary Language:** English (en)  
@@ -30,29 +49,29 @@ lang = detect_lang("mujhe job chahiye")  # "hinglish"
 
 ## 📦 Features
 
-| Module | Description | OpenAI Required |
-|--------|-------------|-----------------|
-| `job_recommender.py` | Job/Scheme recommendations based on user profile | ❌ No |
-| `field_classifier.py` | Form field type detection and mapping | ❌ No |
-| `summarizer.py` | Content rewriting and summarization | ❌ No |
-| `intent_classifier.py` | WhatsApp message intent detection | ❌ No |
-| `validator.py` | Document and field validation (Aadhar, PAN, etc.) | ❌ No |
-| `learning_system.py` | Self-learning AI with OpenAI integration | ✅ Optional |
+| Module | Description | ML Available | OpenAI Required |
+|--------|-------------|--------------|-----------------|
+| `job_recommender.py` | Job/Scheme recommendations | ✅ LambdaMART | ❌ No |
+| `field_classifier.py` | Form field detection/mapping | ✅ CNN+BERT | ❌ No |
+| `summarizer.py` | Content rewriting/summarization | ✅ T5/mT5 | ❌ No |
+| `intent_classifier.py` | WhatsApp intent detection | ✅ DistilBERT | ❌ No |
+| `validator.py` | Document validation | ✅ OCR+CNN | ❌ No |
+| `learning_system.py` | Self-learning with feedback | N/A | ✅ Optional |
 
 ## 🚀 Quick Start
 
 ### Installation
 
 ```bash
-# Copy the ai folder to your project
-cp -r backend/ai /path/to/your/project/
+# Basic (rule-based only)
+pip install numpy pillow
 
-# Install dependencies
-pip install numpy
-pip install openai  # Only if using learning_system.py
+# With ML models (optional)
+pip install lightgbm transformers torch sentence-transformers
+pip install pytesseract easyocr torchvision
 ```
 
-### Basic Usage
+### Basic Usage (Rule-Based)
 
 ```python
 from ai import JobRecommender, FieldClassifier, IntentClassifier
@@ -76,6 +95,37 @@ field_type = classifier.classify_field("Father's Name")  # Returns FieldType.FAT
 intent_classifier = IntentClassifier()
 result = intent_classifier.classify("मुझे रेलवे की नौकरी चाहिए")
 # Returns: IntentType.JOB_SEARCH with confidence score
+```
+
+### Advanced Usage (ML-Based)
+
+```python
+from ai import (
+    AdvancedJobRecommender, get_recommendations,
+    AdvancedFieldClassifier, classify_field,
+    AdvancedSummarizer, rewrite, summarize,
+    AdvancedIntentClassifier, predict_intent,
+    AdvancedDocumentValidator, validate_document
+)
+
+# 1. ML-based Job Recommendations (LambdaMART)
+recommender = AdvancedJobRecommender(models_dir="./models")
+recommendations = recommender.get_recommendations(user_profile, jobs, use_ml=True)
+
+# Or use convenience function
+recs = get_recommendations(user_profile, jobs, use_advanced=True)
+
+# 2. ML-based Intent Classification (DistilBERT)
+result = predict_intent("I want to apply for railway jobs", use_ml=True)
+# Returns: {"intent": "job_apply", "confidence": 0.92, "model_used": "distilbert"}
+
+# 3. ML-based Summarization (T5/mT5)
+summary = summarize(job_description, language="hi", use_ml=True)
+rewritten = rewrite(text, language="en", use_ml=True)
+
+# 4. Document Validation (OCR + CNN)
+result = validate_document("./aadhar.jpg", expected_type="aadhar")
+# Returns extracted fields, validation status, and quality score
 ```
 
 ### With OpenAI (Learning System)

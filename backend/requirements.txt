@@ -128,3 +128,10 @@ watchfiles==1.1.1
 websockets==15.0.1
 yarl==1.22.0
 zipp==3.23.0
+lightgbm>=4.0.0
+transformers>=4.35.0
+torch>=2.0.0
+sentence-transformers>=2.2.0
+pytesseract>=0.3.10
+easyocr>=1.7.0
+torchvision>=0.15.0
