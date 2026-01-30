@@ -46,6 +46,17 @@ try:
     from .validator import DocumentValidator, DocumentType, ValidationStatus
     from .learning_system import SelfLearningAI
     
+    # Chat Engine - Independent conversational AI
+    from .chat_engine import (
+        DigitalSahayakAI,
+        ChatMessage,
+        Conversation,
+        KnowledgeBase,
+        AIResponseGenerator,
+        get_ai_instance,
+        digital_sahayak_ai
+    )
+    
     # Advanced ML modules
     from .job_recommender import (
         AdvancedJobRecommender,
