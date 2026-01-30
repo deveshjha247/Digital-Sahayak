@@ -93,6 +93,34 @@ from .secure_storage import (
     mask_pii,
     check_dpdp_compliance,
 )
+from .feedback_loop import (
+    FeedbackCollector,
+    FeedbackIntegrator,
+    FeedbackItem,
+    FeedbackType,
+    FeedbackPriority,
+    ErrorPatternAnalyzer,
+    ContinuousLearningManager,
+    create_feedback_loop,
+)
+from .data_augmentation import (
+    TextAugmenter,
+    TranslationAugmenter,
+    SyntheticVariationGenerator,
+    DataAugmentationPipeline,
+    augment_dataset,
+    create_bilingual_dataset,
+)
+from .model_evaluation import (
+    ModelEvaluator,
+    EvaluationMetrics,
+    EvaluationRun,
+    FailurePatternDetector,
+    FailurePattern,
+    ContinuousEvaluationScheduler,
+    evaluate_model,
+    create_evaluation_scheduler,
+)
 from .synthetic import (
     SyntheticJobGenerator,
     SyntheticUserGenerator,
@@ -176,6 +204,31 @@ __all__ = [
     "create_secure_storage",
     "mask_pii",
     "check_dpdp_compliance",
+    # Feedback Loop (Continuous Learning)
+    "FeedbackCollector",
+    "FeedbackIntegrator",
+    "FeedbackItem",
+    "FeedbackType",
+    "FeedbackPriority",
+    "ErrorPatternAnalyzer",
+    "ContinuousLearningManager",
+    "create_feedback_loop",
+    # Data Augmentation
+    "TextAugmenter",
+    "TranslationAugmenter",
+    "SyntheticVariationGenerator",
+    "DataAugmentationPipeline",
+    "augment_dataset",
+    "create_bilingual_dataset",
+    # Model Evaluation
+    "ModelEvaluator",
+    "EvaluationMetrics",
+    "EvaluationRun",
+    "FailurePatternDetector",
+    "FailurePattern",
+    "ContinuousEvaluationScheduler",
+    "evaluate_model",
+    "create_evaluation_scheduler",
     # Pipeline
     "DataPipeline",
     "run_pipeline",
