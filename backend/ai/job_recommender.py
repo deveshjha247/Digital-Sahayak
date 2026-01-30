@@ -1,17 +1,32 @@
 """
 Job Recommender AI Module
 Ranks jobs/schemes based on user profile (education, age, state, preferences)
-Uses rule-based + heuristic + learning approach (no external AI dependency)
+
+Architecture (LambdaMART + Two-Tower):
+1. Feature Extraction: Categorical features + text embeddings
+2. Two-Tower Retrieval: Embed users and jobs separately for fast candidate generation
+3. LambdaMART Re-ranker: Gradient-boosted ranking for fine-grained scoring
+4. Rule-based fallback: Works without ML models for cold-start
 
 Language Support:
 - Primary: English
 - Secondary: Hindi
 - All reasons/messages in both languages
+
+Dependencies (optional for ML mode):
+- lightgbm (for LambdaMART)
+- sentence-transformers (for embeddings)
 """
 
+import os
+import json
+import pickle
 import logging
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from datetime import datetime
+from dataclasses import dataclass, field
+from pathlib import Path
+
 import numpy as np
 from difflib import SequenceMatcher
 
