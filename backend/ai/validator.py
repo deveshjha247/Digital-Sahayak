@@ -274,15 +274,19 @@ class DocumentValidator:
         
         return extracted
     
-    def validate_field(self, field_type: str, value: str) -> Tuple[bool, Optional[str], Optional[str]]:
+    def validate_field(self, field_type: str, value: str) -> Tuple[bool, Optional[str], Dict[str, str]]:
         """
         Validate a single field
         
         Returns:
-            (is_valid, formatted_value, error_message)
+            (is_valid, formatted_value, message_dict with en/hi/bilingual)
         """
         if not value or field_type not in self.VALIDATION_RULES:
-            return False, None, f"Unknown field type: {field_type}"
+            return False, None, {
+                "en": f"Unknown field type: {field_type}",
+                "hi": f"अज्ञात फ़ील्ड प्रकार: {field_type}",
+                "bilingual": f"Unknown field type: {field_type} / अज्ञात फ़ील्ड प्रकार: {field_type}"
+            }
         
         rules = self.VALIDATION_RULES[field_type]
         pattern = rules.get("pattern", "")
@@ -290,9 +294,19 @@ class DocumentValidator:
         # Clean input
         clean_value = str(value).strip()
         
+        # Get bilingual message for this field type
+        msg = VALIDATION_MESSAGES.get(field_type, {
+            "success": {"en": "Valid", "hi": "वैध"},
+            "error": {"en": "Invalid", "hi": "अवैध"}
+        })
+        
         # Check pattern
         if pattern and not re.match(pattern, clean_value):
-            return False, None, f"Invalid format for {rules['description']}"
+            return False, None, {
+                "en": msg["error"]["en"],
+                "hi": msg["error"]["hi"],
+                "bilingual": f"{msg['error']['en']} / {msg['error']['hi']}"
+            }
         
         # Apply format function
         formatted_value = clean_value
@@ -300,28 +314,53 @@ class DocumentValidator:
             try:
                 formatted_value = rules["format_func"](clean_value)
             except Exception as e:
-                return False, None, f"Error formatting value: {str(e)}"
+                return False, None, {
+                    "en": f"Error formatting value: {str(e)}",
+                    "hi": f"मान स्वरूपित करने में त्रुटि: {str(e)}",
+                    "bilingual": f"Error: {str(e)} / त्रुटि: {str(e)}"
+                }
         
         # Validate constraints
         constraints = rules.get("constraints", {})
         
         if "length" in constraints:
             if len(re.sub(r'\D', '', clean_value)) != constraints["length"]:
-                return False, None, f"Length should be {constraints['length']}"
+                return False, None, {
+                    "en": f"Length should be {constraints['length']}",
+                    "hi": f"लंबाई {constraints['length']} होनी चाहिए",
+                    "bilingual": f"Length should be {constraints['length']} / लंबाई {constraints['length']} होनी चाहिए"
+                }
         
         if "numeric_only" in constraints and constraints["numeric_only"]:
             if not re.match(r'^\d+$', clean_value):
-                return False, None, "Only digits allowed"
+                return False, None, {
+                    "en": "Only digits allowed",
+                    "hi": "केवल अंक अनुमत हैं",
+                    "bilingual": "Only digits allowed / केवल अंक अनुमत हैं"
+                }
         
         if "starts_with" in constraints:
             if not any(clean_value.startswith(prefix) for prefix in constraints["starts_with"]):
-                return False, None, f"Must start with {', '.join(constraints['starts_with'])}"
+                return False, None, {
+                    "en": f"Must start with {', '.join(constraints['starts_with'])}",
+                    "hi": f"{', '.join(constraints['starts_with'])} से शुरू होना चाहिए",
+                    "bilingual": f"Must start with {', '.join(constraints['starts_with'])} / {', '.join(constraints['starts_with'])} से शुरू होना चाहिए"
+                }
         
         if "max_length" in constraints:
             if len(clean_value) > constraints["max_length"]:
-                return False, None, f"Maximum length is {constraints['max_length']}"
+                return False, None, {
+                    "en": f"Maximum length is {constraints['max_length']}",
+                    "hi": f"अधिकतम लंबाई {constraints['max_length']} है",
+                    "bilingual": f"Maximum length is {constraints['max_length']} / अधिकतम लंबाई {constraints['max_length']} है"
+                }
         
-        return True, formatted_value, None
+        # Success
+        return True, formatted_value, {
+            "en": msg["success"]["en"],
+            "hi": msg["success"]["hi"],
+            "bilingual": f"{msg['success']['en']} / {msg['success']['hi']}"
+        }
     
     def validate_form_fields(self, fields: Dict[str, Any]) -> Dict[str, Any]:
         """

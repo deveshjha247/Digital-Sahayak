@@ -2,13 +2,36 @@
 Content Summarizer AI Module
 Rewrites and summarizes job/scheme descriptions for uniqueness and clarity
 Uses template-based rewriting + key extraction (no external AI dependency)
+
+Language Support:
+- Primary: English (en)
+- Secondary: Hindi (hi)
+- All templates and summaries available in both languages
 """
 
 import logging
 import re
 from typing import Dict, List, Optional, Tuple
 
+from .language_helper import get_language_helper
+
 logger = logging.getLogger(__name__)
+
+# Initialize language helper
+lang_helper = get_language_helper()
+
+
+# Bilingual key labels
+KEY_LABELS = {
+    "salary": {"en": "Salary", "hi": "वेतन"},
+    "age": {"en": "Age", "hi": "आयु"},
+    "qualification": {"en": "Qualification", "hi": "योग्यता"},
+    "experience": {"en": "Experience", "hi": "अनुभव"},
+    "deadline": {"en": "Deadline", "hi": "अंतिम तारीख"},
+    "details": {"en": "Details", "hi": "विवरण"},
+    "location": {"en": "Location", "hi": "स्थान"},
+    "vacancies": {"en": "Vacancies", "hi": "रिक्तियां"},
+}
 
 
 class ContentSummarizer:
