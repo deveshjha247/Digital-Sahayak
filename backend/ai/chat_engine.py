@@ -476,12 +476,13 @@ class AIResponseGenerator:
     """
     Generates intelligent responses without external API.
     Uses template-based generation with smart context awareness.
-    Now with web search capability for real-time information!
+    Now with DS-Search capability for intelligent web search!
     """
     
     def __init__(self, db=None):
         self.kb = KnowledgeBase()
-        self.web_search = WebSearchEngine(db)
+        self.web_search = WebSearchEngine(db)  # Fallback
+        self.ds_search: DSSearch = None  # DS-Search (preferred)
         self.db = db
         
         # Patterns that indicate user needs real-time/web information
@@ -500,6 +501,20 @@ class AIResponseGenerator:
             r"salary|सैलरी|cutoff|कटऑफ|vacancy|रिक्ति|last date|अंतिम तिथि"
         ]
     
+    async def _get_ds_search(self) -> Optional[DSSearch]:
+        """Get DS-Search instance lazily"""
+        if not DS_SEARCH_AVAILABLE:
+            return None
+        
+        if self.ds_search is None:
+            try:
+                self.ds_search = await get_ds_search_instance(self.db)
+            except Exception as e:
+                logger.error(f"Failed to initialize DS-Search: {e}")
+                return None
+        
+        return self.ds_search
+    
     def _needs_web_search(self, message: str) -> bool:
         """Check if the query needs web search for real-time info"""
         message_lower = message.lower()
@@ -509,9 +524,10 @@ class AIResponseGenerator:
         return False
     
     async def generate_response_async(self, user_message: str, context: List[Dict] = None, 
-                                      user_profile: Dict = None, language: str = "hi") -> str:
+                                      user_profile: Dict = None, language: str = "hi",
+                                      user_id: str = None) -> str:
         """
-        Generate AI response with web search capability (async version).
+        Generate AI response with DS-Search capability (async version).
         """
         # Detect intent
         intent, preset_responses = self.kb.detect_intent(user_message)
@@ -528,12 +544,93 @@ class AIResponseGenerator:
         
         # Check if web search is needed
         if self._needs_web_search(user_message):
+            # Try DS-Search first (smarter, policy-based)
+            ds_response = await self._ds_search_and_respond(user_message, language, user_id)
+            if ds_response:
+                return ds_response
+            
+            # Fallback to legacy web search
             web_response = await self._search_and_respond(user_message, language)
             if web_response:
                 return web_response
         
         # Generate contextual response
         return self._generate_contextual_response(user_message, context, user_profile, language)
+    
+    async def _ds_search_and_respond(self, query: str, language: str, user_id: str = None) -> Optional[str]:
+        """Search using DS-Search system and generate response"""
+        try:
+            ds_search = await self._get_ds_search()
+            if not ds_search:
+                return None
+            
+            # Execute DS-Search
+            response = await ds_search.search(
+                query=query,
+                user_id=user_id or "chat_engine",
+                language=language
+            )
+            
+            if not response.success or not response.results:
+                logger.info(f"DS-Search found no results for: {query}")
+                return None
+            
+            # Build response from DS-Search results
+            return self._build_ds_search_response(query, response, language)
+            
+        except Exception as e:
+            logger.error(f"DS-Search error: {e}")
+            return None
+    
+    def _build_ds_search_response(self, original_query: str, search_response, language: str) -> str:
+        """Build a helpful response from DS-Search results"""
+        results = search_response.results
+        
+        if not results:
+            return None
+        
+        # Header with confidence indicator
+        confidence = search_response.search_score
+        confidence_emoji = "🟢" if confidence >= 0.7 else "🟡" if confidence >= 0.5 else "🔴"
+        
+        if language == "hi":
+            response = f"🔍 **आपके सवाल के लिए मैंने intelligent search किया:** {confidence_emoji}\n\n"
+        else:
+            response = f"🔍 **I performed an intelligent search for your question:** {confidence_emoji}\n\n"
+        
+        # Add relevant information from results
+        for i, result in enumerate(results[:3], 1):
+            title = result.title
+            snippet = result.snippet
+            url = result.url
+            source_type = result.source_type
+            
+            # Add trust indicator
+            trust_badge = ""
+            if source_type == "official":
+                trust_badge = "✅ "
+            elif source_type == "semi_official":
+                trust_badge = "🏛️ "
+            
+            if title and snippet:
+                response += f"**{i}. {trust_badge}{title}**\n"
+                response += f"   {snippet[:200]}{'...' if len(snippet) > 200 else ''}\n"
+                if url:
+                    response += f"   🔗 {url}\n"
+                response += "\n"
+        
+        # Add intent-specific footer
+        intent = search_response.intent
+        source = search_response.source
+        
+        if language == "hi":
+            response += f"\n📊 *Search Type: {intent} | Source: {source}*\n"
+            response += "💡 *यह जानकारी trusted sources से मिली है। Official website पर verify करें।*"
+        else:
+            response += f"\n📊 *Search Type: {intent} | Source: {source}*\n"
+            response += "💡 *This information is from trusted sources. Please verify on official website.*"
+        
+        return response
     
     async def _search_and_respond(self, query: str, language: str) -> Optional[str]:
         """Search web and generate response from results"""
