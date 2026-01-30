@@ -31,12 +31,50 @@ KEY_LABELS = {
     "details": {"en": "Details", "hi": "विवरण"},
     "location": {"en": "Location", "hi": "स्थान"},
     "vacancies": {"en": "Vacancies", "hi": "रिक्तियां"},
+    "category": {"en": "Category", "hi": "श्रेणी"},
+    "department": {"en": "Department", "hi": "विभाग"},
+    "posts": {"en": "Posts", "hi": "पद"},
+    "apply_link": {"en": "Apply Link", "hi": "आवेदन लिंक"},
+    "important_dates": {"en": "Important Dates", "hi": "महत्वपूर्ण तिथियां"},
+    "application_fee": {"en": "Application Fee", "hi": "आवेदन शुल्क"},
+    "selection_process": {"en": "Selection Process", "hi": "चयन प्रक्रिया"},
+}
+
+# Pre-defined bilingual rewrite templates
+REWRITE_TEMPLATES_BILINGUAL = {
+    "opening": {
+        "en": [
+            "Great opportunity for {role}.",
+            "We are seeking a talented {role}.",
+            "{role} position available.",
+        ],
+        "hi": [
+            "{role} के लिए बेहतरीन अवसर।",
+            "प्रतिभाशाली {role} की तलाश है।",
+            "{role} पद उपलब्ध है।",
+        ]
+    },
+    "apply_cta": {
+        "en": [
+            "Apply Now! Don't miss this opportunity.",
+            "Submit your application before the deadline.",
+        ],
+        "hi": [
+            "अभी आवेदन करें! इस अवसर को न चूकें।",
+            "समय सीमा से पहले अपना आवेदन जमा करें।",
+        ]
+    },
+    "deadline_warning": {
+        "en": ["Last Date: {deadline}. Apply soon!"],
+        "hi": ["अंतिम तिथि: {deadline}। जल्द आवेदन करें!"],
+    }
 }
 
 
 class ContentSummarizer:
     """
     Summarizes and rewrites scraped job/scheme content
+    All templates are pre-defined in both English and Hindi
     
     Approach:
     1. Extract key information (salary, location, qualifications)
@@ -45,16 +83,17 @@ class ContentSummarizer:
     4. Create concise summaries in Hindi/English
     """
     
-    # Key extraction patterns
+    # Key extraction patterns (regex - supports Hindi patterns too)
     KEY_PATTERNS = {
-        "salary": [r"salary[:\s]*[₹]*\s*([\d,]+)", r"([\d,]+)\s*(?:per|pm|p\.m)", r"ctc[:\s]*([\d,]+)"],
-        "age": [r"age[:\s]*(\d+)\s*-?\s*(\d+)?", r"(\d+)\s*years?(?:\s*-\s*(\d+))?"],
-        "qualification": [r"qualification[:\s]*([a-z ]+)", r"education[:\s]*([a-z ]+)"],
-        "experience": [r"experience[:\s]*(\d+)\s*years?", r"(\d+)\s*y(?:ears?)?(?:\s*of)?(?:\s*exp)?"],
-        "deadline": [r"deadline[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})", r"closing\s*date[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})"],
+        "salary": [r"salary[:\s]*[₹]*\s*([\d,]+)", r"([\d,]+)\s*(?:per|pm|p\.m)", r"ctc[:\s]*([\d,]+)", r"वेतन[:\s]*([\d,]+)"],
+        "age": [r"age[:\s]*(\d+)\s*-?\s*(\d+)?", r"(\d+)\s*years?(?:\s*-\s*(\d+))?", r"आयु[:\s]*(\d+)"],
+        "qualification": [r"qualification[:\s]*([a-z ]+)", r"education[:\s]*([a-z ]+)", r"योग्यता[:\s]*(.+)"],
+        "experience": [r"experience[:\s]*(\d+)\s*years?", r"(\d+)\s*y(?:ears?)?(?:\s*of)?(?:\s*exp)?", r"अनुभव[:\s]*(\d+)"],
+        "deadline": [r"deadline[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})", r"closing\s*date[:\s]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})", r"अंतिम\s*तिथि[:\s]*(.+)"],
+        "vacancies": [r"(\d+)\s*(?:vacancies|posts|पद)", r"total\s*posts?[:\s]*(\d+)", r"रिक्तियां[:\s]*(\d+)"],
     }
     
-    # Description templates for rewriting
+    # Description templates for rewriting (backward compatible)
     REWRITE_TEMPLATES = {
         "opening": [
             "We are seeking a talented {role} to join our {company} team.",
