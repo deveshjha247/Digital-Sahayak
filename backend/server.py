@@ -21,7 +21,7 @@ import re
 from bs4 import BeautifulSoup
 from openai import OpenAI
 import unicodedata
-from ai_learning_system import SelfLearningAI
+from ai.learning_system import SelfLearningAI
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
