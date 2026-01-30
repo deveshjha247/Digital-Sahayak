@@ -9,8 +9,10 @@ Flow:
 3. Check cache (hit → return)
 4. Generate optimized queries
 5. Execute search (crawler first, API optional)
-6. Rank results
-7. Cache and return
+6. Extract facts (Evidence Extractor)
+7. Rank results
+8. Generate natural response (DS-Talk)
+9. Cache and return
 
 Priority Order (Free-First):
 1. Local DB / internal index
@@ -31,6 +33,19 @@ from .crawler import DSCrawler, CrawlPlan, CrawlResult, get_crawler_instance
 from .search_api import SearchAPIManager, get_api_manager
 from .ranker import ResultRanker, RankedResult, get_ranker_instance
 from .cache import SearchCache, get_cache_instance
+
+# Evidence Extractor and DS-Talk integration
+try:
+    from ai.evidence import EvidenceExtractor, Facts, extract_facts
+    EVIDENCE_AVAILABLE = True
+except ImportError:
+    EVIDENCE_AVAILABLE = False
+
+try:
+    from ai.nlg import DSTalk, compose_answer
+    NLG_AVAILABLE = True
+except ImportError:
+    NLG_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
