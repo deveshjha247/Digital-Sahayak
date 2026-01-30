@@ -9,17 +9,26 @@ Features:
 - Hindi + English bilingual support
 - Context-aware responses about jobs, schemes, government
 - Integration with project knowledge base
-- Web search for real-time information
+- Web search for real-time information (like ChatGPT/Gemini)
+- Self-learning from web searches
 """
 
 import asyncio
 import re
 import json
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field, asdict
 import logging
+
+# Web search imports
+try:
+    import httpx
+    from bs4 import BeautifulSoup
+    WEB_SEARCH_AVAILABLE = True
+except ImportError:
+    WEB_SEARCH_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -231,6 +240,170 @@ class KnowledgeBase:
                     return intent, data['responses']
         
         return 'general', None
+
+
+# ===================== WEB SEARCH ENGINE =====================
+
+class WebSearchEngine:
+    """
+    Web search capability for real-time information.
+    Uses DuckDuckGo (no API key required) - just like ChatGPT/Gemini.
+    """
+    
+    def __init__(self, db=None):
+        self.db = db
+        self.cache_duration = timedelta(hours=6)  # Cache results for 6 hours
+    
+    async def search(self, query: str, num_results: int = 5) -> List[Dict]:
+        """
+        Search the web using DuckDuckGo.
+        
+        Args:
+            query: Search query
+            num_results: Number of results to return
+            
+        Returns:
+            List of search results with title, url, snippet
+        """
+        if not WEB_SEARCH_AVAILABLE:
+            logger.warning("Web search not available - httpx/bs4 not installed")
+            return []
+        
+        # Check cache first
+        cached = await self._get_cached_results(query)
+        if cached:
+            logger.info(f"Using cached search results for: {query}")
+            return cached
+        
+        try:
+            # DuckDuckGo HTML search (no API needed)
+            search_url = f"https://html.duckduckgo.com/html/?q={query.replace(' ', '+')}"
+            
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    search_url,
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                    }
+                )
+                
+                if response.status_code != 200:
+                    logger.error(f"Search failed with status {response.status_code}")
+                    return []
+                
+                # Parse results
+                soup = BeautifulSoup(response.text, 'html.parser')
+                results = []
+                
+                for result in soup.select('.result')[:num_results]:
+                    title_elem = result.select_one('.result__title')
+                    snippet_elem = result.select_one('.result__snippet')
+                    url_elem = result.select_one('.result__url')
+                    
+                    if title_elem:
+                        results.append({
+                            "title": title_elem.get_text(strip=True),
+                            "url": url_elem.get_text(strip=True) if url_elem else "",
+                            "snippet": snippet_elem.get_text(strip=True) if snippet_elem else ""
+                        })
+                
+                # Cache results
+                await self._cache_results(query, results)
+                
+                logger.info(f"Web search found {len(results)} results for: {query}")
+                return results
+                
+        except Exception as e:
+            logger.error(f"Web search error: {e}")
+            return []
+    
+    async def fetch_page_content(self, url: str, max_length: int = 5000) -> str:
+        """
+        Fetch and extract main content from a webpage.
+        
+        Args:
+            url: URL to fetch
+            max_length: Maximum content length to return
+            
+        Returns:
+            Extracted text content
+        """
+        if not WEB_SEARCH_AVAILABLE:
+            return ""
+        
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    url,
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                    },
+                    follow_redirects=True
+                )
+                
+                if response.status_code != 200:
+                    return ""
+                
+                soup = BeautifulSoup(response.text, 'html.parser')
+                
+                # Remove script and style elements
+                for element in soup(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+                    element.decompose()
+                
+                # Extract text
+                text = soup.get_text(separator=' ', strip=True)
+                
+                # Clean up
+                text = re.sub(r'\s+', ' ', text)
+                
+                return text[:max_length]
+                
+        except Exception as e:
+            logger.error(f"Page fetch error: {e}")
+            return ""
+    
+    async def _get_cached_results(self, query: str) -> Optional[List[Dict]]:
+        """Get cached search results if available and not expired"""
+        if self.db is None:
+            return None
+        
+        try:
+            cache_key = hashlib.md5(query.lower().encode()).hexdigest()
+            cached = await self.db.ai_search_cache.find_one({"cache_key": cache_key})
+            
+            if cached:
+                cached_time = cached.get('timestamp')
+                if isinstance(cached_time, str):
+                    cached_time = datetime.fromisoformat(cached_time)
+                
+                if datetime.now(timezone.utc) - cached_time.replace(tzinfo=timezone.utc) < self.cache_duration:
+                    return cached.get('results', [])
+            
+            return None
+        except Exception as e:
+            logger.error(f"Cache read error: {e}")
+            return None
+    
+    async def _cache_results(self, query: str, results: List[Dict]):
+        """Cache search results"""
+        if self.db is None:
+            return
+        
+        try:
+            cache_key = hashlib.md5(query.lower().encode()).hexdigest()
+            await self.db.ai_search_cache.update_one(
+                {"cache_key": cache_key},
+                {
+                    "$set": {
+                        "query": query,
+                        "results": results,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                },
+                upsert=True
+            )
+        except Exception as e:
+            logger.error(f"Cache write error: {e}")
 
 
 # ===================== AI RESPONSE GENERATOR =====================
