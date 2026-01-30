@@ -36,13 +36,13 @@ STYLE_MODIFIERS = {
             "prefix": "",
             "suffix": "",
             "politeness": [],  # No random politeness - formal
-            "closing": "धन्यवाद।",
+            "closing": "",
         },
         "en": {
             "prefix": "",
             "suffix": "",
             "politeness": [],
-            "closing": "Thank you.",
+            "closing": "",
         }
     },
     StyleTone.FRIENDLY: {
@@ -50,13 +50,13 @@ STYLE_MODIFIERS = {
             "prefix": "",
             "suffix": "",
             "politeness": [],  # No random prefixes - cleaner output
-            "closing": "💡 *कृपया आधिकारिक वेबसाइट पर verify करें।*",
+            "closing": "",
         },
         "en": {
             "prefix": "",
             "suffix": "",
             "politeness": [],
-            "closing": "💡 *Please verify on official website.*",
+            "closing": "",
         }
     },
     StyleTone.CONCISE: {

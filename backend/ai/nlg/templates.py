@@ -60,7 +60,7 @@ TEMPLATES = {
     # ===================== RESULT SUMMARY =====================
     "result_summary_hi": [
         "{title} का रिजल्ट घोषित हो चुका है!",
-        "{title} - परिणाम आ गया है।",
+        "{title} - परिणाम जारी हो चुका है।",
         "बधाई हो! {title} के नतीजे जारी।",
         "{title} का परिणाम अब उपलब्ध है।",
         "{title} - मेरिट लिस्ट देखें।",
@@ -78,6 +78,22 @@ TEMPLATES = {
         "Wait is over! {title} result out.",
         "{title} examination results declared.",
         "{title} - Check your result here.",
+    ],
+    
+    "exam_result_summary_hi": [
+        "{title} की परीक्षा तारीख जारी हो चुकी है।",
+        "{title} - परीक्षा की जानकारी।",
+        "{title} बोर्ड परीक्षा की तिथि घोषित।",
+        "{title} - परीक्षा शेड्यूल आ गया है।",
+        "{title} के लिए exam dates जारी।",
+    ],
+    
+    "exam_result_summary_en": [
+        "Exam dates for {title} have been announced.",
+        "{title} - Exam information.",
+        "{title} board exam dates declared.",
+        "{title} - Exam schedule is out.",
+        "Exam dates released for {title}.",
     ],
     
     # ===================== DATES =====================

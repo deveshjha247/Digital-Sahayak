@@ -104,9 +104,15 @@ class SurfaceRealizer:
         template = self._get_template(template_key)
         
         if not template:
+            # Try result_summary for exam_result type
+            if content_type == "exam_result":
+                template_key = f"result_summary_{language}"
+                template = self._get_template(template_key)
+            
             # Fallback to job summary
-            template_key = f"job_summary_{language}"
-            template = self._get_template(template_key)
+            if not template:
+                template_key = f"job_summary_{language}"
+                template = self._get_template(template_key)
         
         if template:
             text = template.format(title=title)
