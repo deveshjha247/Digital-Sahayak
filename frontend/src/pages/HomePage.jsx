@@ -355,33 +355,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-secondary text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#25D366] mx-auto mb-6 flex items-center justify-center animate-pulse-glow">
-            <MessageCircle className="w-10 h-10" />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ fontFamily: 'Outfit' }}>
-            WhatsApp पर जुड़ें
-          </h2>
-          <p className="text-lg text-white/70 mb-8 max-w-2xl mx-auto hindi-text">
-            नई नौकरी और योजना की जानकारी सबसे पहले पाएं। 
-            बस एक मैसेज भेजें और हमसे जुड़ जाएं!
-          </p>
-          <a 
-            href="https://wa.me/916200184827?text=नमस्ते! मुझे Digital Sahayak से जुड़ना है।"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button size="lg" className="bg-[#25D366] hover:bg-[#25D366]/90 rounded-full px-10 gap-2 text-lg shadow-lg" data-testid="cta-whatsapp-btn">
-              <MessageCircle className="w-5 h-5" />
-              अभी जुड़ें - मुफ्त
-            </Button>
-          </a>
-          <p className="text-sm text-white/50 mt-4">+91 6200184827</p>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-card border-t py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
