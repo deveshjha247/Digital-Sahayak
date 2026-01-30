@@ -21,13 +21,33 @@ from .data_config import DataConfig, SOURCES, CATEGORIES, STATES
 from .collector import DataCollector
 from .balancer import DataBalancer
 from .metadata import MetadataManager
+from .pipeline import DataPipeline, run_pipeline
+from .synthetic import (
+    SyntheticJobGenerator,
+    SyntheticUserGenerator,
+    SyntheticInteractionGenerator,
+    generate_training_dataset,
+)
+from .scrapers import BaseScraper
 
 __all__ = [
+    # Config
     "DataConfig",
-    "DataCollector", 
-    "DataBalancer",
-    "MetadataManager",
     "SOURCES",
     "CATEGORIES",
-    "STATES"
+    "STATES",
+    # Collection
+    "DataCollector",
+    "BaseScraper",
+    # Processing
+    "DataBalancer",
+    "MetadataManager",
+    # Pipeline
+    "DataPipeline",
+    "run_pipeline",
+    # Synthetic
+    "SyntheticJobGenerator",
+    "SyntheticUserGenerator",
+    "SyntheticInteractionGenerator",
+    "generate_training_dataset",
 ]
