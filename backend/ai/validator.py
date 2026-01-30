@@ -2,6 +2,11 @@
 Document & Field Validator AI Module
 Validates documents, form fields, and user data
 Includes OCR field extraction, format validation, and constraint checking
+
+Language Support:
+- Primary: English (en)
+- Secondary: Hindi (hi)
+- All validation messages are pre-defined bilingually
 """
 
 import logging
@@ -9,7 +14,49 @@ import re
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Any
 
+from .language_helper import get_language_helper
+
 logger = logging.getLogger(__name__)
+
+# Initialize language helper
+lang_helper = get_language_helper()
+
+
+# Bilingual error messages
+VALIDATION_MESSAGES = {
+    "aadhar": {
+        "success": {"en": "Valid Aadhar number", "hi": "वैध आधार नंबर"},
+        "error": {"en": "Invalid Aadhar number. Must be 12 digits.", "hi": "अवैध आधार नंबर। 12 अंकों का होना चाहिए।"}
+    },
+    "pan": {
+        "success": {"en": "Valid PAN number", "hi": "वैध पैन नंबर"},
+        "error": {"en": "Invalid PAN format. Must be 5 letters + 4 digits + 1 letter.", "hi": "अवैध पैन प्रारूप। 5 अक्षर + 4 अंक + 1 अक्षर होना चाहिए।"}
+    },
+    "email": {
+        "success": {"en": "Valid email address", "hi": "वैध ईमेल पता"},
+        "error": {"en": "Invalid email format.", "hi": "अवैध ईमेल प्रारूप।"}
+    },
+    "phone": {
+        "success": {"en": "Valid phone number", "hi": "वैध फोन नंबर"},
+        "error": {"en": "Invalid phone number. Must be 10 digits starting with 6-9.", "hi": "अवैध फोन नंबर। 6-9 से शुरू होने वाले 10 अंक होने चाहिए।"}
+    },
+    "date_dob": {
+        "success": {"en": "Valid date of birth", "hi": "वैध जन्म तिथि"},
+        "error": {"en": "Invalid date format. Use DD/MM/YYYY.", "hi": "अवैध तारीख प्रारूप। DD/MM/YYYY का उपयोग करें।"}
+    },
+    "voter_id": {
+        "success": {"en": "Valid Voter ID", "hi": "वैध वोटर आईडी"},
+        "error": {"en": "Invalid Voter ID. Must be 3 letters + 7 digits.", "hi": "अवैध वोटर आईडी। 3 अक्षर + 7 अंक होने चाहिए।"}
+    },
+    "driving_license": {
+        "success": {"en": "Valid Driving License", "hi": "वैध ड्राइविंग लाइसेंस"},
+        "error": {"en": "Invalid DL format. Must be 2 letters + 13 digits.", "hi": "अवैध डीएल प्रारूप। 2 अक्षर + 13 अंक होने चाहिए।"}
+    },
+    "pincode": {
+        "success": {"en": "Valid Pincode", "hi": "वैध पिनकोड"},
+        "error": {"en": "Invalid Pincode. Must be 6 digits.", "hi": "अवैध पिनकोड। 6 अंक होने चाहिए।"}
+    },
+}
 
 
 class DocumentType(Enum):

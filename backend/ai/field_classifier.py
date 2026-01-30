@@ -537,16 +537,46 @@ class FieldClassifier:
         if re.match(pattern, str(value)):
             return True, None
         
-        # Generate helpful error message
+        # Generate helpful error message (bilingual)
         error_messages = {
-            FieldType.EMAIL: "Invalid email format",
-            FieldType.PHONE: "Invalid phone number",
-            FieldType.MOBILE: "Mobile should be 10 digits starting with 6-9",
-            FieldType.AADHAR: "Aadhar should be 12 digits",
-            FieldType.PAN: "PAN format: 5 letters + 4 digits + 1 letter",
-            FieldType.PINCODE: "Pincode should be 6 digits",
-            FieldType.DOB: "Date format: DD/MM/YYYY or YYYY-MM-DD",
+            FieldType.EMAIL: {
+                "en": "Invalid email format",
+                "hi": "गलत ईमेल प्रारूप"
+            },
+            FieldType.PHONE: {
+                "en": "Invalid phone number",
+                "hi": "गलत फोन नंबर"
+            },
+            FieldType.MOBILE: {
+                "en": "Mobile should be 10 digits starting with 6-9",
+                "hi": "मोबाइल 10 अंकों का होना चाहिए (6-9 से शुरू)"
+            },
+            FieldType.AADHAR: {
+                "en": "Aadhar should be 12 digits",
+                "hi": "आधार 12 अंकों का होना चाहिए"
+            },
+            FieldType.PAN: {
+                "en": "PAN format: 5 letters + 4 digits + 1 letter",
+                "hi": "पैन प्रारूप: 5 अक्षर + 4 अंक + 1 अक्षर"
+            },
+            FieldType.PINCODE: {
+                "en": "Pincode should be 6 digits",
+                "hi": "पिनकोड 6 अंकों का होना चाहिए"
+            },
+            FieldType.DOB: {
+                "en": "Date format: DD/MM/YYYY or YYYY-MM-DD",
+                "hi": "तारीख प्रारूप: DD/MM/YYYY या YYYY-MM-DD"
+            },
         }
         
-        error = error_messages.get(field_type, f"Invalid {field_type}")
-        return False, error
+        error_data = error_messages.get(field_type, {
+            "en": f"Invalid {field_type}",
+            "hi": f"अमान्य {field_type}"
+        })
+        
+        # Return bilingual error message
+        return False, {
+            "en": error_data["en"],
+            "hi": error_data["hi"],
+            "bilingual": f"{error_data['en']} / {error_data['hi']}"
+        }
