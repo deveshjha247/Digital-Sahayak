@@ -1,0 +1,40 @@
+{"message_id": "MSG001", "message": "मुझे रेलवे की नौकरी चाहिए", "language": "hi", "intent": "search_job", "confidence": "high", "entities": {"category": "Railway"}}
+{"message_id": "MSG002", "message": "railway job chahiye", "language": "hinglish", "intent": "search_job", "confidence": "high", "entities": {"category": "Railway"}}
+{"message_id": "MSG003", "message": "SSC ki koi vacancy hai?", "language": "hinglish", "intent": "search_job", "confidence": "high", "entities": {"category": "SSC"}}
+{"message_id": "MSG004", "message": "बिहार में कोई सरकारी नौकरी?", "language": "hi", "intent": "search_job", "confidence": "high", "entities": {"state": "Bihar"}}
+{"message_id": "MSG005", "message": "इस जॉब के लिए आवेदन करना है", "language": "hi", "intent": "apply_job", "confidence": "high", "entities": {}}
+{"message_id": "MSG006", "message": "apply karna hai", "language": "hinglish", "intent": "apply_job", "confidence": "high", "entities": {}}
+{"message_id": "MSG007", "message": "form bharna hai", "language": "hinglish", "intent": "fill_form", "confidence": "high", "entities": {}}
+{"message_id": "MSG008", "message": "How to apply for this job?", "language": "en", "intent": "apply_job", "confidence": "high", "entities": {}}
+{"message_id": "MSG009", "message": "क्या मैं PM Kisan के लिए eligible हूं?", "language": "hinglish", "intent": "yojana_eligibility", "confidence": "high", "entities": {"yojana": "PM Kisan"}}
+{"message_id": "MSG010", "message": "Am I eligible for Ayushman Bharat?", "language": "en", "intent": "yojana_eligibility", "confidence": "high", "entities": {"yojana": "Ayushman Bharat"}}
+{"message_id": "MSG011", "message": "Yojana ke liye kya documents chahiye?", "language": "hinglish", "intent": "yojana_documents", "confidence": "high", "entities": {}}
+{"message_id": "MSG012", "message": "नमस्ते", "language": "hi", "intent": "greeting", "confidence": "high", "entities": {}}
+{"message_id": "MSG013", "message": "Hi", "language": "en", "intent": "greeting", "confidence": "high", "entities": {}}
+{"message_id": "MSG014", "message": "Hello bhai", "language": "hinglish", "intent": "greeting", "confidence": "high", "entities": {}}
+{"message_id": "MSG015", "message": "mera application status kya hai?", "language": "hinglish", "intent": "job_status", "confidence": "high", "entities": {}}
+{"message_id": "MSG016", "message": "मेरा फॉर्म कहां तक पहुंचा?", "language": "hi", "intent": "job_status", "confidence": "high", "entities": {}}
+{"message_id": "MSG017", "message": "payment kaise karu?", "language": "hinglish", "intent": "make_payment", "confidence": "high", "entities": {}}
+{"message_id": "MSG018", "message": "₹20 bhejne hai", "language": "hinglish", "intent": "make_payment", "confidence": "medium", "entities": {"amount": 20}}
+{"message_id": "MSG019", "message": "document upload karna hai", "language": "hinglish", "intent": "upload_document", "confidence": "high", "entities": {}}
+{"message_id": "MSG020", "message": "aadhar card dena hai", "language": "hinglish", "intent": "upload_document", "confidence": "high", "entities": {"document_type": "aadhar"}}
+{"message_id": "MSG021", "message": "profile update karo", "language": "hinglish", "intent": "update_profile", "confidence": "high", "entities": {}}
+{"message_id": "MSG022", "message": "मेरी प्रोफाइल दिखाओ", "language": "hi", "intent": "view_profile", "confidence": "high", "entities": {}}
+{"message_id": "MSG023", "message": "help chahiye", "language": "hinglish", "intent": "help", "confidence": "high", "entities": {}}
+{"message_id": "MSG024", "message": "kya kar sakte ho tum?", "language": "hinglish", "intent": "help", "confidence": "medium", "entities": {}}
+{"message_id": "MSG025", "message": "thank you", "language": "en", "intent": "thanks", "confidence": "high", "entities": {}}
+{"message_id": "MSG026", "message": "धन्यवाद", "language": "hi", "intent": "thanks", "confidence": "high", "entities": {}}
+{"message_id": "MSG027", "message": "bye", "language": "en", "intent": "goodbye", "confidence": "high", "entities": {}}
+{"message_id": "MSG028", "message": "kal milte hain", "language": "hinglish", "intent": "goodbye", "confidence": "high", "entities": {}}
+{"message_id": "MSG029", "message": "PM Awas Yojana ke bare mein batao", "language": "hinglish", "intent": "search_yojana", "confidence": "high", "entities": {"yojana": "PM Awas Yojana"}}
+{"message_id": "MSG030", "message": "kisan samman nidhi ka form bharna hai", "language": "hinglish", "intent": "apply_yojana", "confidence": "high", "entities": {"yojana": "PM Kisan"}}
+{"message_id": "MSG031", "message": "bank job mil jayegi kya?", "language": "hinglish", "intent": "search_job", "confidence": "high", "entities": {"category": "Bank"}}
+{"message_id": "MSG032", "message": "UPSC ka syllabus bhejo", "language": "hinglish", "intent": "job_details", "confidence": "high", "entities": {"category": "UPSC"}}
+{"message_id": "MSG033", "message": "complaint register karna hai", "language": "hinglish", "intent": "complaint", "confidence": "high", "entities": {}}
+{"message_id": "MSG034", "message": "aapka app bahut accha hai", "language": "hinglish", "intent": "feedback", "confidence": "high", "entities": {"sentiment": "positive"}}
+{"message_id": "MSG035", "message": "koi baat nahi samajh aa rahi", "language": "hinglish", "intent": "unclear", "confidence": "low", "entities": {}}
+{"message_id": "MSG036", "message": "pizza order karna hai", "language": "hinglish", "intent": "out_of_scope", "confidence": "high", "entities": {}}
+{"message_id": "MSG037", "message": "10th pass ke liye kya job hai?", "language": "hinglish", "intent": "search_job", "confidence": "high", "entities": {"education": "10th Pass"}}
+{"message_id": "MSG038", "message": "graduate ke liye sarkari naukri", "language": "hinglish", "intent": "search_job", "confidence": "high", "entities": {"education": "Graduate"}}
+{"message_id": "MSG039", "message": "age limit kya hai is job ki?", "language": "hinglish", "intent": "job_details", "confidence": "high", "entities": {}}
+{"message_id": "MSG040", "message": "kitni salary milegi?", "language": "hinglish", "intent": "job_details", "confidence": "high", "entities": {}}
