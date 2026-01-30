@@ -35,13 +35,13 @@ STYLE_MODIFIERS = {
         "hi": {
             "prefix": "",
             "suffix": "",
-            "politeness": ["आपको सूचित किया जाता है कि", "कृपया ध्यान दें"],
+            "politeness": [],  # No random politeness - formal
             "closing": "धन्यवाद।",
         },
         "en": {
             "prefix": "",
             "suffix": "",
-            "politeness": ["You are hereby informed that", "Please note that"],
+            "politeness": [],
             "closing": "Thank you.",
         }
     },
@@ -49,14 +49,14 @@ STYLE_MODIFIERS = {
         "hi": {
             "prefix": "",
             "suffix": "",
-            "politeness": ["अरे वाह!", "देखिए", "सुनिए"],
-            "closing": "कोई सवाल हो तो पूछिए! 😊",
+            "politeness": [],  # No random prefixes - cleaner output
+            "closing": "💡 *कृपया आधिकारिक वेबसाइट पर verify करें।*",
         },
         "en": {
             "prefix": "",
             "suffix": "",
-            "politeness": ["Hey!", "Check this out", "Listen up"],
-            "closing": "Feel free to ask if you have questions! 😊",
+            "politeness": [],
+            "closing": "💡 *Please verify on official website.*",
         }
     },
     StyleTone.CONCISE: {
