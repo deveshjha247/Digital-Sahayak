@@ -2,6 +2,11 @@
 WhatsApp Intent Classifier AI Module
 Analyzes WhatsApp messages to understand user intent
 Uses keyword matching + context analysis (no external AI dependency)
+
+Language Support:
+- Primary: English (en)
+- Secondary: Hindi (hi)
+- Auto-detects: Hinglish (romanized Hindi)
 """
 
 import logging
@@ -9,7 +14,12 @@ import re
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
+from .language_helper import get_language_helper, detect_language
+
 logger = logging.getLogger(__name__)
+
+# Initialize language helper
+lang_helper = get_language_helper()
 
 
 class IntentType(Enum):
