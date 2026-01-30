@@ -256,6 +256,7 @@ class WebSearchEngine:
     """
     Web search capability for real-time information.
     Uses DuckDuckGo (no API key required) - just like ChatGPT/Gemini.
+    Supports multiple search methods for reliability.
     """
     
     def __init__(self, db=None):
@@ -265,6 +266,7 @@ class WebSearchEngine:
     async def search(self, query: str, num_results: int = 5) -> List[Dict]:
         """
         Search the web using DuckDuckGo.
+        Uses DDGS library if available, falls back to HTTP scraping.
         
         Args:
             query: Search query
@@ -273,91 +275,104 @@ class WebSearchEngine:
         Returns:
             List of search results with title, url, snippet
         """
-        if not WEB_SEARCH_AVAILABLE:
-            logger.warning("Web search not available - httpx/bs4 not installed")
-            return []
-        
         # Check cache first
         cached = await self._get_cached_results(query)
         if cached:
             logger.info(f"Using cached search results for: {query}")
             return cached
         
-        try:
-            # DuckDuckGo HTML search (no API needed) - Use POST method
-            search_url = "https://html.duckduckgo.com/html/"
-            
-            async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
-                # POST with form data
-                response = await client.post(
-                    search_url,
-                    data={"q": query},
-                    headers={
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                        "Accept-Language": "en-US,en;q=0.5",
-                        "Referer": "https://html.duckduckgo.com/"
-                    }
-                )
-                
-                if response.status_code not in [200, 202]:
-                    logger.error(f"Search failed with status {response.status_code}")
-                    return []
-                
-                # Parse results
-                soup = BeautifulSoup(response.text, 'html.parser')
-                results = []
-                
-                # Try multiple selector patterns for DuckDuckGo
-                result_elements = soup.select('.result') or soup.select('.web-result') or soup.select('.results_links')
-                
-                for result in result_elements[:num_results]:
-                    title_elem = result.select_one('.result__title') or result.select_one('.result__a') or result.select_one('a.result__url')
-                    snippet_elem = result.select_one('.result__snippet') or result.select_one('.result__body')
-                    url_elem = result.select_one('.result__url') or result.select_one('.result__extras__url')
-                    
-                    title = ""
-                    if title_elem:
-                        title = title_elem.get_text(strip=True)
-                    
-                    # Also try to get link text
-                    if not title:
-                        link = result.find('a')
-                        if link:
-                            title = link.get_text(strip=True)
-                    
-                    if title:
-                        results.append({
-                            "title": title,
-                            "url": url_elem.get_text(strip=True) if url_elem else "",
-                            "snippet": snippet_elem.get_text(strip=True) if snippet_elem else ""
-                        })
-                
-                # If no results from selectors, try alternative parsing
-                if not results:
-                    # Find all links with result data
-                    for link in soup.find_all('a', {'class': lambda x: x and 'result' in x.lower() if x else False}):
-                        title = link.get_text(strip=True)
-                        href = link.get('href', '')
-                        if title and len(title) > 10:
-                            results.append({
-                                "title": title[:100],
-                                "url": href[:100] if href else "",
-                                "snippet": ""
-                            })
-                        if len(results) >= num_results:
-                            break
-                
-                # Cache results
+        results = []
+        
+        # Method 1: Use duckduckgo-search library (most reliable)
+        if DDGS_AVAILABLE:
+            try:
+                results = await self._search_with_ddgs(query, num_results)
                 if results:
-                    await self._cache_results(query, results)
+                    logger.info(f"DDGS search found {len(results)} results for: {query}")
+            except Exception as e:
+                logger.warning(f"DDGS search failed: {e}, trying HTTP fallback")
+        
+        # Method 2: Fallback to HTTP scraping
+        if not results and WEB_SEARCH_AVAILABLE:
+            try:
+                results = await self._search_with_http(query, num_results)
+                if results:
+                    logger.info(f"HTTP search found {len(results)} results for: {query}")
+            except Exception as e:
+                logger.error(f"HTTP search also failed: {e}")
+        
+        # Cache results if we got any
+        if results:
+            await self._cache_results(query, results)
+        
+        return results
+    
+    async def _search_with_ddgs(self, query: str, num_results: int) -> List[Dict]:
+        """Search using duckduckgo-search library"""
+        import asyncio
+        
+        def sync_search():
+            with DDGS() as ddgs:
+                search_results = list(ddgs.text(query, max_results=num_results))
+                return [
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("href", r.get("link", "")),
+                        "snippet": r.get("body", r.get("snippet", ""))
+                    }
+                    for r in search_results
+                ]
+        
+        # Run sync function in thread pool
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, sync_search)
+    
+    async def _search_with_http(self, query: str, num_results: int) -> List[Dict]:
+        """Fallback HTTP scraping method"""
+        search_url = "https://html.duckduckgo.com/html/"
+        
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            # POST with form data
+            response = await client.post(
+                search_url,
+                data={"q": query},
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.5"
+                }
+            )
+            
+            if response.status_code not in [200, 202]:
+                return []
+            
+            # Parse results
+            soup = BeautifulSoup(response.text, 'html.parser')
+            results = []
+            
+            # Try multiple selector patterns
+            result_elements = soup.select('.result') or soup.select('.web-result')
+            
+            for result in result_elements[:num_results]:
+                title_elem = result.select_one('.result__title') or result.select_one('.result__a')
+                snippet_elem = result.select_one('.result__snippet')
+                url_elem = result.select_one('.result__url')
                 
-                logger.info(f"Web search found {len(results)} results for: {query}")
-                return results
+                title = title_elem.get_text(strip=True) if title_elem else ""
                 
-        except Exception as e:
-            logger.error(f"Web search error: {e}")
-            return []
+                if not title:
+                    link = result.find('a')
+                    if link:
+                        title = link.get_text(strip=True)
+                
+                if title:
+                    results.append({
+                        "title": title,
+                        "url": url_elem.get_text(strip=True) if url_elem else "",
+                        "snippet": snippet_elem.get_text(strip=True) if snippet_elem else ""
+                    })
+            
+            return results
     
     async def fetch_page_content(self, url: str, max_length: int = 5000) -> str:
         """
