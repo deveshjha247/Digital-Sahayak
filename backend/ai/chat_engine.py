@@ -868,18 +868,20 @@ class DigitalSahayakAI:
     """
     Main AI Chat Engine for Digital Sahayak.
     Provides ChatGPT/Gemini-like conversational experience.
+    Now with web search capability for real-time information!
     """
     
     def __init__(self, db=None):
         self.db = db
-        self.generator = AIResponseGenerator()
+        self.generator = AIResponseGenerator(db)  # Pass db for web search
         self.conversations: Dict[str, Conversation] = {}  # In-memory cache
-        self.version = "2.0.0"
+        self.version = "2.1.0"  # Updated version with web search
     
     async def initialize(self, db):
         """Initialize with database connection"""
         self.db = db
-        logger.info(f"Digital Sahayak AI v{self.version} initialized")
+        self.generator = AIResponseGenerator(db)  # Re-initialize with db
+        logger.info(f"Digital Sahayak AI v{self.version} initialized with web search")
     
     def _generate_conversation_id(self, user_id: str) -> str:
         """Generate unique conversation ID"""
@@ -954,6 +956,7 @@ class DigitalSahayakAI:
                    user_profile: Dict = None, language: str = "hi") -> Dict:
         """
         Main chat method - processes user message and returns AI response.
+        Now with web search capability for real-time information!
         
         Args:
             user_id: User's ID
@@ -980,7 +983,7 @@ class DigitalSahayakAI:
         # Get conversation context
         context = conversation.get_context(max_messages=8)
         
-        # Generate AI response
+        # First try sync response (for known queries)
         ai_response = self.generator.generate_response(
             user_message=message,
             context=context,
@@ -988,10 +991,22 @@ class DigitalSahayakAI:
             language=language
         )
         
+        # If web search is needed, use async version
+        used_web_search = False
+        if ai_response == "NEEDS_WEB_SEARCH":
+            ai_response = await self.generator.generate_response_async(
+                user_message=message,
+                context=context,
+                user_profile=user_profile,
+                language=language
+            )
+            used_web_search = True
+        
         # Add AI response
         conversation.add_message('assistant', ai_response, metadata={
             "model": "digital-sahayak-ai",
-            "version": self.version
+            "version": self.version,
+            "used_web_search": used_web_search
         })
         
         # Update in DB
