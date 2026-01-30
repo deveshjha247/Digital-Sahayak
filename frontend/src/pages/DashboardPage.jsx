@@ -60,14 +60,46 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold" style={{ fontFamily: 'Outfit' }}>
-            नमस्ते, {user?.name}! 👋
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            आपके डैशबोर्ड में आपका स्वागत है
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold" style={{ fontFamily: 'Outfit' }}>
+              नमस्ते, {user?.name}! 👋
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              आपके डैशबोर्ड में आपका स्वागत है
+            </p>
+          </div>
+          <Link to="/ai-chat">
+            <Button size="lg" className="gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg">
+              <Bot className="w-5 h-5" />
+              <span>AI से बात करें</span>
+              <Sparkles className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
+
+        {/* AI Chat Banner */}
+        <Card className="mb-8 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200 dark:border-orange-800">
+          <CardContent className="flex items-center justify-between p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                <Bot className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Digital Sahayak AI 🤖</h3>
+                <p className="text-sm text-muted-foreground">
+                  ChatGPT जैसा AI Assistant - योजनाओं, नौकरियों और documents में मदद के लिए
+                </p>
+              </div>
+            </div>
+            <Link to="/ai-chat">
+              <Button variant="default" className="gap-2 bg-orange-500 hover:bg-orange-600">
+                चैट शुरू करें
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         {/* WhatsApp Connect Banner */}
         {!user?.whatsapp_connected && (
