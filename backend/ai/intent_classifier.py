@@ -269,31 +269,109 @@ class IntentClassifier:
         """Classify multiple messages"""
         return [self.classify(msg) for msg in messages]
     
-    def get_suggested_response(self, intent: IntentType) -> str:
-        """Get suggested response based on intent"""
+    def get_suggested_response(self, intent: IntentType, lang: str = "en") -> Dict[str, str]:
+        """
+        Get suggested response based on intent in both languages
+        
+        Args:
+            intent: The detected intent
+            lang: Preferred language ('en' or 'hi')
+        
+        Returns:
+            Dictionary with 'en', 'hi', and 'bilingual' keys
+        """
         responses = {
-            IntentType.JOB_SEARCH: "I can help you find jobs. What type of job are you looking for? Share your location, qualification, and preferred category.",
-            IntentType.JOB_DETAILS: "Here are the details of the job. Do you want to apply or need more information?",
-            IntentType.JOB_APPLY: "Great! I'll help you apply. Please fill in your details.",
-            IntentType.JOB_STATUS: "Let me check your application status. Please provide your application ID.",
-            IntentType.SCHEME_SEARCH: "Which scheme are you interested in? I can help you find relevant schemes based on your profile.",
-            IntentType.SCHEME_DETAILS: "Here's the information about the scheme. Do you want to apply?",
-            IntentType.SCHEME_APPLY: "I'll help you apply for the scheme. Let's start with your basic information.",
-            IntentType.SCHEME_ELIGIBILITY: "Let me check your eligibility. I'll need to verify your details.",
-            IntentType.REGISTER: "Welcome! Let's create your account. Please provide your basic details.",
-            IntentType.LOGIN: "Let me help you login. What's the issue you're facing?",
-            IntentType.PROFILE_UPDATE: "I can help you update your profile. What would you like to change?",
-            IntentType.HELP: "I'm here to help! What do you need assistance with?",
-            IntentType.GREETING: "Hello! Welcome to Digital Sahayak. How can I help you today?",
-            IntentType.FEEDBACK: "We'd love to hear your feedback! What do you think about our service?",
-            IntentType.COMPLAINT: "I'm sorry to hear you're facing an issue. Please describe the problem in detail.",
-            IntentType.UPLOAD_DOCUMENT: "Sure, I can help you upload documents. Which document would you like to upload?",
-            IntentType.FILL_FORM: "Let's fill the form together. I'll guide you through each field.",
-            IntentType.CHECK_STATUS: "Let me check your status. Please provide your reference number.",
-            IntentType.UNCLEAR: "I'm not sure I understood correctly. Could you please rephrase your question?",
+            IntentType.JOB_SEARCH: {
+                "en": "I can help you find jobs. What type of job are you looking for? Share your location, qualification, and preferred category.",
+                "hi": "मैं आपको नौकरी खोजने में मदद कर सकता हूं। आप किस प्रकार की नौकरी खोज रहे हैं? अपना स्थान, योग्यता और पसंदीदा श्रेणी बताएं।"
+            },
+            IntentType.JOB_DETAILS: {
+                "en": "Here are the details of the job. Do you want to apply or need more information?",
+                "hi": "यहां नौकरी का विवरण है। क्या आप आवेदन करना चाहते हैं या और जानकारी चाहिए?"
+            },
+            IntentType.JOB_APPLY: {
+                "en": "Great! I'll help you apply. Please fill in your details.",
+                "hi": "बहुत अच्छा! मैं आपको आवेदन करने में मदद करूंगा। कृपया अपना विवरण भरें।"
+            },
+            IntentType.JOB_STATUS: {
+                "en": "Let me check your application status. Please provide your application ID.",
+                "hi": "मैं आपके आवेदन की स्थिति जांचता हूं। कृपया अपना आवेदन आईडी दें।"
+            },
+            IntentType.SCHEME_SEARCH: {
+                "en": "Which scheme are you interested in? I can help you find relevant schemes based on your profile.",
+                "hi": "आप किस योजना में रुचि रखते हैं? मैं आपकी प्रोफाइल के आधार पर उचित योजनाएं खोज सकता हूं।"
+            },
+            IntentType.SCHEME_DETAILS: {
+                "en": "Here's the information about the scheme. Do you want to apply?",
+                "hi": "यहां योजना की जानकारी है। क्या आप आवेदन करना चाहते हैं?"
+            },
+            IntentType.SCHEME_APPLY: {
+                "en": "I'll help you apply for the scheme. Let's start with your basic information.",
+                "hi": "मैं योजना के लिए आवेदन करने में मदद करूंगा। अपनी बुनियादी जानकारी से शुरू करें।"
+            },
+            IntentType.SCHEME_ELIGIBILITY: {
+                "en": "Let me check your eligibility. I'll need to verify your details.",
+                "hi": "मैं आपकी पात्रता जांचता हूं। मुझे आपके विवरण की पुष्टि करनी होगी।"
+            },
+            IntentType.REGISTER: {
+                "en": "Welcome! Let's create your account. Please provide your basic details.",
+                "hi": "स्वागत है! आइए आपका खाता बनाएं। कृपया अपना बुनियादी विवरण दें।"
+            },
+            IntentType.LOGIN: {
+                "en": "Let me help you login. What's the issue you're facing?",
+                "hi": "मैं आपको लॉगिन करने में मदद करता हूं। आपको क्या समस्या है?"
+            },
+            IntentType.PROFILE_UPDATE: {
+                "en": "I can help you update your profile. What would you like to change?",
+                "hi": "मैं आपकी प्रोफाइल अपडेट करने में मदद कर सकता हूं। आप क्या बदलना चाहते हैं?"
+            },
+            IntentType.HELP: {
+                "en": "I'm here to help! What do you need assistance with?",
+                "hi": "मैं मदद के लिए यहां हूं! आपको किसमें सहायता चाहिए?"
+            },
+            IntentType.GREETING: {
+                "en": "Hello! Welcome to Digital Sahayak. How can I help you today?",
+                "hi": "नमस्ते! डिजिटल सहायक में आपका स्वागत है। आज मैं आपकी कैसे मदद कर सकता हूं?"
+            },
+            IntentType.FEEDBACK: {
+                "en": "We'd love to hear your feedback! What do you think about our service?",
+                "hi": "हम आपकी प्रतिक्रिया सुनना चाहेंगे! आप हमारी सेवा के बारे में क्या सोचते हैं?"
+            },
+            IntentType.COMPLAINT: {
+                "en": "I'm sorry to hear you're facing an issue. Please describe the problem in detail.",
+                "hi": "मुझे खेद है कि आपको समस्या हो रही है। कृपया समस्या का विस्तार से वर्णन करें।"
+            },
+            IntentType.UPLOAD_DOCUMENT: {
+                "en": "Sure, I can help you upload documents. Which document would you like to upload?",
+                "hi": "ज़रूर, मैं दस्तावेज अपलोड करने में मदद कर सकता हूं। आप कौन सा दस्तावेज अपलोड करना चाहते हैं?"
+            },
+            IntentType.FILL_FORM: {
+                "en": "Let's fill the form together. I'll guide you through each field.",
+                "hi": "आइए साथ में फॉर्म भरें। मैं आपको हर फील्ड में मार्गदर्शन करूंगा।"
+            },
+            IntentType.CHECK_STATUS: {
+                "en": "Let me check your status. Please provide your reference number.",
+                "hi": "मैं आपकी स्थिति जांचता हूं। कृपया अपना संदर्भ नंबर दें।"
+            },
+            IntentType.UNCLEAR: {
+                "en": "I'm not sure I understood correctly. Could you please rephrase your question?",
+                "hi": "मुझे सही से समझ नहीं आया। क्या आप अपना सवाल दोबारा बता सकते हैं?"
+            },
         }
         
-        return responses.get(intent, "How can I assist you?")
+        default_response = {
+            "en": "How can I assist you?",
+            "hi": "मैं आपकी कैसे मदद कर सकता हूं?"
+        }
+        
+        response = responses.get(intent, default_response)
+        
+        return {
+            "en": response["en"],
+            "hi": response["hi"],
+            "bilingual": f"{response['en']}\n\n{response['hi']}",
+            "preferred": response.get(lang, response["en"])
+        }
     
     def extract_entities(self, message: str) -> Dict:
         """Extract entities from message (location, job type, etc.)"""

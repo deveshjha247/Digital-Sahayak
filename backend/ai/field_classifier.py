@@ -2,6 +2,11 @@
 Field Classifier AI Module
 Identifies form field types and maps user data to form fields
 Uses regex patterns + semantic matching (no external AI dependency)
+
+Language Support:
+- Primary: English (en)
+- Secondary: Hindi (hi)
+- All field labels and validation messages are pre-defined bilingually
 """
 
 import logging
@@ -9,7 +14,12 @@ import re
 from typing import Dict, List, Tuple, Optional
 from enum import Enum
 
+from .language_helper import get_language_helper, EDUCATION_BILINGUAL, CATEGORY_BILINGUAL, STATE_BILINGUAL
+
 logger = logging.getLogger(__name__)
+
+# Initialize language helper
+lang_helper = get_language_helper()
 
 
 class FieldType(str, Enum):
