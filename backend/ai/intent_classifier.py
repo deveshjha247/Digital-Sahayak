@@ -281,21 +281,25 @@ class IntentClassifier:
         for phrase in all_phrases:
             if phrase in text:
                 phrase_match += 1
-        
-        if phrase_match > 0:
-            score += phrase_match * base_weight * 0.4  # 40% from phrase match
+                score += 0.3  # High weight for phrase match
         
         # Check keyword matches - bilingual (en + hi + hinglish)
         all_pattern_keywords = self._get_all_keywords(pattern)
-        keyword_matches = sum(1 for kw in keywords if kw in all_pattern_keywords)
+        keyword_matches = 0
         
-        # Also check if any pattern keyword exists in text
+        # Check each keyword in text (not just words)
         for pattern_kw in all_pattern_keywords:
-            if pattern_kw in text and pattern_kw not in keywords:
+            if pattern_kw in text:
                 keyword_matches += 1
         
-        if keyword_matches > 0 and len(all_pattern_keywords) > 0:
-            keyword_score = min(keyword_matches / len(all_pattern_keywords), 1.0) * 0.6 * base_weight
+        # Also check word-by-word match
+        for kw in keywords:
+            if kw in all_pattern_keywords:
+                keyword_matches += 1
+        
+        if keyword_matches > 0:
+            # Scale score based on matches
+            keyword_score = min(keyword_matches * 0.15, 0.7) * base_weight
             score += keyword_score
         
         # Normalize to 0-1
@@ -303,7 +307,7 @@ class IntentClassifier:
     
     def classify(self, message: str) -> Tuple[IntentType, float, Dict]:
         """
-        Classify message intent
+        Classify message intent (supports English, Hindi, Hinglish)
         
         Returns:
             (top_intent, confidence_score, details_dict)
@@ -321,10 +325,10 @@ class IntentClassifier:
         top_intent = max(scores, key=scores.get)
         top_score = scores[top_intent]
         
-        # If confidence too low, mark as unclear
-        if top_score < self.min_confidence:
+        # Lower threshold for intent detection
+        if top_score < 0.2:
             top_intent = IntentType.UNCLEAR
-            top_score = top_score / self.min_confidence  # Adjusted score
+            top_score = top_score / 0.2  # Adjusted score
         
         # Get runner-ups for context
         sorted_intents = sorted(scores.items(), key=lambda x: x[1], reverse=True)
