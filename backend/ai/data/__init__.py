@@ -22,6 +22,7 @@ from .collector import DataCollector
 from .balancer import DataBalancer
 from .metadata import MetadataManager
 from .pipeline import DataPipeline, run_pipeline
+from .preprocessor import DataPreprocessor, TextNormalizer, preprocess_dataset
 from .synthetic import (
     SyntheticJobGenerator,
     SyntheticUserGenerator,
@@ -42,6 +43,9 @@ __all__ = [
     # Processing
     "DataBalancer",
     "MetadataManager",
+    "DataPreprocessor",
+    "TextNormalizer",
+    "preprocess_dataset",
     # Pipeline
     "DataPipeline",
     "run_pipeline",

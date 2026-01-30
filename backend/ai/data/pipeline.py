@@ -14,6 +14,7 @@ from .data_config import DataConfig, SOURCES, CATEGORIES, STATES
 from .collector import DataCollector
 from .metadata import MetadataManager
 from .balancer import DataBalancer
+from .preprocessor import DataPreprocessor
 from .synthetic import generate_training_dataset
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ class DataPipeline:
         
         # Components
         self.collector = DataCollector()
+        self.preprocessor = DataPreprocessor(required_fields=["title"])
         self.metadata_manager = MetadataManager()
         self.balancer = DataBalancer(target_ratio=0.5)
         
@@ -58,6 +60,7 @@ class DataPipeline:
         # Statistics
         self.stats = {
             "collected": 0,
+            "preprocessed": 0,
             "validated": 0,
             "deduplicated": 0,
             "synthetic_added": 0,
@@ -90,7 +93,10 @@ class DataPipeline:
         if collect:
             await self._collect_step()
         
-        # Step 2: Validate and deduplicate
+        # Step 2: Preprocess and clean
+        self._preprocess_step()
+        
+        # Step 3: Validate and deduplicate (now handled by preprocessor)
         self._validate_step()
         
         # Step 3: Store metadata
@@ -137,35 +143,49 @@ class DataPipeline:
         
         logger.info(f"Collected {len(all_data)} items from sources")
     
+    def _preprocess_step(self):
+        """Preprocess and clean data"""
+        logger.info("Step 2: Preprocessing data...")
+        
+        # Run full preprocessing pipeline
+        cleaned_data = self.preprocessor.process(self.collected_data)
+        preprocessing_stats = self.preprocessor.get_stats()
+        
+        self.collected_data = cleaned_data
+        self.stats["preprocessed"] = len(cleaned_data)
+        self.stats["preprocessing_details"] = preprocessing_stats
+        
+        logger.info(f"Preprocessed: {len(cleaned_data)} items")
+        logger.info(f"  - Duplicates removed: {preprocessing_stats['duplicates_removed']}")
+        logger.info(f"  - Fields normalized: {preprocessing_stats['fields_normalized']}")
+        logger.info(f"  - Dates standardized: {preprocessing_stats['dates_standardized']}")
+        logger.info(f"  - Text cleaned: {preprocessing_stats['text_cleaned']}")
+    
     def _validate_step(self):
-        """Validate and deduplicate data"""
-        logger.info("Step 2: Validating data...")
+        """Additional validation after preprocessing"""
+        logger.info("Step 3: Final validation...")
         
         validated = []
-        seen_hashes = set()
         
         for item in self.collected_data:
-            # Skip items without required fields
-            if not item.get("title") or not item.get("description"):
+            # Skip items without description (title already checked by preprocessor)
+            if not item.get("description"):
                 continue
             
-            # Skip duplicates
-            content_hash = hash(item.get("title", "") + item.get("description", "")[:200])
-            if content_hash in seen_hashes:
+            # Skip items marked as having too many missing fields
+            if item.get("_too_many_missing"):
                 continue
             
-            seen_hashes.add(content_hash)
             validated.append(item)
         
         self.processed_data = validated
         self.stats["validated"] = len(validated)
-        self.stats["deduplicated"] = self.stats["collected"] - len(validated)
         
-        logger.info(f"Validated: {len(validated)}, Removed duplicates: {self.stats['deduplicated']}")
+        logger.info(f"Validated: {len(validated)} items")
     
     def _metadata_step(self):
         """Store metadata for RAG"""
-        logger.info("Step 3: Storing metadata...")
+        logger.info("Step 4: Storing metadata...")
         
         for item in self.processed_data:
             self.metadata_manager.add_metadata(item)
