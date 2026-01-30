@@ -558,7 +558,7 @@ class AIResponseGenerator:
         return self._generate_contextual_response(user_message, context, user_profile, language)
     
     async def _ds_search_and_respond(self, query: str, language: str, user_id: str = None) -> Optional[str]:
-        """Search using DS-Search system and generate response"""
+        """Search using DS-Search system and generate natural language response"""
         try:
             ds_search = await self._get_ds_search()
             if not ds_search:
@@ -575,62 +575,120 @@ class AIResponseGenerator:
                 logger.info(f"DS-Search found no results for: {query}")
                 return None
             
-            # Build response from DS-Search results
-            return self._build_ds_search_response(query, response, language)
+            # Check if we have facts and use DS-Talk for natural response
+            if response.facts:
+                return self._build_natural_response_from_facts(query, response.facts, response, language)
+            
+            # Fallback: Extract facts from results and generate response
+            return await self._extract_and_respond(query, response, language)
             
         except Exception as e:
             logger.error(f"DS-Search error: {e}")
             return None
     
-    def _build_ds_search_response(self, original_query: str, search_response, language: str) -> str:
-        """Build a helpful response from DS-Search results"""
+    async def _extract_and_respond(self, query: str, search_response, language: str) -> Optional[str]:
+        """Extract facts from results and generate natural response"""
+        try:
+            # Try to import Evidence Extractor and DS-Talk
+            from ai.evidence import extract_facts
+            from ai.nlg import DSTalk
+            
+            # Convert results to format for extraction
+            results_for_extraction = [
+                {
+                    "title": r.title,
+                    "url": r.url,
+                    "snippet": r.snippet
+                }
+                for r in search_response.results
+            ]
+            
+            # Extract facts
+            facts = await extract_facts(results_for_extraction, query, scrape_top_n=1)
+            
+            if facts and facts.is_valid():
+                facts_dict = facts.to_dict()
+                return self._build_natural_response_from_facts(query, facts_dict, search_response, language)
+            
+            # If extraction fails, use formatted summary
+            return self._build_summary_response(query, search_response, language)
+            
+        except ImportError:
+            logger.warning("Evidence/NLG modules not available, using fallback")
+            return self._build_summary_response(query, search_response, language)
+        except Exception as e:
+            logger.error(f"Extraction error: {e}")
+            return self._build_summary_response(query, search_response, language)
+    
+    def _build_natural_response_from_facts(self, query: str, facts: dict, search_response, language: str) -> str:
+        """Build natural language response using DS-Talk"""
+        try:
+            from ai.nlg import DSTalk
+            
+            ds_talk = DSTalk(style="chatbot", use_emojis=True)
+            response = ds_talk.compose(facts, language)
+            
+            text = response.text
+            
+            # Add source attribution at the end
+            if search_response.results:
+                top_result = search_response.results[0]
+                if language == "hi":
+                    text += f"\n\n📎 **स्रोत:** {top_result.url}"
+                else:
+                    text += f"\n\n📎 **Source:** {top_result.url}"
+            
+            return text
+            
+        except Exception as e:
+            logger.error(f"DS-Talk error: {e}")
+            return self._build_summary_response(query, search_response, language)
+    
+    def _build_summary_response(self, query: str, search_response, language: str) -> str:
+        """Build a summarized response when DS-Talk is not available"""
         results = search_response.results
         
         if not results:
             return None
         
-        # Header with confidence indicator
-        confidence = search_response.search_score
-        confidence_emoji = "🟢" if confidence >= 0.7 else "🟡" if confidence >= 0.5 else "🔴"
+        # Get the best result
+        top_result = results[0]
         
+        # Build a natural summary
         if language == "hi":
-            response = f"🔍 **आपके सवाल के लिए मैंने intelligent search किया:** {confidence_emoji}\n\n"
-        else:
-            response = f"🔍 **I performed an intelligent search for your question:** {confidence_emoji}\n\n"
-        
-        # Add relevant information from results
-        for i, result in enumerate(results[:3], 1):
-            title = result.title
-            snippet = result.snippet
-            url = result.url
-            source_type = result.source_type
+            response = f"📋 **{top_result.title}**\n\n"
+            response += f"{top_result.snippet}\n\n"
             
-            # Add trust indicator
-            trust_badge = ""
-            if source_type == "official":
-                trust_badge = "✅ "
-            elif source_type == "semi_official":
-                trust_badge = "🏛️ "
+            # Add other key info if available
+            if len(results) > 1:
+                response += "📌 **अन्य जानकारी:**\n"
+                for r in results[1:3]:
+                    response += f"• {r.title[:60]}...\n"
             
-            if title and snippet:
-                response += f"**{i}. {trust_badge}{title}**\n"
-                response += f"   {snippet[:200]}{'...' if len(snippet) > 200 else ''}\n"
-                if url:
-                    response += f"   🔗 {url}\n"
-                response += "\n"
-        
-        # Add intent-specific footer
-        intent = search_response.intent
-        source = search_response.source
-        
-        if language == "hi":
-            response += f"\n📊 *Search Type: {intent} | Source: {source}*\n"
-            response += "💡 *यह जानकारी trusted sources से मिली है। Official website पर verify करें।*"
+            response += f"\n🔗 **आधिकारिक लिंक:** {top_result.url}\n"
+            response += "\n💡 *यह जानकारी web search से मिली है। Official website पर verify करें।*"
         else:
-            response += f"\n📊 *Search Type: {intent} | Source: {source}*\n"
-            response += "💡 *This information is from trusted sources. Please verify on official website.*"
+            response = f"📋 **{top_result.title}**\n\n"
+            response += f"{top_result.snippet}\n\n"
+            
+            if len(results) > 1:
+                response += "📌 **More Information:**\n"
+                for r in results[1:3]:
+                    response += f"• {r.title[:60]}...\n"
+            
+            response += f"\n🔗 **Official Link:** {top_result.url}\n"
+            response += "\n💡 *This information is from web search. Please verify on official website.*"
         
         return response
+    
+    def _build_ds_search_response(self, original_query: str, search_response, language: str) -> str:
+        """Legacy method - redirects to natural response building"""
+        # Try to use facts if available
+        if search_response.facts:
+            return self._build_natural_response_from_facts(original_query, search_response.facts, search_response, language)
+        
+        # Otherwise use summary
+        return self._build_summary_response(original_query, search_response, language)
     
     async def _search_and_respond(self, query: str, language: str) -> Optional[str]:
         """Search web and generate response from results"""
