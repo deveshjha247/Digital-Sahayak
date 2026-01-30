@@ -21,6 +21,7 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import ProfilePreferencesPage from './pages/ProfilePreferencesPage';
 import RecommendationsPage from './pages/RecommendationsPage';
 import ContentDraftsPage from './pages/ContentDraftsPage';
+import AIChatPage from './pages/AIChatPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -102,6 +103,13 @@ function AppRoutes() {
       <Route path="/payment-success" element={
         <ProtectedRoute>
           <MainLayout><PaymentSuccessPage /></MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      {/* AI Chat - Full screen without navbar */}
+      <Route path="/ai-chat" element={
+        <ProtectedRoute>
+          <AIChatPage />
         </ProtectedRoute>
       } />
       
