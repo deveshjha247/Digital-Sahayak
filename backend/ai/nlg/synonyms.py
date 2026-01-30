@@ -1,0 +1,174 @@
+"""
+DS-Talk Synonyms Dictionary
+===========================
+Hindi and English synonym mappings for natural variation.
+Used to substitute common words with alternatives.
+"""
+
+# ===================== HINDI SYNONYMS =====================
+
+SYNONYMS_HI = {
+    # Application related
+    "आवेदन": ["अप्लाई", "रजिस्ट्रेशन", "फॉर्म भरना", "दर्ज करना"],
+    "भर्ती": ["नियुक्ति", "रिक्रूटमेंट", "वैकेंसी"],
+    "नोटिफिकेशन": ["सूचना", "घोषणा", "नोटिस", "अधिसूचना"],
+    
+    # Date related
+    "तिथि": ["तारीख़", "डेट"],
+    "अंतिम": ["आखिरी", "लास्ट", "समाप्ति"],
+    "शुरू": ["प्रारंभ", "आरंभ", "स्टार्ट"],
+    
+    # Document related
+    "दस्तावेज़": ["डॉक्यूमेंट्स", "कागज़ात", "प्रमाण पत्र"],
+    "प्रमाण पत्र": ["सर्टिफिकेट", "प्रमाणपत्र"],
+    
+    # Fee related  
+    "शुल्क": ["फीस", "चार्ज", "भुगतान"],
+    "सरकारी": ["गवर्नमेंट", "सरकार का"],
+    
+    # Action related
+    "जल्दी": ["तुरंत", "शीघ्र", "फौरन"],
+    "देखें": ["चेक करें", "जाँचें", "पता करें"],
+    "जानें": ["समझें", "पता करें", "जानकारी लें"],
+    
+    # Result related
+    "परिणाम": ["रिजल्ट", "नतीजा", "नतीजे"],
+    "घोषित": ["जारी", "आउट", "प्रकाशित"],
+    
+    # Eligibility related
+    "पात्रता": ["योग्यता", "एलिजिबिलिटी"],
+    "योग्य": ["पात्र", "एलिजिबल"],
+    "आयु": ["उम्र", "एज"],
+    
+    # General
+    "जानकारी": ["इन्फॉर्मेशन", "विवरण", "डिटेल्स"],
+    "आधिकारिक": ["ऑफिशियल", "सरकारी"],
+    "उपलब्ध": ["मिल रहा", "अवेलेबल"],
+    "मौका": ["अवसर", "चांस", "opportunity"],
+    
+    # Links
+    "लिंक": ["कड़ी", "वेबसाइट", "URL"],
+    "वेबसाइट": ["साइट", "पोर्टल"],
+    
+    # Positive words
+    "खुशखबरी": ["गुड न्यूज़", "अच्छी खबर", "शुभ समाचार"],
+    "बधाई": ["congratulations", "शुभकामनाएं"],
+    
+    # Job related
+    "नौकरी": ["जॉब", "रोज़गार", "employment"],
+    "पद": ["पोस्ट", "position", "vacancy"],
+    "विभाग": ["डिपार्टमेंट", "department"],
+    
+    # Exam related
+    "परीक्षा": ["एग्जाम", "टेस्ट"],
+    "एडमिट कार्ड": ["हॉल टिकट", "प्रवेश पत्र"],
+}
+
+# ===================== ENGLISH SYNONYMS =====================
+
+SYNONYMS_EN = {
+    # Application related
+    "apply": ["submit your form", "register", "enroll", "fill the form"],
+    "application": ["form", "registration"],
+    "recruitment": ["hiring", "vacancy", "job opening"],
+    "notification": ["notice", "announcement", "circular"],
+    
+    # Date related
+    "date": ["deadline", "due date"],
+    "last": ["final", "closing", "end"],
+    "start": ["begin", "commence", "opening"],
+    
+    # Document related
+    "documents": ["papers", "certificates", "proofs"],
+    "certificate": ["proof", "document"],
+    
+    # Fee related
+    "fee": ["charge", "payment", "cost"],
+    "government": ["official", "govt"],
+    
+    # Action related
+    "quickly": ["soon", "immediately", "promptly"],
+    "check": ["verify", "see", "look at"],
+    "learn": ["know", "find out", "discover"],
+    
+    # Result related
+    "result": ["outcome", "score", "marks"],
+    "declared": ["announced", "released", "published", "out"],
+    
+    # Eligibility related
+    "eligibility": ["qualification", "requirements"],
+    "eligible": ["qualified", "suitable"],
+    "age": ["years old"],
+    
+    # General
+    "information": ["details", "info", "data"],
+    "official": ["authorized", "government"],
+    "available": ["accessible", "ready", "obtainable"],
+    "opportunity": ["chance", "opening"],
+    
+    # Links
+    "link": ["URL", "website", "portal"],
+    "website": ["site", "portal", "page"],
+    
+    # Positive words
+    "good news": ["great news", "exciting news"],
+    "congratulations": ["best wishes", "well done"],
+    
+    # Job related
+    "job": ["position", "post", "employment"],
+    "posts": ["positions", "vacancies", "seats"],
+    "department": ["ministry", "office"],
+    
+    # Exam related
+    "exam": ["examination", "test"],
+    "admit card": ["hall ticket", "entry pass"],
+}
+
+# ===================== POLITE MARKERS =====================
+
+POLITE_MARKERS = {
+    "hi": {
+        "formal": ["कृपया", "आपसे अनुरोध है", "आपको सूचित किया जाता है"],
+        "friendly": ["जी", "भाई/बहन", "दोस्त"],
+    },
+    "en": {
+        "formal": ["Please", "We request you to", "You are hereby informed"],
+        "friendly": ["Hey", "Just letting you know", "Quick update"],
+    }
+}
+
+# ===================== EMOJI MAPPINGS =====================
+
+EMOJI_MAP = {
+    "success": "✅",
+    "warning": "⚠️",
+    "info": "ℹ️",
+    "date": "📅",
+    "fee": "💰",
+    "document": "📄",
+    "link": "🔗",
+    "job": "💼",
+    "result": "📊",
+    "admit": "🎫",
+    "search": "🔍",
+    "tip": "💡",
+    "note": "📌",
+    "celebration": "🎉",
+    "time": "⏰",
+    "state": "📍",
+}
+
+def get_synonym(word: str, language: str = "hi") -> str:
+    """Get a random synonym for a word"""
+    import random
+    
+    synonyms_dict = SYNONYMS_HI if language == "hi" else SYNONYMS_EN
+    
+    if word in synonyms_dict and synonyms_dict[word]:
+        return random.choice(synonyms_dict[word])
+    
+    return word
+
+def get_emoji(category: str) -> str:
+    """Get emoji for a category"""
+    return EMOJI_MAP.get(category, "")
