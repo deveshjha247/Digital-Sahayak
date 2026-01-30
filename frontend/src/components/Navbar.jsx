@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { Menu, User, LogOut, LayoutDashboard, FileText, Settings, ChevronDown, Briefcase, Building2, Sparkles, UserCircle } from 'lucide-react';
+import { Menu, User, LogOut, LayoutDashboard, FileText, Settings, ChevronDown, Briefcase, Building2, Sparkles, UserCircle, Bot } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -99,6 +99,12 @@ const Navbar = () => {
                     <Link to="/recommendations" className="flex items-center gap-2 cursor-pointer" data-testid="menu-recommendations">
                       <Sparkles className="w-4 h-4" />
                       <span>AI सुझाव</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/ai-chat" className="flex items-center gap-2 cursor-pointer" data-testid="menu-ai-chat">
+                      <Bot className="w-4 h-4" />
+                      <span>AI चैट</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

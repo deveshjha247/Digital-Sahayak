@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Progress } from '../components/ui/progress';
 import { 
   Briefcase, Building2, FileText, Clock, CheckCircle2, 
-  AlertCircle, IndianRupee, ArrowRight, MessageCircle
+  AlertCircle, IndianRupee, ArrowRight, MessageCircle, Bot, Sparkles
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
