@@ -1892,6 +1892,349 @@ async def clear_ai_history(current_user: dict = Depends(get_current_user)):
         raise HTTPException(500, f"Error: {str(e)}")
 
 
+# ===================== DS-SEARCH ENDPOINTS =====================
+
+from ai.search import get_ds_search_instance, DSSearch
+
+# Global DS-Search instance
+ds_search: DSSearch = None
+
+@app.post("/api/ask")
+async def ds_search_ask(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search: User query endpoint.
+    Main endpoint for intelligent search with policy checks.
+    
+    Input: {text, user_id}
+    Output: answer + sources + confidence
+    """
+    global ds_search
+    try:
+        data = await request.json()
+        text = data.get('text', '').strip()
+        
+        if not text:
+            raise HTTPException(400, "Text query is required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        # Get user's preferred language
+        user_profile = await db.users.find_one({"_id": ObjectId(current_user['id'])})
+        language = user_profile.get('preferred_language', 'hi') if user_profile else 'hi'
+        
+        # Execute search
+        response = await ds_search.search(
+            query=text,
+            user_id=current_user['id'],
+            user_context={"profile": user_profile},
+            language=language
+        )
+        
+        return {
+            "success": response.success,
+            "answer": response.formatted_response,
+            "sources": [r.to_dict() for r in response.results[:5]],
+            "confidence": response.search_score,
+            "intent": response.intent,
+            "source_type": response.source,
+            "metadata": response.metadata
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search error: {e}")
+        raise HTTPException(500, f"Search error: {str(e)}")
+
+@app.post("/api/search/fetch")
+async def ds_search_fetch(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search: Manual URL fetch endpoint.
+    Fetches and extracts content from a specific URL.
+    
+    Input: {url} or {keyword}
+    Output: extracted facts + summary
+    """
+    global ds_search
+    try:
+        data = await request.json()
+        url = data.get('url', '').strip()
+        keyword = data.get('keyword', '').strip()
+        
+        if not url and not keyword:
+            raise HTTPException(400, "URL or keyword is required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        if url:
+            # Fetch specific URL
+            result = await ds_search.fetch_url(url, current_user['id'])
+            return result
+        else:
+            # Search for keyword
+            user_profile = await db.users.find_one({"_id": ObjectId(current_user['id'])})
+            language = user_profile.get('preferred_language', 'hi') if user_profile else 'hi'
+            
+            response = await ds_search.search(
+                query=keyword,
+                user_id=current_user['id'],
+                language=language
+            )
+            
+            return {
+                "success": response.success,
+                "results": [r.to_dict() for r in response.results],
+                "summary": response.formatted_response
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search fetch error: {e}")
+        raise HTTPException(500, f"Fetch error: {str(e)}")
+
+@app.get("/api/search/cache/status")
+async def ds_search_cache_status(current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search: Get cache status.
+    Shows cache statistics and health.
+    """
+    global ds_search
+    try:
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        status = await ds_search.get_cache_status()
+        return {"success": True, "cache": status}
+        
+    except Exception as e:
+        logger.error(f"DS-Search cache status error: {e}")
+        raise HTTPException(500, f"Cache error: {str(e)}")
+
+
+# ===================== DS-SEARCH ADMIN ENDPOINTS =====================
+
+@app.post("/api/admin/sources/add")
+async def ds_search_add_source(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: Add a trusted source.
+    Only admins can add new trusted domains.
+    """
+    global ds_search
+    try:
+        # Check admin permission
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        data = await request.json()
+        domain = data.get('domain', '').strip()
+        name = data.get('name', '').strip()
+        source_type = data.get('source_type', 'aggregator')
+        priority = data.get('priority', 5)
+        categories = data.get('categories', [])
+        
+        if not domain or not name:
+            raise HTTPException(400, "Domain and name are required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        success = await ds_search.add_trusted_source(
+            domain=domain,
+            name=name,
+            source_type=source_type,
+            priority=priority,
+            categories=categories
+        )
+        
+        return {"success": success, "message": f"Source {domain} added" if success else "Failed to add"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search add source error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.patch("/api/admin/sources/{domain}")
+async def ds_search_update_source(domain: str, request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: Update or block a source.
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        data = await request.json()
+        action = data.get('action', '')  # 'block', 'enable', 'disable'
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        if action == 'block':
+            reason = data.get('reason', '')
+            success = await ds_search.block_domain(domain, reason)
+            return {"success": success, "message": f"Domain {domain} blocked"}
+        
+        # Other actions can be added here
+        
+        return {"success": False, "message": "Invalid action"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search update source error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.get("/api/admin/sources")
+async def ds_search_list_sources(current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: List all trusted sources.
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        sources = await ds_search.get_sources_list()
+        return {"success": True, "sources": sources, "count": len(sources)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search list sources error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.get("/api/admin/search/logs")
+async def ds_search_logs(
+    limit: int = 100,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    DS-Search Admin: Get search logs for analytics.
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        logs = await ds_search.get_search_logs(limit)
+        return {"success": True, "logs": logs, "count": len(logs)}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search logs error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.post("/api/admin/search/api/enable")
+async def ds_search_enable_api(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: Enable paid search API.
+    WARNING: This will incur costs!
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        data = await request.json()
+        api_type = data.get('api_type', '')  # 'google', 'bing', 'serpapi'
+        api_key = data.get('api_key', '')
+        daily_limit = data.get('daily_limit', 100)
+        
+        if not api_type or not api_key:
+            raise HTTPException(400, "API type and key are required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        ds_search.enable_search_api(api_type, api_key, daily_limit)
+        
+        return {"success": True, "message": f"Search API ({api_type}) enabled with limit {daily_limit}/day"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search enable API error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.post("/api/admin/search/api/disable")
+async def ds_search_disable_api(current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: Disable paid search API.
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        ds_search.disable_search_api()
+        
+        return {"success": True, "message": "Search API disabled (free mode)"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search disable API error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.get("/api/admin/search/api/status")
+async def ds_search_api_status(current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: Get search API status.
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        status = ds_search.get_api_status()
+        return {"success": True, "api_status": status}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search API status error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@app.delete("/api/admin/search/cache")
+async def ds_search_clear_cache(current_user: dict = Depends(get_current_user)):
+    """
+    DS-Search Admin: Clear all search caches.
+    """
+    global ds_search
+    try:
+        if current_user.get('role') != 'admin':
+            raise HTTPException(403, "Admin access required")
+        
+        if ds_search is None:
+            ds_search = await get_ds_search_instance(db)
+        
+        result = await ds_search.clear_cache()
+        return {"success": True, "message": "All caches cleared", "result": result}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DS-Search clear cache error: {e}")
+        raise HTTPException(500, f"Error: {str(e)}")
+
+
 # Include router
 app.include_router(api_router)
 
