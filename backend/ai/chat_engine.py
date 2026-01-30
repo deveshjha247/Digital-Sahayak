@@ -9,7 +9,7 @@ Features:
 - Hindi + English bilingual support
 - Context-aware responses about jobs, schemes, government
 - Integration with project knowledge base
-- Web search for real-time information (like ChatGPT/Gemini)
+- DS-Search integration for intelligent web search
 - Self-learning from web searches
 """
 
@@ -37,6 +37,13 @@ try:
 except ImportError:
     DDGS_AVAILABLE = False
     WEB_SEARCH_AVAILABLE = False
+
+# DS-Search integration
+try:
+    from ai.search import get_ds_search_instance, DSSearch
+    DS_SEARCH_AVAILABLE = True
+except ImportError:
+    DS_SEARCH_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
