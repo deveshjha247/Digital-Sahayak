@@ -1,0 +1,439 @@
+{
+  "version": "1.0.0",
+  "project": "Digital Sahayak AI",
+  "description": "Dataset definitions for training AI models for government job and scheme portal",
+  "datasets": {
+    "job_recommender": {
+      "name": "Job/Yojana Recommender Dataset",
+      "objective": "Train a ranking model to match jobs/schemes with user profiles based on explicit and implicit feedback",
+      "task_type": "ranking",
+      "input_schema": {
+        "user_profile": {
+          "user_id": "string",
+          "education": "enum: 10th|12th|Graduate|Post-Graduate|Diploma",
+          "age": "integer: 18-60",
+          "state": "string: Indian state name",
+          "district": "string: optional",
+          "caste_category": "enum: General|OBC|SC|ST|EWS",
+          "gender": "enum: Male|Female|Other",
+          "preferred_categories": "list[string]: Railway|SSC|UPSC|Bank|Police|Teaching",
+          "work_experience_years": "integer: 0-40"
+        },
+        "job_posting": {
+          "job_id": "string",
+          "title": "string",
+          "title_hi": "string",
+          "organization": "string",
+          "category": "string",
+          "education_required": "string",
+          "min_age": "integer",
+          "max_age": "integer",
+          "state": "string: state or 'All India'",
+          "salary_min": "integer",
+          "salary_max": "integer",
+          "vacancies": "integer",
+          "reservation": "dict: {SC: int, ST: int, OBC: int, EWS: int, General: int}"
+        }
+      },
+      "labels": {
+        "applied": {
+          "value": 1.0,
+          "description": "User submitted application"
+        },
+        "saved": {
+          "value": 0.8,
+          "description": "User bookmarked for later"
+        },
+        "clicked": {
+          "value": 0.6,
+          "description": "User viewed full details"
+        },
+        "viewed_long": {
+          "value": 0.4,
+          "description": "Viewed for >30 seconds without action"
+        },
+        "skipped": {
+          "value": 0.1,
+          "description": "Shown in list but not clicked"
+        },
+        "rejected": {
+          "value": 0.0,
+          "description": "User marked as 'not interested'"
+        }
+      },
+      "data_sources": [
+        "User application logs from database",
+        "Click-through events from frontend",
+        "Job listings scraped from sarkariresult.com, rojgar.com",
+        "Manual labeling by operators"
+      ],
+      "annotation_guidelines": [
+        "Log every user-job interaction with timestamp",
+        "Track session duration per job view",
+        "Store user profile snapshot at interaction time",
+        "Handle new users with cold-start defaults"
+      ],
+      "files": {
+        "jobs": "data/training/job_matching/jobs.jsonl",
+        "users": "data/training/job_matching/users.jsonl",
+        "interactions": "data/training/job_matching/interactions.jsonl",
+        "labeled_pairs": "data/training/job_matching/labeled_pairs.jsonl"
+      },
+      "target_size": {
+        "jobs": 5000,
+        "users": 10000,
+        "interactions": 100000
+      }
+    },
+    "form_field_classifier": {
+      "name": "Government Form Field Classification Dataset",
+      "objective": "Train a model to identify semantic type of form fields from label text, enabling auto-fill functionality",
+      "task_type": "multi-class classification",
+      "input_schema": {
+        "field_label": "string: visible text label of the field",
+        "field_label_normalized": "string: lowercase, stripped",
+        "placeholder": "string: optional hint text",
+        "html_type": "string: text|email|tel|date|select|radio|checkbox",
+        "html_name": "string: field name attribute",
+        "html_id": "string: field id attribute",
+        "surrounding_context": "string: labels of adjacent fields"
+      },
+      "labels": {
+        "personal": [
+          "applicant_name",
+          "father_name", 
+          "mother_name",
+          "spouse_name",
+          "date_of_birth",
+          "age",
+          "gender",
+          "marital_status"
+        ],
+        "identity": [
+          "aadhar_number",
+          "pan_number",
+          "voter_id",
+          "driving_license",
+          "passport_number"
+        ],
+        "contact": [
+          "mobile_number",
+          "alternate_mobile",
+          "email"
+        ],
+        "address": [
+          "address_line1",
+          "address_line2",
+          "village",
+          "post_office",
+          "tehsil",
+          "district",
+          "state",
+          "pincode"
+        ],
+        "education": [
+          "qualification",
+          "degree",
+          "university",
+          "board",
+          "passing_year",
+          "percentage"
+        ],
+        "caste": [
+          "caste",
+          "caste_category",
+          "sub_caste"
+        ],
+        "bank": [
+          "bank_name",
+          "account_number",
+          "ifsc_code",
+          "branch_name"
+        ],
+        "other": [
+          "photo",
+          "signature",
+          "captcha",
+          "unknown"
+        ]
+      },
+      "data_sources": [
+        "Scrape forms from pmjay.gov.in, pmkisan.gov.in",
+        "Bihar RTPS, Jharkhand Seva Portal",
+        "Railway recruitment portals",
+        "SSC, UPSC application forms"
+      ],
+      "annotation_guidelines": [
+        "One label per field, choose most specific",
+        "Hindi labels should map to same tags as English",
+        "Include both HTML attributes and visible text",
+        "Log operator corrections for improvement"
+      ],
+      "files": {
+        "forms": "data/training/form_fields/forms.jsonl",
+        "fields": "data/training/form_fields/labeled_fields.jsonl",
+        "corrections": "data/training/form_fields/operator_corrections.jsonl"
+      },
+      "target_size": {
+        "forms": 500,
+        "fields": 10000
+      }
+    },
+    "content_rewriter": {
+      "name": "Content Rewriting and Summarization Dataset",
+      "objective": "Train model to rewrite scraped job/scheme content into unique, readable summaries with key highlights",
+      "task_type": "seq2seq generation",
+      "input_schema": {
+        "source_text": "string: raw scraped content",
+        "source_url": "string: origin URL",
+        "content_type": "enum: job|yojana|result|admit_card|syllabus"
+      },
+      "output_schema": {
+        "title_rewritten": "string: unique title",
+        "description_rewritten": "string: 100-200 words summary",
+        "highlights": "list[string]: 3-5 bullet points",
+        "key_dates": {
+          "application_start": "date",
+          "application_end": "date",
+          "exam_date": "date"
+        },
+        "extracted_data": {
+          "salary": "string",
+          "vacancies": "integer",
+          "qualification": "string",
+          "age_limit": "string"
+        }
+      },
+      "labels": {
+        "quality_score": "float: 0.0-1.0 human rating",
+        "uniqueness_score": "float: plagiarism check result"
+      },
+      "data_sources": [
+        "Sarkari Result job notifications",
+        "Government scheme PDFs",
+        "Newspaper job advertisements",
+        "Human-written summaries by content team"
+      ],
+      "annotation_guidelines": [
+        "Rewritten content must be 100% unique",
+        "Keep all factual information accurate",
+        "Hindi translation should be natural, not literal",
+        "Extract all dates, numbers, eligibility criteria"
+      ],
+      "files": {
+        "raw_content": "data/training/content_rewriting/raw.jsonl",
+        "rewritten": "data/training/content_rewriting/rewritten.jsonl",
+        "quality_ratings": "data/training/content_rewriting/ratings.jsonl"
+      },
+      "target_size": {
+        "pairs": 5000
+      }
+    },
+    "intent_classifier": {
+      "name": "WhatsApp Intent Classification Dataset",
+      "objective": "Train model to understand user intents from Hindi/English mixed messages for chatbot routing",
+      "task_type": "multi-class classification",
+      "input_schema": {
+        "message": "string: user message text",
+        "language": "enum: hi|en|hinglish",
+        "previous_context": "string: optional conversation history",
+        "user_state": "dict: current session state"
+      },
+      "labels": {
+        "job_intents": [
+          "search_job",
+          "apply_job",
+          "job_status",
+          "job_details",
+          "job_eligibility"
+        ],
+        "yojana_intents": [
+          "search_yojana",
+          "apply_yojana",
+          "yojana_status",
+          "yojana_eligibility",
+          "yojana_documents"
+        ],
+        "form_intents": [
+          "fill_form",
+          "upload_document",
+          "check_document"
+        ],
+        "general_intents": [
+          "greeting",
+          "help",
+          "goodbye",
+          "thanks",
+          "complaint",
+          "feedback"
+        ],
+        "profile_intents": [
+          "update_profile",
+          "view_profile"
+        ],
+        "payment_intents": [
+          "make_payment",
+          "payment_status"
+        ],
+        "other": [
+          "out_of_scope",
+          "unclear"
+        ]
+      },
+      "example_messages": {
+        "search_job": [
+          "मुझे रेलवे की नौकरी चाहिए",
+          "railway job chahiye",
+          "SSC ki koi vacancy hai?",
+          "बिहार में कोई सरकारी नौकरी?"
+        ],
+        "apply_job": [
+          "इस जॉब के लिए आवेदन करना है",
+          "apply karna hai",
+          "form bharna hai",
+          "How to apply for this job?"
+        ],
+        "yojana_eligibility": [
+          "क्या मैं PM Kisan के लिए eligible हूं?",
+          "Am I eligible for Ayushman Bharat?",
+          "Yojana ke liye kya documents chahiye?"
+        ],
+        "greeting": [
+          "नमस्ते",
+          "Hi",
+          "Hello bhai"
+        ]
+      },
+      "data_sources": [
+        "WhatsApp chat logs (anonymized)",
+        "Website chatbot conversations",
+        "Synthetic data generation",
+        "Human-labeled samples"
+      ],
+      "annotation_guidelines": [
+        "Each message gets exactly one primary intent",
+        "Mark confidence: high/medium/low",
+        "Flag ambiguous cases for review",
+        "Native Hindi speakers for Hindi messages",
+        "Remove PII before storage"
+      ],
+      "files": {
+        "messages": "data/training/intent/messages.jsonl",
+        "labeled": "data/training/intent/labeled_intents.jsonl",
+        "ambiguous": "data/training/intent/ambiguous_cases.jsonl"
+      },
+      "target_size": {
+        "messages": 20000,
+        "per_intent_min": 500
+      }
+    },
+    "document_validator": {
+      "name": "Document Validation Dataset",
+      "objective": "Train model to validate Indian government documents (Aadhar, PAN, etc.) for format correctness",
+      "task_type": "validation + extraction",
+      "input_schema": {
+        "document_image": "string: base64 or file path",
+        "document_type": "enum: aadhar|pan|voter_id|driving_license|passport|bank_statement|certificate",
+        "declared_value": "string: user-entered value to validate"
+      },
+      "output_schema": {
+        "is_valid": "boolean",
+        "extracted_value": "string: OCR extracted value",
+        "confidence": "float: 0.0-1.0",
+        "error_type": "enum: format_error|checksum_error|mismatch|unclear_image|none"
+      },
+      "validation_rules": {
+        "aadhar": {
+          "pattern": "^[0-9]{12}$",
+          "checksum": "Verhoeff algorithm"
+        },
+        "pan": {
+          "pattern": "^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
+        },
+        "phone": {
+          "pattern": "^[6-9][0-9]{9}$"
+        },
+        "pincode": {
+          "pattern": "^[1-9][0-9]{5}$"
+        }
+      },
+      "data_sources": [
+        "Anonymized document uploads",
+        "Synthetic document images",
+        "Public domain sample documents",
+        "Operator validation logs"
+      ],
+      "annotation_guidelines": [
+        "Never store actual document images long-term",
+        "Extract and validate, then delete image",
+        "Log only validation results and error types",
+        "Compliance with data protection rules"
+      ],
+      "files": {
+        "validation_logs": "data/training/validation/logs.jsonl",
+        "format_rules": "data/training/validation/rules.json",
+        "error_patterns": "data/training/validation/errors.jsonl"
+      },
+      "target_size": {
+        "validation_records": 50000
+      }
+    }
+  },
+  "collection_best_practices": {
+    "quality": [
+      "Deduplicate data before adding to dataset",
+      "Track class balance - ensure minimum samples per class",
+      "Monitor diversity: state, education, category distribution",
+      "Validate data format against schema before storage"
+    ],
+    "annotation": [
+      "Clear labeling guidelines for each dataset",
+      "Inter-annotator agreement tracking for subjective labels",
+      "Regular quality audits on labeled data",
+      "Feedback loop from model errors to annotation"
+    ],
+    "privacy": [
+      "Anonymize PII immediately after collection",
+      "No storage of actual document images",
+      "Consent tracking for user interaction data",
+      "Data retention policy: delete raw data after 90 days"
+    ],
+    "versioning": [
+      "Version control all datasets",
+      "Track data lineage: source -> processing -> final",
+      "Maintain train/val/test splits consistently",
+      "Log all data transformations"
+    ]
+  },
+  "data_directory_structure": {
+    "root": "data/training/",
+    "structure": {
+      "job_matching/": {
+        "jobs.jsonl": "Job postings",
+        "users.jsonl": "User profiles",
+        "interactions.jsonl": "User-job interactions",
+        "labeled_pairs.jsonl": "Training pairs with labels"
+      },
+      "form_fields/": {
+        "forms.jsonl": "Scraped form metadata",
+        "labeled_fields.jsonl": "Fields with semantic tags",
+        "operator_corrections.jsonl": "Human corrections for feedback"
+      },
+      "content_rewriting/": {
+        "raw.jsonl": "Original scraped content",
+        "rewritten.jsonl": "Human-written summaries",
+        "ratings.jsonl": "Quality ratings"
+      },
+      "intent/": {
+        "messages.jsonl": "Raw messages",
+        "labeled_intents.jsonl": "Messages with intent labels",
+        "ambiguous_cases.jsonl": "Unclear cases for review"
+      },
+      "validation/": {
+        "logs.jsonl": "Validation results",
+        "rules.json": "Format validation rules",
+        "errors.jsonl": "Common error patterns"
+      }
+    }
+  }
+}

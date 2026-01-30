@@ -1,0 +1,30 @@
+{"field_id": "F001", "field_label": "Applicant Name", "field_label_hi": "आवेदक का नाम", "semantic_tag": "applicant_name", "html_type": "text", "html_name": "name", "examples": ["Rahul Kumar", "Priya Singh"]}
+{"field_id": "F002", "field_label": "Father's Name", "field_label_hi": "पिता का नाम", "semantic_tag": "father_name", "html_type": "text", "html_name": "fatherName", "examples": ["Ram Kumar", "Shyam Singh"]}
+{"field_id": "F003", "field_label": "Mother's Name", "field_label_hi": "माता का नाम", "semantic_tag": "mother_name", "html_type": "text", "html_name": "motherName", "examples": ["Sita Devi", "Geeta Kumari"]}
+{"field_id": "F004", "field_label": "Date of Birth", "field_label_hi": "जन्म तिथि", "semantic_tag": "date_of_birth", "html_type": "date", "html_name": "dob", "examples": ["15-08-1998", "01-01-2000"]}
+{"field_id": "F005", "field_label": "Age", "field_label_hi": "आयु", "semantic_tag": "age", "html_type": "number", "html_name": "age", "examples": ["25", "30"]}
+{"field_id": "F006", "field_label": "Gender", "field_label_hi": "लिंग", "semantic_tag": "gender", "html_type": "select", "html_name": "gender", "examples": ["Male", "Female", "Other"]}
+{"field_id": "F007", "field_label": "Mobile Number", "field_label_hi": "मोबाइल नंबर", "semantic_tag": "mobile_number", "html_type": "tel", "html_name": "mobile", "examples": ["9876543210", "8765432109"]}
+{"field_id": "F008", "field_label": "Email ID", "field_label_hi": "ईमेल आईडी", "semantic_tag": "email", "html_type": "email", "html_name": "email", "examples": ["user@gmail.com"]}
+{"field_id": "F009", "field_label": "Aadhar Number", "field_label_hi": "आधार नंबर", "semantic_tag": "aadhar_number", "html_type": "text", "html_name": "aadhar", "examples": ["123456789012"]}
+{"field_id": "F010", "field_label": "PAN Number", "field_label_hi": "पैन नंबर", "semantic_tag": "pan_number", "html_type": "text", "html_name": "pan", "examples": ["ABCDE1234F"]}
+{"field_id": "F011", "field_label": "Category", "field_label_hi": "श्रेणी", "semantic_tag": "caste_category", "html_type": "select", "html_name": "category", "examples": ["General", "OBC", "SC", "ST", "EWS"]}
+{"field_id": "F012", "field_label": "Caste", "field_label_hi": "जाति", "semantic_tag": "caste", "html_type": "text", "html_name": "caste", "examples": ["Yadav", "Sharma", "Kumar"]}
+{"field_id": "F013", "field_label": "Address", "field_label_hi": "पता", "semantic_tag": "address_line1", "html_type": "textarea", "html_name": "address", "examples": ["123 Main Road, Near Bus Stand"]}
+{"field_id": "F014", "field_label": "Village/Town", "field_label_hi": "गाँव/शहर", "semantic_tag": "village", "html_type": "text", "html_name": "village", "examples": ["Rampur", "Shivnagar"]}
+{"field_id": "F015", "field_label": "Post Office", "field_label_hi": "डाकघर", "semantic_tag": "post_office", "html_type": "text", "html_name": "postOffice", "examples": ["Patna GPO", "Muzaffarpur HO"]}
+{"field_id": "F016", "field_label": "District", "field_label_hi": "जिला", "semantic_tag": "district", "html_type": "select", "html_name": "district", "examples": ["Patna", "Lucknow", "Ranchi"]}
+{"field_id": "F017", "field_label": "State", "field_label_hi": "राज्य", "semantic_tag": "state", "html_type": "select", "html_name": "state", "examples": ["Bihar", "Uttar Pradesh", "Jharkhand"]}
+{"field_id": "F018", "field_label": "PIN Code", "field_label_hi": "पिन कोड", "semantic_tag": "pincode", "html_type": "text", "html_name": "pincode", "examples": ["800001", "226001"]}
+{"field_id": "F019", "field_label": "Qualification", "field_label_hi": "शैक्षिक योग्यता", "semantic_tag": "qualification", "html_type": "select", "html_name": "qualification", "examples": ["10th", "12th", "Graduate"]}
+{"field_id": "F020", "field_label": "University/Board", "field_label_hi": "विश्वविद्यालय/बोर्ड", "semantic_tag": "university", "html_type": "text", "html_name": "university", "examples": ["CBSE", "Bihar Board", "Patna University"]}
+{"field_id": "F021", "field_label": "Passing Year", "field_label_hi": "उत्तीर्ण वर्ष", "semantic_tag": "passing_year", "html_type": "number", "html_name": "passingYear", "examples": ["2020", "2022"]}
+{"field_id": "F022", "field_label": "Percentage/CGPA", "field_label_hi": "प्रतिशत/सीजीपीए", "semantic_tag": "percentage", "html_type": "text", "html_name": "percentage", "examples": ["75%", "8.5 CGPA"]}
+{"field_id": "F023", "field_label": "Bank Name", "field_label_hi": "बैंक का नाम", "semantic_tag": "bank_name", "html_type": "select", "html_name": "bankName", "examples": ["SBI", "HDFC", "ICICI"]}
+{"field_id": "F024", "field_label": "Account Number", "field_label_hi": "खाता संख्या", "semantic_tag": "account_number", "html_type": "text", "html_name": "accountNumber", "examples": ["1234567890123456"]}
+{"field_id": "F025", "field_label": "IFSC Code", "field_label_hi": "आईएफएससी कोड", "semantic_tag": "ifsc_code", "html_type": "text", "html_name": "ifsc", "examples": ["SBIN0001234", "HDFC0001234"]}
+{"field_id": "F026", "field_label": "Photo", "field_label_hi": "फोटो", "semantic_tag": "photo", "html_type": "file", "html_name": "photo", "examples": ["passport_photo.jpg"]}
+{"field_id": "F027", "field_label": "Signature", "field_label_hi": "हस्ताक्षर", "semantic_tag": "signature", "html_type": "file", "html_name": "signature", "examples": ["signature.jpg"]}
+{"field_id": "F028", "field_label": "Marital Status", "field_label_hi": "वैवाहिक स्थिति", "semantic_tag": "marital_status", "html_type": "select", "html_name": "maritalStatus", "examples": ["Unmarried", "Married", "Divorced"]}
+{"field_id": "F029", "field_label": "Spouse Name", "field_label_hi": "पति/पत्नी का नाम", "semantic_tag": "spouse_name", "html_type": "text", "html_name": "spouseName", "examples": ["Meera Devi"]}
+{"field_id": "F030", "field_label": "Religion", "field_label_hi": "धर्म", "semantic_tag": "religion", "html_type": "select", "html_name": "religion", "examples": ["Hindu", "Muslim", "Christian", "Sikh"]}
