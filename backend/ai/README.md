@@ -2,6 +2,32 @@
 
 A portable, reusable AI package for job/scheme recommendations, intent detection, document validation, and more.
 
+## 🌐 Language Support
+
+**Primary Language:** English (en)  
+**Secondary Language:** Hindi (hi)
+
+All labels, messages, intents, and responses are pre-defined in both languages - **no translation API needed**.
+
+```python
+from ai import t, t_both, t_bi, detect_lang
+
+# Get text in specific language
+text_en = t("labels.education.graduate", "en")  # "Graduate"
+text_hi = t("labels.education.graduate", "hi")  # "स्नातक"
+
+# Get both languages
+en, hi = t_both("labels.education.graduate")  # ("Graduate", "स्नातक")
+
+# Get bilingual text
+text = t_bi("labels.education.graduate")  # "Graduate / स्नातक"
+
+# Detect language
+lang = detect_lang("मुझे नौकरी चाहिए")  # "hi"
+lang = detect_lang("I want a job")  # "en"
+lang = detect_lang("mujhe job chahiye")  # "hinglish"
+```
+
 ## 📦 Features
 
 | Module | Description | OpenAI Required |

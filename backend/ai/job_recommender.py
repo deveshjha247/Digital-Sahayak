@@ -2,6 +2,11 @@
 Job Recommender AI Module
 Ranks jobs/schemes based on user profile (education, age, state, preferences)
 Uses rule-based + heuristic + learning approach (no external AI dependency)
+
+Language Support:
+- Primary: English
+- Secondary: Hindi
+- All reasons/messages in both languages
 """
 
 import logging
@@ -11,6 +16,16 @@ import numpy as np
 from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
+
+# Import language helper
+try:
+    from .language_helper import get_language_helper, EDUCATION_BILINGUAL, CATEGORY_BILINGUAL, STATE_BILINGUAL
+    lang_helper = get_language_helper()
+except ImportError:
+    lang_helper = None
+    EDUCATION_BILINGUAL = {}
+    CATEGORY_BILINGUAL = {}
+    STATE_BILINGUAL = {}
 
 
 class JobRecommender:
@@ -324,48 +339,78 @@ class JobRecommender:
         user_profile: Dict,
         job: Dict
     ) -> Dict[str, str]:
-        """Generate Hindi and English reasoning for the recommendation"""
+        """
+        Generate bilingual reasoning for the recommendation
+        Primary: English, Secondary: Hindi
+        """
         reasons = {
-            "hindi": [],
-            "english": []
+            "en": [],
+            "hi": [],
+            "english": [],  # Keep for backward compatibility
+            "hindi": []     # Keep for backward compatibility
         }
         
         # Education reason
         edu_score = score_breakdown.get("education", 0)
         if edu_score == 1.0:
-            reasons["hindi"].append("आपकी शिक्षा इस नौकरी के लिए सही है")
-            reasons["english"].append("Your education matches the job requirement")
-        elif edu_score > 0.7:
-            reasons["hindi"].append("आपकी शिक्षा इस नौकरी के लिए उपयुक्त है")
-            reasons["english"].append("Your education is suitable for this job")
+            reasons["en"].append("Your education qualifies for this position")
+            reasons["hi"].append("आपकी शिक्षा इस पद के लिए योग्य है")
+        elif edu_score >= 0.8:
+            reasons["en"].append("Your education is suitable for this job")
+            reasons["hi"].append("आपकी शिक्षा इस नौकरी के लिए उपयुक्त है")
+        elif edu_score < 0.5:
+            reasons["en"].append("Higher education may be required")
+            reasons["hi"].append("उच्च शिक्षा आवश्यक हो सकती है")
         
         # Age reason
         age_score = score_breakdown.get("age", 0)
-        if age_score == 1.0:
-            reasons["hindi"].append("आप आयु सीमा में हैं")
-            reasons["english"].append("You meet the age criteria")
-        elif age_score > 0.7:
-            reasons["hindi"].append("आप आयु मानदंड के करीब हैं")
-            reasons["english"].append("You are close to the age requirement")
+        if age_score >= 0.9:
+            reasons["en"].append("Your age is within the eligible range")
+            reasons["hi"].append("आपकी आयु पात्रता सीमा में है")
+        elif age_score >= 0.7:
+            reasons["en"].append("You are close to the age requirement")
+            reasons["hi"].append("आप आयु मानदंड के करीब हैं")
+        elif age_score < 0.5:
+            reasons["en"].append("Age limit may be an issue")
+            reasons["hi"].append("आयु सीमा में समस्या हो सकती है")
         
         # Location reason
         location_score = score_breakdown.get("location", 0)
         if location_score == 1.0:
-            reasons["hindi"].append("नौकरी आपके राज्य में है")
-            reasons["english"].append("The job is in your state")
-        elif location_score > 0.7:
-            reasons["hindi"].append("नौकरी आपके क्षेत्र में उपलब्ध है")
-            reasons["english"].append("The job is available in your region")
+            reasons["en"].append("This job is available in your state")
+            reasons["hi"].append("यह नौकरी आपके राज्य में उपलब्ध है")
+        elif location_score >= 0.6:
+            reasons["en"].append("This is an All India level job")
+            reasons["hi"].append("यह अखिल भारतीय स्तर की नौकरी है")
         
         # Category reason
         category_score = score_breakdown.get("category", 0)
         if category_score == 1.0:
-            reasons["hindi"].append("यह आपकी पसंद की श्रेणी है")
-            reasons["english"].append("This matches your preferred category")
+            reasons["en"].append("Matches your preferred job category")
+            reasons["hi"].append("आपकी पसंदीदा श्रेणी से मेल खाता है")
+        elif category_score >= 0.7:
+            reasons["en"].append("Related to your interests")
+            reasons["hi"].append("आपकी रुचि से संबंधित है")
         
-        # Join with newlines
-        reasons["hindi"] = " | ".join(reasons["hindi"]) if reasons["hindi"] else "उपयुक्त नौकरी"
-        reasons["english"] = " | ".join(reasons["english"]) if reasons["english"] else "Suitable job"
+        # Salary reason
+        salary_score = score_breakdown.get("salary", 0)
+        if salary_score >= 0.9:
+            reasons["en"].append("Salary meets your expectations")
+            reasons["hi"].append("वेतन आपकी अपेक्षाओं के अनुरूप है")
+        
+        # Default if no reasons
+        if not reasons["en"]:
+            reasons["en"].append("May be suitable for your profile")
+            reasons["hi"].append("आपकी प्रोफ़ाइल के लिए उपयुक्त हो सकता है")
+        
+        # Backward compatibility
+        reasons["english"] = reasons["en"]
+        reasons["hindi"] = reasons["hi"]
+        
+        # Combined format
+        reasons["en_text"] = " | ".join(reasons["en"])
+        reasons["hi_text"] = " | ".join(reasons["hi"])
+        reasons["bilingual"] = f"{reasons['en_text']}\n{reasons['hi_text']}"
         
         return reasons
     
