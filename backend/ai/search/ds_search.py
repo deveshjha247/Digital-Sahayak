@@ -199,24 +199,39 @@ class DSSearch:
             )
         
         # Step 2: Check cache
-        cached_results = await self._cache.get(query)
-        if cached_results:
+        cached_data = await self._cache.get(query)
+        if cached_data:
             log_entry["action"] = "cache_hit"
             self._log_search(log_entry)
+            
+            # Handle both old and new cache format
+            if isinstance(cached_data, dict) and "results" in cached_data:
+                cached_results = cached_data["results"]
+                cached_facts = cached_data.get("facts")
+            else:
+                cached_results = cached_data
+                cached_facts = None
             
             # Re-rank cached results
             ranked = self._ranker.rank(cached_results, query)
             top_results = self._ranker.get_top_results(ranked)
             
+            # Use DS-Talk if we have facts
+            if cached_facts and self._ds_talk:
+                formatted = self._ds_talk.compose_quick(cached_facts, language)
+            else:
+                formatted = self._ranker.format_for_response(top_results, language)
+            
             return SearchResponse(
                 success=True,
                 query=query,
                 results=top_results,
-                formatted_response=self._ranker.format_for_response(top_results, language),
+                formatted_response=formatted,
                 source="cache",
                 search_score=policy_decision.search_score,
                 intent=policy_decision.intent.value,
-                metadata={"cache_hit": True}
+                facts=cached_facts,
+                metadata={"cache_hit": True, "has_facts": cached_facts is not None}
             )
         
         # Step 3: Generate optimized queries
@@ -274,11 +289,41 @@ class DSSearch:
         # Get top results
         top_results = self._ranker.get_top_results(ranked_results, min_score=0.40)
         
-        # Step 8: Cache results
+        # Step 8: Extract facts using Evidence Extractor
+        facts_dict = None
+        if top_results and self._evidence_extractor:
+            try:
+                # Convert to format expected by extractor
+                results_for_extraction = [
+                    {
+                        "title": r.title,
+                        "url": r.url,
+                        "snippet": r.snippet
+                    }
+                    for r in top_results
+                ]
+                
+                facts = await self._evidence_extractor.extract(
+                    results=results_for_extraction,
+                    query=query,
+                    scrape_top_n=2
+                )
+                
+                if facts and facts.is_valid():
+                    facts_dict = facts.to_dict()
+                    logger.info(f"Facts extracted: {facts.title}")
+            except Exception as e:
+                logger.error(f"Evidence extraction error: {e}")
+        
+        # Step 9: Cache results
         if top_results:
+            cache_data = {
+                "results": [r.to_dict() for r in top_results],
+                "facts": facts_dict
+            }
             await self._cache.put(
                 query=query,
-                results=[r.to_dict() for r in top_results],
+                results=cache_data,
                 source=results_source
             )
         
@@ -290,11 +335,16 @@ class DSSearch:
         log_entry["action"] = "search_complete"
         log_entry["source"] = results_source
         log_entry["results_count"] = len(top_results)
+        log_entry["has_facts"] = facts_dict is not None
         log_entry["duration_ms"] = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
         self._log_search(log_entry)
         
-        # Format response
-        if top_results:
+        # Step 10: Format response using DS-Talk
+        if facts_dict and self._ds_talk:
+            # Use DS-Talk for natural language response
+            formatted = self._ds_talk.compose_quick(facts_dict, language)
+        elif top_results:
+            # Fallback to ranker formatting
             formatted = self._ranker.format_for_response(top_results, language)
         else:
             formatted = self._get_not_found_response(query, language)
@@ -307,10 +357,13 @@ class DSSearch:
             source=results_source,
             search_score=policy_decision.search_score,
             intent=policy_decision.intent.value,
+            facts=facts_dict,
             metadata={
                 "queries_generated": len(generated_queries),
                 "crawl_results": len(crawl_results),
                 "ranked_results": len(ranked_results),
+                "has_facts": facts_dict is not None,
+                "nlg_used": facts_dict is not None and self._ds_talk is not None,
                 "duration_ms": log_entry.get("duration_ms", 0)
             }
         )
