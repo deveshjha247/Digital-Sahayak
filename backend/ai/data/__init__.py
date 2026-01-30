@@ -23,6 +23,20 @@ from .balancer import DataBalancer
 from .metadata import MetadataManager
 from .pipeline import DataPipeline, run_pipeline
 from .preprocessor import DataPreprocessor, TextNormalizer, preprocess_dataset
+from .annotation_guidelines import (
+    AnnotationGuidelinesManager,
+    get_guidelines_manager,
+    FORM_FIELD_TYPES,
+    INTENT_LABELS,
+    SENSITIVE_FIELDS,
+)
+from .annotation_pipeline import (
+    HeuristicPreLabeler,
+    ConsensusManager,
+    AnnotationDeduplicator,
+    QualityTracker,
+    AnnotationPipeline,
+)
 from .synthetic import (
     SyntheticJobGenerator,
     SyntheticUserGenerator,
@@ -46,6 +60,17 @@ __all__ = [
     "DataPreprocessor",
     "TextNormalizer",
     "preprocess_dataset",
+    # Annotation
+    "AnnotationGuidelinesManager",
+    "get_guidelines_manager",
+    "FORM_FIELD_TYPES",
+    "INTENT_LABELS",
+    "SENSITIVE_FIELDS",
+    "HeuristicPreLabeler",
+    "ConsensusManager",
+    "AnnotationDeduplicator",
+    "QualityTracker",
+    "AnnotationPipeline",
     # Pipeline
     "DataPipeline",
     "run_pipeline",
@@ -53,5 +78,7 @@ __all__ = [
     "SyntheticJobGenerator",
     "SyntheticUserGenerator",
     "SyntheticInteractionGenerator",
+    "generate_training_dataset",
+]
     "generate_training_dataset",
 ]
