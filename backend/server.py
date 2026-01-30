@@ -1782,6 +1782,116 @@ async def get_categories():
         ]
     }
 
+
+# ===================== AI CHAT ENDPOINTS =====================
+
+from ai.chat_engine import get_ai_instance, DigitalSahayakAI
+
+# Global chat AI instance
+chat_ai: DigitalSahayakAI = None
+
+@api_router.post("/ai/chat")
+async def ai_chat(request: Request, current_user: dict = Depends(get_current_user)):
+    """
+    Main AI Chat endpoint - ChatGPT/Gemini style conversation.
+    """
+    global chat_ai
+    try:
+        data = await request.json()
+        message = data.get('message', '').strip()
+        conv_id = data.get('conversation_id')
+        
+        if not message:
+            raise HTTPException(400, "Message is required")
+        
+        if chat_ai is None:
+            chat_ai = await get_ai_instance(db)
+        
+        user_profile = {
+            "age": current_user.get('age'),
+            "education_level": current_user.get('education_level'),
+            "state": current_user.get('state'),
+            "preferred_categories": current_user.get('preferred_categories', [])
+        }
+        
+        result = await chat_ai.chat(
+            user_id=current_user['id'],
+            message=message,
+            conv_id=conv_id,
+            user_profile=user_profile,
+            language=current_user.get('language', 'hi')
+        )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"AI Chat error: {e}")
+        raise HTTPException(500, f"Chat error: {str(e)}")
+
+@api_router.get("/ai/conversations")
+async def get_ai_conversations(current_user: dict = Depends(get_current_user)):
+    """Get all AI chat conversations for current user"""
+    global chat_ai
+    try:
+        if chat_ai is None:
+            chat_ai = await get_ai_instance(db)
+        
+        conversations = await chat_ai.get_user_conversations(current_user['id'])
+        return {"success": True, "conversations": conversations}
+        
+    except Exception as e:
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@api_router.get("/ai/conversations/{conv_id}")
+async def get_ai_conversation(conv_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific conversation with all messages"""
+    global chat_ai
+    try:
+        if chat_ai is None:
+            chat_ai = await get_ai_instance(db)
+        
+        conversation = await chat_ai.get_conversation(conv_id, current_user['id'])
+        if not conversation:
+            raise HTTPException(404, "Conversation not found")
+        
+        return {"success": True, "conversation": conversation.to_dict()}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@api_router.delete("/ai/conversations/{conv_id}")
+async def delete_ai_conversation(conv_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a specific conversation"""
+    global chat_ai
+    try:
+        if chat_ai is None:
+            chat_ai = await get_ai_instance(db)
+        
+        deleted = await chat_ai.delete_conversation(conv_id, current_user['id'])
+        return {"success": deleted, "message": "Conversation deleted" if deleted else "Not found"}
+        
+    except Exception as e:
+        raise HTTPException(500, f"Error: {str(e)}")
+
+@api_router.delete("/ai/conversations")
+async def clear_ai_history(current_user: dict = Depends(get_current_user)):
+    """Clear all conversation history for current user"""
+    global chat_ai
+    try:
+        if chat_ai is None:
+            chat_ai = await get_ai_instance(db)
+        
+        count = await chat_ai.clear_user_history(current_user['id'])
+        return {"success": True, "deleted_count": count}
+        
+    except Exception as e:
+        raise HTTPException(500, f"Error: {str(e)}")
+
+
 # Include router
 app.include_router(api_router)
 
@@ -2199,130 +2309,6 @@ async def get_heuristic_weights(current_user: dict = Depends(get_current_user)):
         
     except Exception as e:
         raise HTTPException(500, f"Get weights error: {str(e)}")
-
-
-# ===================== AI CHAT ENDPOINTS =====================
-
-from ai.chat_engine import get_ai_instance, DigitalSahayakAI
-
-# Global chat AI instance
-chat_ai: DigitalSahayakAI = None
-
-@api_router.post("/ai/chat")
-async def ai_chat(request: Request, current_user: dict = Depends(get_current_user)):
-    """
-    Main AI Chat endpoint - ChatGPT/Gemini style conversation.
-    
-    Request body:
-    {
-        "message": "User's message",
-        "conversation_id": "optional - for continuing conversation"
-    }
-    
-    Response:
-    {
-        "success": true,
-        "conversation_id": "conv_xxx",
-        "message": "AI response",
-        "title": "Conversation title"
-    }
-    """
-    global chat_ai
-    try:
-        data = await request.json()
-        message = data.get('message', '').strip()
-        conv_id = data.get('conversation_id')
-        
-        if not message:
-            raise HTTPException(400, "Message is required")
-        
-        if not chat_ai:
-            chat_ai = await get_ai_instance(db)
-        
-        # Get user profile for personalization
-        user_profile = {
-            "age": current_user.get('age'),
-            "education_level": current_user.get('education_level'),
-            "state": current_user.get('state'),
-            "preferred_categories": current_user.get('preferred_categories', [])
-        }
-        
-        result = await chat_ai.chat(
-            user_id=current_user['id'],
-            message=message,
-            conv_id=conv_id,
-            user_profile=user_profile,
-            language=current_user.get('language', 'hi')
-        )
-        
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"AI Chat error: {e}")
-        raise HTTPException(500, f"Chat error: {str(e)}")
-
-@api_router.get("/ai/conversations")
-async def get_ai_conversations(current_user: dict = Depends(get_current_user)):
-    """Get all AI chat conversations for current user"""
-    global chat_ai
-    try:
-        if not chat_ai:
-            chat_ai = await get_ai_instance(db)
-        
-        conversations = await chat_ai.get_user_conversations(current_user['id'])
-        return {"success": True, "conversations": conversations}
-        
-    except Exception as e:
-        raise HTTPException(500, f"Error: {str(e)}")
-
-@api_router.get("/ai/conversations/{conv_id}")
-async def get_ai_conversation(conv_id: str, current_user: dict = Depends(get_current_user)):
-    """Get a specific conversation with all messages"""
-    global chat_ai
-    try:
-        if not chat_ai:
-            chat_ai = await get_ai_instance(db)
-        
-        conversation = await chat_ai.get_conversation(conv_id, current_user['id'])
-        if not conversation:
-            raise HTTPException(404, "Conversation not found")
-        
-        return {"success": True, "conversation": conversation.to_dict()}
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, f"Error: {str(e)}")
-
-@api_router.delete("/ai/conversations/{conv_id}")
-async def delete_ai_conversation(conv_id: str, current_user: dict = Depends(get_current_user)):
-    """Delete a specific conversation"""
-    global chat_ai
-    try:
-        if not chat_ai:
-            chat_ai = await get_ai_instance(db)
-        
-        deleted = await chat_ai.delete_conversation(conv_id, current_user['id'])
-        return {"success": deleted, "message": "Conversation deleted" if deleted else "Not found"}
-        
-    except Exception as e:
-        raise HTTPException(500, f"Error: {str(e)}")
-
-@api_router.delete("/ai/conversations")
-async def clear_ai_history(current_user: dict = Depends(get_current_user)):
-    """Clear all conversation history for current user"""
-    global chat_ai
-    try:
-        if not chat_ai:
-            chat_ai = await get_ai_instance(db)
-        
-        count = await chat_ai.clear_user_history(current_user['id'])
-        return {"success": True, "deleted_count": count}
-        
-    except Exception as e:
-        raise HTTPException(500, f"Error: {str(e)}")
 
 
 # ===================== STARTUP & SHUTDOWN =====================
