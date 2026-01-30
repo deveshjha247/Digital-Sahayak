@@ -559,7 +559,7 @@ class DigitalSahayakAI:
         self.conversations[conv_id] = conv
         
         # Save to DB
-        if self.db:
+        if self.db is not None:
             await self.db.ai_conversations.insert_one(conv.to_dict())
         
         return conv
@@ -573,7 +573,7 @@ class DigitalSahayakAI:
                 return conv
         
         # Load from DB
-        if self.db:
+        if self.db is not None:
             data = await self.db.ai_conversations.find_one({"id": conv_id, "user_id": user_id})
             if data:
                 conv = Conversation(
@@ -596,7 +596,7 @@ class DigitalSahayakAI:
     
     async def get_user_conversations(self, user_id: str, limit: int = 20) -> List[Dict]:
         """Get all conversations for a user"""
-        if not self.db:
+        if self.db is None:
             return []
         
         cursor = self.db.ai_conversations.find(
@@ -660,7 +660,7 @@ class DigitalSahayakAI:
         })
         
         # Update in DB
-        if self.db:
+        if self.db is not None:
             await self.db.ai_conversations.update_one(
                 {"id": conversation.id},
                 {"$set": conversation.to_dict()},
@@ -681,7 +681,7 @@ class DigitalSahayakAI:
         if conv_id in self.conversations:
             del self.conversations[conv_id]
         
-        if self.db:
+        if self.db is not None:
             result = await self.db.ai_conversations.delete_one({
                 "id": conv_id,
                 "user_id": user_id
@@ -698,7 +698,7 @@ class DigitalSahayakAI:
             del self.conversations[k]
         
         # Clear from DB
-        if self.db:
+        if self.db is not None:
             result = await self.db.ai_conversations.delete_many({"user_id": user_id})
             return result.deleted_count
         
