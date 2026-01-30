@@ -32,6 +32,9 @@ Examples:
   # Analyze existing data
   python -m backend.ai.data.cli --analyze data/processed/training_data.jsonl
   
+  # Preprocess/clean raw data
+  python -m backend.ai.data.cli --preprocess data/raw/collected.jsonl
+  
   # Balance existing dataset
   python -m backend.ai.data.cli --balance data/raw/collected.jsonl --key category
 """
@@ -53,6 +56,12 @@ Examples:
         type=str,
         metavar="FILE",
         help="Analyze distribution of a data file"
+    )
+    parser.add_argument(
+        "--preprocess",
+        type=str,
+        metavar="FILE",
+        help="Preprocess and clean a raw data file"
     )
     parser.add_argument(
         "--balance",
@@ -120,6 +129,9 @@ Examples:
     
     elif args.analyze:
         analyze_cmd(args)
+    
+    elif args.preprocess:
+        preprocess_cmd(args)
     
     elif args.balance:
         balance_cmd(args)
