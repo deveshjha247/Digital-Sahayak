@@ -59,6 +59,40 @@ from .quality_control import (
     ConsistencyChecker,
     create_quality_control_system,
 )
+from .dataset_splitter import (
+    DatasetSplitter,
+    SplitConfig,
+    SplitResult,
+    DiversityBalancer,
+    split_dataset,
+    save_splits,
+)
+from .dataset_analyzer import (
+    DatasetAnalyzer,
+    ClassDistributionAnalyzer,
+    FeatureAnalyzer,
+    BiasDetector,
+    AnalysisConfig,
+    analyze_dataset,
+    print_dataset_report,
+)
+from .dataset_documentation import (
+    Datasheet,
+    DatasheetGenerator,
+    generate_datasheet,
+    create_empty_datasheet,
+)
+from .secure_storage import (
+    SecureStorage,
+    PIIMasker,
+    AccessController,
+    AccessLevel,
+    AccessPolicy,
+    DPDPComplianceChecker,
+    create_secure_storage,
+    mask_pii,
+    check_dpdp_compliance,
+)
 from .synthetic import (
     SyntheticJobGenerator,
     SyntheticUserGenerator,
@@ -112,6 +146,36 @@ __all__ = [
     "AnnotationTask",
     "ConsistencyChecker",
     "create_quality_control_system",
+    # Dataset Splitting
+    "DatasetSplitter",
+    "SplitConfig",
+    "SplitResult",
+    "DiversityBalancer",
+    "split_dataset",
+    "save_splits",
+    # Dataset Analysis
+    "DatasetAnalyzer",
+    "ClassDistributionAnalyzer",
+    "FeatureAnalyzer",
+    "BiasDetector",
+    "AnalysisConfig",
+    "analyze_dataset",
+    "print_dataset_report",
+    # Dataset Documentation
+    "Datasheet",
+    "DatasheetGenerator",
+    "generate_datasheet",
+    "create_empty_datasheet",
+    # Secure Storage
+    "SecureStorage",
+    "PIIMasker",
+    "AccessController",
+    "AccessLevel",
+    "AccessPolicy",
+    "DPDPComplianceChecker",
+    "create_secure_storage",
+    "mask_pii",
+    "check_dpdp_compliance",
     # Pipeline
     "DataPipeline",
     "run_pipeline",
