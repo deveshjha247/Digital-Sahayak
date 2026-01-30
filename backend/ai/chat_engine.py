@@ -412,15 +412,173 @@ class AIResponseGenerator:
     """
     Generates intelligent responses without external API.
     Uses template-based generation with smart context awareness.
+    Now with web search capability for real-time information!
     """
     
-    def __init__(self):
+    def __init__(self, db=None):
         self.kb = KnowledgeBase()
+        self.web_search = WebSearchEngine(db)
+        self.db = db
+        
+        # Patterns that indicate user needs real-time/web information
+        self.web_search_triggers = [
+            # Date/time related
+            r"kab se|कब से|when|date|तारीख|schedule|time table",
+            # Latest/current info
+            r"latest|नया|new|current|अभी|recent|2024|2025|2026",
+            # Result/notification related
+            r"result|रिजल्ट|notification|नोटिफिकेशन|admit card|एडमिट",
+            # Exam related
+            r"exam|परीक्षा|board|बोर्ड|entrance|प्रवेश",
+            # News/updates
+            r"news|खबर|update|अपडेट|announcement|घोषणा",
+            # Specific queries AI might not know
+            r"salary|सैलरी|cutoff|कटऑफ|vacancy|रिक्ति|last date|अंतिम तिथि"
+        ]
+    
+    def _needs_web_search(self, message: str) -> bool:
+        """Check if the query needs web search for real-time info"""
+        message_lower = message.lower()
+        for pattern in self.web_search_triggers:
+            if re.search(pattern, message_lower, re.IGNORECASE):
+                return True
+        return False
+    
+    async def generate_response_async(self, user_message: str, context: List[Dict] = None, 
+                                      user_profile: Dict = None, language: str = "hi") -> str:
+        """
+        Generate AI response with web search capability (async version).
+        """
+        # Detect intent
+        intent, preset_responses = self.kb.detect_intent(user_message)
+        
+        # Check for specific queries in knowledge base
+        response = self._handle_specific_queries(user_message, user_profile, language)
+        if response:
+            return response
+        
+        # Use preset responses for known intents
+        if preset_responses:
+            import random
+            return random.choice(preset_responses)
+        
+        # Check if web search is needed
+        if self._needs_web_search(user_message):
+            web_response = await self._search_and_respond(user_message, language)
+            if web_response:
+                return web_response
+        
+        # Generate contextual response
+        return self._generate_contextual_response(user_message, context, user_profile, language)
+    
+    async def _search_and_respond(self, query: str, language: str) -> Optional[str]:
+        """Search web and generate response from results"""
+        try:
+            # Enhance query for better results
+            search_query = self._enhance_search_query(query)
+            
+            # Search the web
+            results = await self.web_search.search(search_query, num_results=5)
+            
+            if not results:
+                return None
+            
+            # Build response from search results
+            response = self._build_response_from_search(query, results, language)
+            
+            # Store learned information
+            await self._store_learned_info(query, results)
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Search and respond error: {e}")
+            return None
+    
+    def _enhance_search_query(self, query: str) -> str:
+        """Enhance user query for better search results"""
+        # Add context for Indian government related queries
+        query_lower = query.lower()
+        
+        # Board exam queries
+        if "bihar board" in query_lower or "bseb" in query_lower:
+            return f"{query} BSEB official 2026"
+        
+        # SSC queries
+        if "ssc" in query_lower:
+            return f"{query} ssc.nic.in official"
+        
+        # Railway queries
+        if "railway" in query_lower or "rrb" in query_lower:
+            return f"{query} indianrailways.gov.in official"
+        
+        # UPSC queries
+        if "upsc" in query_lower:
+            return f"{query} upsc.gov.in official"
+        
+        # Bank exams
+        if "bank" in query_lower or "ibps" in query_lower:
+            return f"{query} ibps.in official"
+        
+        # General government queries
+        if any(word in query_lower for word in ["sarkari", "government", "govt", "सरकारी"]):
+            return f"{query} official india.gov.in"
+        
+        return query
+    
+    def _build_response_from_search(self, original_query: str, results: List[Dict], language: str) -> str:
+        """Build a helpful response from search results"""
+        if not results:
+            return None
+        
+        # Header
+        if language == "hi":
+            response = f"🔍 **आपके सवाल के लिए मैंने web search किया:**\n\n"
+        else:
+            response = f"🔍 **I searched the web for your question:**\n\n"
+        
+        # Add relevant information from results
+        for i, result in enumerate(results[:3], 1):
+            title = result.get('title', '')
+            snippet = result.get('snippet', '')
+            url = result.get('url', '')
+            
+            if title and snippet:
+                response += f"**{i}. {title}**\n"
+                response += f"   {snippet}\n"
+                if url:
+                    response += f"   🔗 Source: {url}\n"
+                response += "\n"
+        
+        # Add helpful footer
+        if language == "hi":
+            response += "\n💡 *यह जानकारी web search से मिली है। Official website पर verify करें।*"
+        else:
+            response += "\n💡 *This information is from web search. Please verify on official website.*"
+        
+        return response
+    
+    async def _store_learned_info(self, query: str, results: List[Dict]):
+        """Store learned information from web search"""
+        if self.db is None:
+            return
+        
+        try:
+            await self.db.ai_learned_knowledge.insert_one({
+                "query": query,
+                "results": results,
+                "learned_at": datetime.now(timezone.utc).isoformat(),
+                "source": "web_search"
+            })
+            logger.info(f"Stored learned info for: {query}")
+        except Exception as e:
+            logger.error(f"Failed to store learned info: {e}")
     
     def generate_response(self, user_message: str, context: List[Dict] = None, 
                          user_profile: Dict = None, language: str = "hi") -> str:
         """
         Generate AI response based on user message and context.
+        Sync version - for backward compatibility.
         
         Args:
             user_message: Current user message
@@ -443,6 +601,10 @@ class AIResponseGenerator:
         if preset_responses:
             import random
             return random.choice(preset_responses)
+        
+        # For queries needing web search, return a message to use async version
+        if self._needs_web_search(user_message):
+            return "NEEDS_WEB_SEARCH"  # Signal to use async version
         
         # Generate contextual response
         return self._generate_contextual_response(user_message, context, user_profile, language)
