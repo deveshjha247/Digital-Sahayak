@@ -194,6 +194,57 @@ def generate_synthetic_cmd(args):
         print(f"  {key}: {path}")
 
 
+def preprocess_cmd(args):
+    """Preprocess and clean raw data file"""
+    import json
+    from .preprocessor import DataPreprocessor
+    
+    data_path = Path(args.preprocess)
+    if not data_path.exists():
+        logger.error(f"File not found: {data_path}")
+        sys.exit(1)
+    
+    # Load data
+    data = []
+    with open(data_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():
+                try:
+                    data.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+    
+    logger.info(f"Loaded {len(data)} records from {data_path}")
+    
+    # Preprocess
+    preprocessor = DataPreprocessor(required_fields=["title"])
+    cleaned_data = preprocessor.process(data)
+    stats = preprocessor.get_stats()
+    
+    # Save
+    output_path = args.output or data_path.parent / f"{data_path.stem}_cleaned.jsonl"
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        for item in cleaned_data:
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+    
+    print("\n" + "="*60)
+    print("DATA PREPROCESSING COMPLETE")
+    print("="*60)
+    print(f"\nInput: {data_path}")
+    print(f"Output: {output_path}")
+    print(f"\nStatistics:")
+    print(f"  Total records:        {stats['total_records']}")
+    print(f"  Duplicates removed:   {stats['duplicates_removed']}")
+    print(f"  Missing handled:      {stats['missing_values_handled']}")
+    print(f"  Dates standardized:   {stats['dates_standardized']}")
+    print(f"  Numbers standardized: {stats['numbers_standardized']}")
+    print(f"  Text cleaned:         {stats['text_cleaned']}")
+    print(f"  Fields normalized:    {stats['fields_normalized']}")
+    print(f"  Invalid dropped:      {stats['invalid_records_dropped']}")
+    print(f"  Final records:        {stats['final_records']}")
+
+
 def analyze_cmd(args):
     """Analyze data file distribution"""
     import json
