@@ -714,6 +714,6 @@ digital_sahayak_ai = DigitalSahayakAI()
 async def get_ai_instance(db=None) -> DigitalSahayakAI:
     """Get or initialize AI instance"""
     global digital_sahayak_ai
-    if db and not digital_sahayak_ai.db:
+    if db is not None and digital_sahayak_ai.db is None:
         await digital_sahayak_ai.initialize(db)
     return digital_sahayak_ai
