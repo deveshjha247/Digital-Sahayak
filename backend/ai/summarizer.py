@@ -281,19 +281,53 @@ class ContentSummarizer:
     def process_job_description(self, job: Dict) -> Dict:
         """
         Process complete job description and return enriched content
+        Returns bilingual summaries (English primary, Hindi secondary)
         """
         original_desc = job.get("description", "")
         title = job.get("title", "Job")
         
+        english_summary = self.generate_english_summary(original_desc, title)
+        hindi_summary = self.generate_hindi_summary(original_desc, title)
+        
         return {
             "title": title,
             "original_description": original_desc,
-            "summary_english": self.generate_english_summary(original_desc, title),
-            "summary_hindi": self.generate_hindi_summary(original_desc, title),
+            
+            # English summaries (primary)
+            "summary_english": english_summary,
+            "summary_en": english_summary,  # Alias
+            
+            # Hindi summaries (secondary)
+            "summary_hindi": hindi_summary,
+            "summary_hi": hindi_summary,  # Alias
+            
+            # Bilingual combined
+            "summary_bilingual": f"**English:**\n{english_summary}\n\n**हिंदी:**\n{hindi_summary}",
+            
+            # Rewritten versions
             "rewritten_professional": self.rewrite_description(original_desc, "professional"),
             "rewritten_casual": self.rewrite_description(original_desc, "casual"),
             "rewritten_concise": self.rewrite_description(original_desc, "concise"),
-            "key_info": self.extract_key_info(original_desc),
+            
+            # Key information (bilingual)
+            "key_info": self._get_bilingual_key_info(original_desc),
             "bullet_points": self.extract_bullet_points(original_desc),
-            "uniqueness_score": 0.75,  # Placeholder for actual uniqueness check
+            "uniqueness_score": 0.75,
         }
+    
+    def _get_bilingual_key_info(self, text: str) -> Dict:
+        """Extract key info with bilingual labels"""
+        key_info = self.extract_key_info(text)
+        
+        bilingual_info = {}
+        for key, value in key_info.items():
+            if value and key in KEY_LABELS:
+                bilingual_info[key] = {
+                    "value": value,
+                    "label_en": KEY_LABELS[key]["en"],
+                    "label_hi": KEY_LABELS[key]["hi"],
+                    "formatted_en": f"{KEY_LABELS[key]['en']}: {value}",
+                    "formatted_hi": f"{KEY_LABELS[key]['hi']}: {value}"
+                }
+        
+        return bilingual_info
