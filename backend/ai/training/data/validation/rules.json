@@ -1,0 +1,111 @@
+{
+  "aadhar": {
+    "pattern": "^[2-9][0-9]{11}$",
+    "display_format": "XXXX XXXX XXXX",
+    "length": 12,
+    "checksum": "verhoeff",
+    "description": "12-digit Aadhar number starting with 2-9",
+    "examples_valid": ["234567891234", "567891234567"],
+    "examples_invalid": ["123456789012", "12345678901", "1234567890123"]
+  },
+  "pan": {
+    "pattern": "^[A-Z]{5}[0-9]{4}[A-Z]{1}$",
+    "display_format": "AAAAA0000A",
+    "length": 10,
+    "description": "PAN format: 5 letters + 4 digits + 1 letter",
+    "fourth_char_meaning": {
+      "P": "Individual",
+      "C": "Company",
+      "H": "HUF",
+      "F": "Firm",
+      "A": "AOP",
+      "T": "Trust",
+      "B": "BOI",
+      "L": "Local Authority",
+      "J": "Artificial Juridical Person",
+      "G": "Government"
+    },
+    "examples_valid": ["ABCDE1234F", "PQRST9876Z"],
+    "examples_invalid": ["ABCD1234EF", "12345ABCDE", "abcde1234f"]
+  },
+  "phone": {
+    "pattern": "^[6-9][0-9]{9}$",
+    "display_format": "+91 XXXXX XXXXX",
+    "length": 10,
+    "description": "Indian mobile number starting with 6-9",
+    "examples_valid": ["9876543210", "8765432109", "7654321098", "6543210987"],
+    "examples_invalid": ["5432109876", "1234567890", "98765432101"]
+  },
+  "pincode": {
+    "pattern": "^[1-9][0-9]{5}$",
+    "length": 6,
+    "description": "6-digit Indian PIN code, first digit 1-9",
+    "state_ranges": {
+      "1": "Delhi, Haryana, Punjab, HP, J&K",
+      "2": "UP, Uttarakhand",
+      "3": "Rajasthan, Gujarat",
+      "4": "Maharashtra, Goa, MP, Chhattisgarh",
+      "5": "AP, Telangana, Karnataka",
+      "6": "Tamil Nadu, Kerala",
+      "7": "West Bengal, Odisha, NE States",
+      "8": "Bihar, Jharkhand"
+    },
+    "examples_valid": ["800001", "110001", "400001"],
+    "examples_invalid": ["000001", "1234567", "12345"]
+  },
+  "voter_id": {
+    "pattern": "^[A-Z]{3}[0-9]{7}$",
+    "length": 10,
+    "description": "3 letters (state code) + 7 digits",
+    "examples_valid": ["ABC1234567", "XYZ9876543"],
+    "examples_invalid": ["AB1234567", "ABCD123456", "abc1234567"]
+  },
+  "driving_license": {
+    "pattern": "^[A-Z]{2}[0-9]{2}[0-9]{4}[0-9]{7}$",
+    "length": 15,
+    "description": "State code + RTO code + Year + 7 digit number",
+    "examples_valid": ["BR0620211234567", "UP1520201234567"],
+    "examples_invalid": ["BR062021123456", "BR06202112345678"]
+  },
+  "passport": {
+    "pattern": "^[A-Z][0-9]{7}$",
+    "length": 8,
+    "description": "1 letter + 7 digits",
+    "examples_valid": ["A1234567", "Z9876543"],
+    "examples_invalid": ["12345678", "AB123456", "a1234567"]
+  },
+  "email": {
+    "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+    "max_length": 254,
+    "description": "Standard email format",
+    "examples_valid": ["user@gmail.com", "test.user@domain.co.in"],
+    "examples_invalid": ["user@", "@gmail.com", "user@.com"]
+  },
+  "ifsc": {
+    "pattern": "^[A-Z]{4}0[A-Z0-9]{6}$",
+    "length": 11,
+    "description": "4 letter bank code + 0 + 6 alphanumeric branch code",
+    "examples_valid": ["SBIN0001234", "HDFC0001234", "ICIC0000001"],
+    "examples_invalid": ["SBIN1234567", "SBI0001234", "sbin0001234"]
+  },
+  "bank_account": {
+    "pattern": "^[0-9]{9,18}$",
+    "min_length": 9,
+    "max_length": 18,
+    "description": "9-18 digit bank account number",
+    "examples_valid": ["123456789", "12345678901234567"],
+    "examples_invalid": ["12345678", "1234567890123456789"]
+  },
+  "date_dob": {
+    "pattern": "^(0[1-9]|[12][0-9]|3[01])[-/](0[1-9]|1[0-2])[-/](19|20)[0-9]{2}$",
+    "formats": ["DD-MM-YYYY", "DD/MM/YYYY"],
+    "description": "Date of birth in Indian format",
+    "constraints": {
+      "min_year": 1940,
+      "max_year": 2010,
+      "typical_job_age": {"min": 18, "max": 40}
+    },
+    "examples_valid": ["15-08-1998", "01/01/2000"],
+    "examples_invalid": ["32-01-2000", "15-13-1998", "1998-08-15"]
+  }
+}
