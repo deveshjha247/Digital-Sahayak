@@ -1,6 +1,15 @@
 """
 AI Package - Central AI/ML inference hub
 Houses all AI tasks: recommendations, field classification, summarization, intent detection, validation
+This package is designed to be portable and reusable in other projects.
+
+Modules:
+- job_recommender: Job/Scheme recommendation based on user profile
+- field_classifier: Form field type detection and mapping  
+- summarizer: Content rewriting and summarization
+- intent_classifier: WhatsApp message intent detection
+- validator: Document and field validation
+- learning_system: Self-learning AI with OpenAI integration (optional)
 """
 
 import logging
@@ -17,6 +26,7 @@ try:
     from .summarizer import ContentSummarizer
     from .intent_classifier import IntentClassifier, IntentType
     from .validator import DocumentValidator, DocumentType, ValidationStatus
+    from .learning_system import SelfLearningAI
     
     logger.info("All AI modules loaded successfully")
 except Exception as e:
@@ -31,4 +41,5 @@ __all__ = [
     "DocumentValidator",
     "DocumentType",
     "ValidationStatus",
+    "SelfLearningAI",
 ]
