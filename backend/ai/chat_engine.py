@@ -746,33 +746,69 @@ class AIResponseGenerator:
         return query
     
     def _build_response_from_search(self, original_query: str, results: List[Dict], language: str) -> str:
-        """Build a helpful response from search results"""
+        """Build a natural summarized response from search results"""
         if not results:
             return None
         
-        # Header
-        if language == "hi":
-            response = f"🔍 **आपके सवाल के लिए मैंने web search किया:**\n\n"
-        else:
-            response = f"🔍 **I searched the web for your question:**\n\n"
-        
-        # Add relevant information from results
-        for i, result in enumerate(results[:3], 1):
-            title = result.get('title', '')
-            snippet = result.get('snippet', '')
-            url = result.get('url', '')
+        # Try to extract facts and use DS-Talk
+        try:
+            import asyncio
+            from ai.evidence import extract_facts
+            from ai.nlg import DSTalk
             
-            if title and snippet:
-                response += f"**{i}. {title}**\n"
-                response += f"   {snippet}\n"
-                if url:
-                    response += f"   🔗 Source: {url}\n"
-                response += "\n"
+            # Run extraction synchronously
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Already in async context - can't use run_until_complete
+                # Fall back to summary
+                pass
+            else:
+                facts = loop.run_until_complete(extract_facts(results, original_query, scrape_top_n=0))
+                if facts and facts.is_valid():
+                    ds_talk = DSTalk(style="chatbot", use_emojis=True)
+                    response = ds_talk.compose(facts.to_dict(), language)
+                    
+                    text = response.text
+                    if results and results[0].get('url'):
+                        if language == "hi":
+                            text += f"\n\n📎 **स्रोत:** {results[0]['url']}"
+                        else:
+                            text += f"\n\n📎 **Source:** {results[0]['url']}"
+                    return text
+        except Exception as e:
+            logger.debug(f"Could not use DS-Talk: {e}")
         
-        # Add helpful footer
+        # Fallback: Build natural summary without DS-Talk
+        top_result = results[0]
+        title = top_result.get('title', '')
+        snippet = top_result.get('snippet', '')
+        url = top_result.get('url', '')
+        
         if language == "hi":
+            response = f"📋 **{title}**\n\n"
+            response += f"{snippet}\n\n"
+            
+            if len(results) > 1:
+                response += "📌 **और जानकारी:**\n"
+                for r in results[1:3]:
+                    r_title = r.get('title', '')[:60]
+                    response += f"• {r_title}...\n"
+            
+            if url:
+                response += f"\n🔗 **आधिकारिक लिंक:** {url}\n"
             response += "\n💡 *यह जानकारी web search से मिली है। Official website पर verify करें।*"
         else:
+            response = f"📋 **{title}**\n\n"
+            response += f"{snippet}\n\n"
+            
+            if len(results) > 1:
+                response += "📌 **More Information:**\n"
+                for r in results[1:3]:
+                    r_title = r.get('title', '')[:60]
+                    response += f"• {r_title}...\n"
+            
+            if url:
+                response += f"\n🔗 **Official Link:** {url}\n"
             response += "\n💡 *This information is from web search. Please verify on official website.*"
         
         return response
