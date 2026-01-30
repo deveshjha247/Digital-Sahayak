@@ -14,7 +14,7 @@ import re
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
-from .language_helper import get_language_helper, detect_language
+from .language_helper import get_language_helper, detect_lang
 
 logger = logging.getLogger(__name__)
 
