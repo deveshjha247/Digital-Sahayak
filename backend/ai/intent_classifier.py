@@ -1,18 +1,29 @@
 """
 WhatsApp Intent Classifier AI Module
 Analyzes WhatsApp messages to understand user intent
-Uses keyword matching + context analysis (no external AI dependency)
+
+Architecture (DistilBERT + Rule Hybrid):
+1. DistilBERT: 40% smaller, 60% faster than BERT, 97% capability retention
+2. Bag-of-Words Fallback: For speed and low resource usage
+3. Keyword Matching: Bilingual pattern matching for reliability
 
 Language Support:
 - Primary: English (en)
 - Secondary: Hindi (hi)
 - Auto-detects: Hinglish (romanized Hindi)
+
+Dependencies (optional for ML mode):
+- transformers (for DistilBERT)
+- torch (for model inference)
 """
 
 import logging
 import re
+import os
+import json
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
+from pathlib import Path
 
 from .language_helper import get_language_helper, detect_lang
 
@@ -472,3 +483,473 @@ class IntentClassifier:
                 break
         
         return entities
+
+
+# ==============================================================================
+# Advanced ML Components (DistilBERT Intent Classification)
+# ==============================================================================
+
+class DistilBERTIntentClassifier:
+    """
+    DistilBERT-based intent classification
+    40% smaller, 60% faster than BERT while retaining 97% of language understanding
+    """
+    
+    # Intent labels for fine-tuned model
+    INTENT_LABELS = [
+        "job_search", "job_details", "job_apply", "job_status",
+        "scheme_search", "scheme_details", "scheme_apply", "scheme_eligibility",
+        "register", "login", "profile_update", "help",
+        "upload_document", "fill_form", "check_status",
+        "greeting", "feedback", "complaint", "unclear"
+    ]
+    
+    def __init__(
+        self,
+        model_name: str = "distilbert-base-multilingual-cased",
+        model_path: Optional[str] = None,
+        num_labels: int = 19
+    ):
+        self.model_name = model_name
+        self.model_path = model_path
+        self.num_labels = num_labels
+        self.model = None
+        self.tokenizer = None
+        self.label2id = {label: i for i, label in enumerate(self.INTENT_LABELS)}
+        self.id2label = {i: label for i, label in enumerate(self.INTENT_LABELS)}
+        self._load_model()
+    
+    def _load_model(self):
+        """Load DistilBERT model for intent classification"""
+        try:
+            from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
+            
+            if self.model_path and os.path.exists(self.model_path):
+                self.model = DistilBertForSequenceClassification.from_pretrained(
+                    self.model_path,
+                    num_labels=self.num_labels
+                )
+                self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_path)
+            else:
+                # Load base model (would need fine-tuning for production)
+                self.model = DistilBertForSequenceClassification.from_pretrained(
+                    self.model_name,
+                    num_labels=self.num_labels
+                )
+                self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_name)
+            
+            self.model.eval()
+            logger.info(f"Loaded DistilBERT model: {self.model_name}")
+        except ImportError:
+            logger.warning("transformers not installed, using keyword-based classification")
+        except Exception as e:
+            logger.warning(f"Could not load DistilBERT model: {e}")
+    
+    def predict(self, text: str) -> Tuple[str, float, Dict[str, float]]:
+        """
+        Predict intent from text
+        
+        Args:
+            text: Input message
+            
+        Returns:
+            (predicted_intent, confidence, all_probabilities)
+        """
+        if self.model is None or self.tokenizer is None:
+            return "unclear", 0.5, {}
+        
+        try:
+            import torch
+            import torch.nn.functional as F
+            
+            inputs = self.tokenizer(
+                text,
+                return_tensors="pt",
+                truncation=True,
+                max_length=128,
+                padding=True
+            )
+            
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+                logits = outputs.logits
+                probs = F.softmax(logits, dim=-1)
+            
+            # Get prediction
+            pred_idx = torch.argmax(probs, dim=-1).item()
+            confidence = probs[0, pred_idx].item()
+            
+            # Get all probabilities
+            all_probs = {
+                self.id2label[i]: probs[0, i].item()
+                for i in range(self.num_labels)
+            }
+            
+            return self.id2label[pred_idx], confidence, all_probs
+            
+        except Exception as e:
+            logger.warning(f"DistilBERT prediction failed: {e}")
+            return "unclear", 0.5, {}
+    
+    def train(self, train_data: List[Dict], val_data: Optional[List[Dict]] = None, epochs: int = 3):
+        """
+        Fine-tune DistilBERT on intent classification data
+        
+        Args:
+            train_data: List of {"text": str, "intent": str}
+            val_data: Optional validation data
+            epochs: Number of training epochs
+        """
+        if self.model is None or self.tokenizer is None:
+            logger.error("Model not loaded, cannot train")
+            return
+        
+        try:
+            import torch
+            from torch.utils.data import DataLoader, Dataset
+            from transformers import AdamW, get_linear_schedule_with_warmup
+            
+            class IntentDataset(Dataset):
+                def __init__(self, data, tokenizer, label2id):
+                    self.data = data
+                    self.tokenizer = tokenizer
+                    self.label2id = label2id
+                
+                def __len__(self):
+                    return len(self.data)
+                
+                def __getitem__(self, idx):
+                    item = self.data[idx]
+                    encoding = self.tokenizer(
+                        item["text"],
+                        truncation=True,
+                        max_length=128,
+                        padding="max_length",
+                        return_tensors="pt"
+                    )
+                    return {
+                        "input_ids": encoding["input_ids"].squeeze(),
+                        "attention_mask": encoding["attention_mask"].squeeze(),
+                        "labels": torch.tensor(self.label2id.get(item["intent"], 0))
+                    }
+            
+            train_dataset = IntentDataset(train_data, self.tokenizer, self.label2id)
+            train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+            
+            optimizer = AdamW(self.model.parameters(), lr=2e-5)
+            scheduler = get_linear_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=100,
+                num_training_steps=len(train_loader) * epochs
+            )
+            
+            self.model.train()
+            for epoch in range(epochs):
+                total_loss = 0
+                for batch in train_loader:
+                    optimizer.zero_grad()
+                    outputs = self.model(
+                        input_ids=batch["input_ids"],
+                        attention_mask=batch["attention_mask"],
+                        labels=batch["labels"]
+                    )
+                    loss = outputs.loss
+                    loss.backward()
+                    optimizer.step()
+                    scheduler.step()
+                    total_loss += loss.item()
+                
+                logger.info(f"Epoch {epoch+1}/{epochs}, Loss: {total_loss/len(train_loader):.4f}")
+            
+            self.model.eval()
+            logger.info("Training complete")
+            
+        except Exception as e:
+            logger.error(f"Training failed: {e}")
+    
+    def save(self, output_dir: str):
+        """Save fine-tuned model"""
+        if self.model is not None and self.tokenizer is not None:
+            output_path = Path(output_dir)
+            output_path.mkdir(parents=True, exist_ok=True)
+            self.model.save_pretrained(output_path)
+            self.tokenizer.save_pretrained(output_path)
+            logger.info(f"Saved model to {output_dir}")
+
+
+class BagOfWordsClassifier:
+    """
+    Lightweight bag-of-words intent classifier
+    Fast alternative when DistilBERT is too heavy
+    """
+    
+    def __init__(self, model_path: Optional[str] = None):
+        self.model_path = model_path
+        self.word_weights: Dict[str, Dict[str, float]] = {}
+        self._load_model()
+    
+    def _load_model(self):
+        """Load pre-computed word weights"""
+        if self.model_path and os.path.exists(self.model_path):
+            try:
+                with open(self.model_path, "r", encoding="utf-8") as f:
+                    self.word_weights = json.load(f)
+                logger.info("Loaded BoW classifier")
+            except Exception as e:
+                logger.warning(f"Could not load BoW model: {e}")
+        else:
+            # Use default weights based on intent patterns
+            self._initialize_default_weights()
+    
+    def _initialize_default_weights(self):
+        """Initialize default word weights from IntentClassifier patterns"""
+        intent_words = {
+            "job_search": ["job", "jobs", "vacancy", "naukri", "bharti", "नौकरी", "भर्ती"],
+            "job_details": ["details", "salary", "eligibility", "qualification", "विवरण"],
+            "job_apply": ["apply", "application", "submit", "आवेदन", "अप्लाई"],
+            "job_status": ["status", "result", "selected", "स्थिति", "परिणाम"],
+            "scheme_search": ["scheme", "yojana", "benefit", "योजना", "लाभ"],
+            "scheme_apply": ["apply", "register", "enroll", "आवेदन"],
+            "greeting": ["hello", "hi", "namaste", "नमस्ते"],
+            "help": ["help", "support", "सहायता", "मदद"],
+            "check_status": ["status", "check", "track", "स्थिति"],
+        }
+        
+        for intent, words in intent_words.items():
+            self.word_weights[intent] = {word: 1.0 for word in words}
+    
+    def predict(self, text: str) -> Tuple[str, float]:
+        """
+        Predict intent using bag-of-words
+        
+        Args:
+            text: Input message
+            
+        Returns:
+            (predicted_intent, confidence)
+        """
+        text_lower = text.lower()
+        words = re.findall(r'\b\w+\b', text_lower)
+        
+        scores = {}
+        for intent, weights in self.word_weights.items():
+            score = sum(weights.get(word, 0) for word in words)
+            if score > 0:
+                scores[intent] = score
+        
+        if not scores:
+            return "unclear", 0.3
+        
+        best_intent = max(scores, key=scores.get)
+        max_score = scores[best_intent]
+        
+        # Normalize to confidence
+        total = sum(scores.values())
+        confidence = max_score / total if total > 0 else 0.5
+        
+        return best_intent, confidence
+    
+    def train(self, data: List[Dict]):
+        """Train BoW classifier from labeled data"""
+        # Count word occurrences per intent
+        word_counts: Dict[str, Dict[str, int]] = {}
+        intent_counts: Dict[str, int] = {}
+        
+        for item in data:
+            intent = item.get("intent", "unclear")
+            text = item.get("text", "").lower()
+            words = re.findall(r'\b\w+\b', text)
+            
+            if intent not in word_counts:
+                word_counts[intent] = {}
+            intent_counts[intent] = intent_counts.get(intent, 0) + 1
+            
+            for word in words:
+                word_counts[intent][word] = word_counts[intent].get(word, 0) + 1
+        
+        # Compute TF-IDF-like weights
+        for intent, counts in word_counts.items():
+            self.word_weights[intent] = {}
+            for word, count in counts.items():
+                # Weight by frequency and inverse document frequency
+                tf = count / intent_counts[intent]
+                idf = len(word_counts) / sum(1 for ic in word_counts.values() if word in ic)
+                self.word_weights[intent][word] = tf * idf
+    
+    def save(self, path: str):
+        """Save word weights"""
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.word_weights, f, ensure_ascii=False, indent=2)
+
+
+class AdvancedIntentClassifier:
+    """
+    Advanced Intent Classification for WhatsApp/Chat
+    
+    Combines DistilBERT with keyword-based fallback for reliable intent detection
+    """
+    
+    def __init__(
+        self,
+        models_dir: Optional[str] = None,
+        use_distilbert: bool = True,
+        use_bow: bool = True
+    ):
+        self.models_dir = Path(models_dir) if models_dir else None
+        
+        # Initialize DistilBERT
+        if use_distilbert:
+            model_path = str(self.models_dir / "intent_model") if self.models_dir else None
+            self.distilbert = DistilBERTIntentClassifier(model_path=model_path)
+        else:
+            self.distilbert = None
+        
+        # Initialize BoW classifier
+        if use_bow:
+            bow_path = str(self.models_dir / "bow_weights.json") if self.models_dir else None
+            self.bow_classifier = BagOfWordsClassifier(model_path=bow_path)
+        else:
+            self.bow_classifier = None
+        
+        # Keyword-based fallback
+        self.keyword_classifier = IntentClassifier()
+    
+    def predict_intent(self, text: str) -> Dict:
+        """
+        Predict intent using ensemble of models
+        
+        Args:
+            text: Input message
+            
+        Returns:
+            Prediction result with intent, confidence, and metadata
+        """
+        results = []
+        
+        # DistilBERT prediction
+        if self.distilbert and self.distilbert.model is not None:
+            intent, confidence, probs = self.distilbert.predict(text)
+            results.append({
+                "model": "distilbert",
+                "intent": intent,
+                "confidence": confidence,
+                "weight": 0.5
+            })
+        
+        # BoW prediction
+        if self.bow_classifier:
+            intent, confidence = self.bow_classifier.predict(text)
+            results.append({
+                "model": "bow",
+                "intent": intent,
+                "confidence": confidence,
+                "weight": 0.2
+            })
+        
+        # Keyword prediction (always available)
+        keyword_result = self.keyword_classifier.classify_intent(text)
+        results.append({
+            "model": "keywords",
+            "intent": keyword_result["intent"].value if hasattr(keyword_result["intent"], "value") else keyword_result["intent"],
+            "confidence": keyword_result["confidence"],
+            "weight": 0.3
+        })
+        
+        # Combine results
+        if results:
+            # Weighted voting
+            intent_scores: Dict[str, float] = {}
+            for r in results:
+                intent = r["intent"]
+                score = r["confidence"] * r["weight"]
+                intent_scores[intent] = intent_scores.get(intent, 0) + score
+            
+            best_intent = max(intent_scores, key=intent_scores.get)
+            combined_confidence = intent_scores[best_intent] / sum(r["weight"] for r in results)
+            
+            # Determine which model was most influential
+            best_model = max(results, key=lambda r: r["confidence"] if r["intent"] == best_intent else 0)
+            
+            return {
+                "intent": best_intent,
+                "confidence": round(combined_confidence, 3),
+                "model_used": best_model["model"],
+                "all_predictions": results,
+                "language": detect_lang(text)
+            }
+        
+        return {
+            "intent": "unclear",
+            "confidence": 0.3,
+            "model_used": "none",
+            "all_predictions": [],
+            "language": "en"
+        }
+    
+    def get_response(self, intent: str, language: str = "en") -> Dict:
+        """Get appropriate response for intent"""
+        return self.keyword_classifier.get_response(
+            IntentType[intent.upper()] if intent.upper() in IntentType.__members__ else IntentType.UNCLEAR,
+            language
+        )
+    
+    def train(self, data: List[Dict], val_split: float = 0.1):
+        """
+        Train all classifiers
+        
+        Args:
+            data: List of {"text": str, "intent": str}
+            val_split: Validation split ratio
+        """
+        # Split data
+        n_val = int(len(data) * val_split)
+        train_data = data[:-n_val] if n_val > 0 else data
+        val_data = data[-n_val:] if n_val > 0 else None
+        
+        # Train DistilBERT
+        if self.distilbert and self.distilbert.model is not None:
+            self.distilbert.train(train_data, val_data)
+        
+        # Train BoW
+        if self.bow_classifier:
+            self.bow_classifier.train(train_data)
+        
+        logger.info("All classifiers trained")
+    
+    def save(self, output_dir: str):
+        """Save all models"""
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        if self.distilbert and self.distilbert.model is not None:
+            self.distilbert.save(str(output_path / "intent_model"))
+        
+        if self.bow_classifier:
+            self.bow_classifier.save(str(output_path / "bow_weights.json"))
+
+
+# Convenience function for API integration
+def predict_intent(text: str, use_ml: bool = False, models_dir: Optional[str] = None) -> Dict:
+    """
+    Predict user intent from message
+    
+    Args:
+        text: Input message
+        use_ml: Use DistilBERT for classification
+        models_dir: Directory with trained models
+        
+    Returns:
+        Prediction result with intent and confidence
+    """
+    if use_ml:
+        classifier = AdvancedIntentClassifier(models_dir=models_dir)
+        return classifier.predict_intent(text)
+    else:
+        classifier = IntentClassifier()
+        result = classifier.classify_intent(text)
+        return {
+            "intent": result["intent"].value if hasattr(result["intent"], "value") else str(result["intent"]),
+            "confidence": result["confidence"],
+            "model_used": "keywords",
+            "language": detect_lang(text)
+        }

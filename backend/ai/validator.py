@@ -1,18 +1,29 @@
 """
 Document & Field Validator AI Module
 Validates documents, form fields, and user data
-Includes OCR field extraction, format validation, and constraint checking
+
+Architecture (OCR + CNN + Rules):
+1. OCR: Tesseract/EasyOCR for text extraction from documents
+2. CNN: Lightweight Vision model for document type/quality detection
+3. Rules: Domain-specific validation (Aadhar, PAN, dates, etc.)
 
 Language Support:
 - Primary: English (en)
 - Secondary: Hindi (hi)
 - All validation messages are pre-defined bilingually
+
+Dependencies (optional for ML mode):
+- pytesseract/easyocr (for OCR)
+- torch/torchvision (for CNN document classification)
+- Pillow (for image processing)
 """
 
 import logging
 import re
+import os
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, Any
+from pathlib import Path
 
 from .language_helper import get_language_helper
 
@@ -508,3 +519,640 @@ class DocumentValidator:
         result["quality_score"] = round(quality_score, 2)
         
         return result
+
+
+# ==============================================================================
+# Advanced ML Components (OCR + CNN Document Validation)
+# ==============================================================================
+
+class TesseractOCR:
+    """
+    Tesseract OCR for text extraction from documents
+    Supports Hindi and English text extraction
+    """
+    
+    def __init__(self, lang: str = "hin+eng"):
+        self.lang = lang
+        self.tesseract_available = self._check_tesseract()
+    
+    def _check_tesseract(self) -> bool:
+        """Check if Tesseract is installed"""
+        try:
+            import pytesseract
+            pytesseract.get_tesseract_version()
+            return True
+        except ImportError:
+            logger.warning("pytesseract not installed")
+            return False
+        except Exception as e:
+            logger.warning(f"Tesseract not found: {e}")
+            return False
+    
+    def extract_text(self, image_path: str) -> str:
+        """
+        Extract text from image using Tesseract
+        
+        Args:
+            image_path: Path to image file
+            
+        Returns:
+            Extracted text
+        """
+        if not self.tesseract_available:
+            return self._fallback_extraction(image_path)
+        
+        try:
+            import pytesseract
+            from PIL import Image
+            
+            image = Image.open(image_path)
+            text = pytesseract.image_to_string(image, lang=self.lang)
+            return text.strip()
+            
+        except Exception as e:
+            logger.warning(f"OCR failed: {e}")
+            return self._fallback_extraction(image_path)
+    
+    def extract_structured(self, image_path: str) -> Dict:
+        """
+        Extract structured text with bounding boxes
+        
+        Returns:
+            Dictionary with text blocks and positions
+        """
+        if not self.tesseract_available:
+            return {"text": self._fallback_extraction(image_path), "blocks": []}
+        
+        try:
+            import pytesseract
+            from PIL import Image
+            
+            image = Image.open(image_path)
+            
+            # Get detailed OCR data
+            data = pytesseract.image_to_data(image, lang=self.lang, output_type=pytesseract.Output.DICT)
+            
+            blocks = []
+            for i in range(len(data["text"])):
+                if data["text"][i].strip():
+                    blocks.append({
+                        "text": data["text"][i],
+                        "bbox": [
+                            data["left"][i],
+                            data["top"][i],
+                            data["left"][i] + data["width"][i],
+                            data["top"][i] + data["height"][i]
+                        ],
+                        "confidence": data["conf"][i]
+                    })
+            
+            full_text = " ".join(b["text"] for b in blocks)
+            return {"text": full_text, "blocks": blocks}
+            
+        except Exception as e:
+            logger.warning(f"Structured OCR failed: {e}")
+            return {"text": "", "blocks": []}
+    
+    def _fallback_extraction(self, image_path: str) -> str:
+        """Fallback when Tesseract unavailable"""
+        # Return empty - in production you'd use an alternative
+        return ""
+
+
+class EasyOCRExtractor:
+    """
+    EasyOCR alternative for text extraction
+    Better multilingual support than Tesseract
+    """
+    
+    def __init__(self, languages: List[str] = ["en", "hi"]):
+        self.languages = languages
+        self.reader = None
+        self._load_model()
+    
+    def _load_model(self):
+        """Load EasyOCR reader"""
+        try:
+            import easyocr
+            self.reader = easyocr.Reader(self.languages, gpu=False)
+            logger.info("Loaded EasyOCR reader")
+        except ImportError:
+            logger.warning("easyocr not installed")
+        except Exception as e:
+            logger.warning(f"Could not load EasyOCR: {e}")
+    
+    def extract_text(self, image_path: str) -> str:
+        """Extract text from image"""
+        if self.reader is None:
+            return ""
+        
+        try:
+            results = self.reader.readtext(image_path)
+            text = " ".join(r[1] for r in results)
+            return text.strip()
+        except Exception as e:
+            logger.warning(f"EasyOCR extraction failed: {e}")
+            return ""
+    
+    def extract_structured(self, image_path: str) -> Dict:
+        """Extract text with bounding boxes"""
+        if self.reader is None:
+            return {"text": "", "blocks": []}
+        
+        try:
+            results = self.reader.readtext(image_path)
+            
+            blocks = []
+            for bbox, text, confidence in results:
+                blocks.append({
+                    "text": text,
+                    "bbox": [
+                        int(bbox[0][0]), int(bbox[0][1]),
+                        int(bbox[2][0]), int(bbox[2][1])
+                    ],
+                    "confidence": confidence
+                })
+            
+            full_text = " ".join(b["text"] for b in blocks)
+            return {"text": full_text, "blocks": blocks}
+            
+        except Exception as e:
+            logger.warning(f"EasyOCR structured extraction failed: {e}")
+            return {"text": "", "blocks": []}
+
+
+class CNNDocumentClassifier:
+    """
+    CNN-based document type and quality classification
+    Distinguishes between Aadhar, PAN, marksheets, etc.
+    """
+    
+    DOCUMENT_CLASSES = [
+        "aadhar", "pan", "voter_id", "driving_license",
+        "passport", "marksheet", "income_certificate",
+        "caste_certificate", "bank_statement", "other"
+    ]
+    
+    def __init__(self, model_path: Optional[str] = None):
+        self.model_path = model_path
+        self.model = None
+        self.transform = None
+        self._load_model()
+    
+    def _load_model(self):
+        """Load CNN classifier model"""
+        try:
+            import torch
+            import torchvision.transforms as transforms
+            import torchvision.models as models
+            
+            if self.model_path and os.path.exists(self.model_path):
+                self.model = torch.load(self.model_path)
+            else:
+                # Use pre-trained ResNet18 as backbone
+                self.model = models.resnet18(pretrained=True)
+                # Replace final layer for document classification
+                self.model.fc = torch.nn.Linear(512, len(self.DOCUMENT_CLASSES))
+            
+            self.model.eval()
+            
+            self.transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225]
+                )
+            ])
+            
+            logger.info("Loaded CNN document classifier")
+        except ImportError:
+            logger.warning("PyTorch not installed, document classification unavailable")
+        except Exception as e:
+            logger.warning(f"Could not load CNN model: {e}")
+    
+    def classify(self, image_path: str) -> Tuple[str, float]:
+        """
+        Classify document type from image
+        
+        Args:
+            image_path: Path to document image
+            
+        Returns:
+            (document_type, confidence)
+        """
+        if self.model is None:
+            return self._rule_based_classify(image_path)
+        
+        try:
+            import torch
+            from PIL import Image
+            
+            image = Image.open(image_path).convert("RGB")
+            image_tensor = self.transform(image).unsqueeze(0)
+            
+            with torch.no_grad():
+                outputs = self.model(image_tensor)
+                probs = torch.nn.functional.softmax(outputs, dim=1)
+                confidence, pred_idx = torch.max(probs, 1)
+            
+            return self.DOCUMENT_CLASSES[pred_idx.item()], confidence.item()
+            
+        except Exception as e:
+            logger.warning(f"CNN classification failed: {e}")
+            return self._rule_based_classify(image_path)
+    
+    def _rule_based_classify(self, image_path: str) -> Tuple[str, float]:
+        """Fallback rule-based classification"""
+        # Use filename hints if available
+        filename = os.path.basename(image_path).lower()
+        
+        for doc_type in self.DOCUMENT_CLASSES:
+            if doc_type in filename:
+                return doc_type, 0.6
+        
+        return "other", 0.3
+    
+    def check_quality(self, image_path: str) -> Dict:
+        """
+        Check document image quality
+        
+        Returns:
+            Quality metrics (blur, brightness, etc.)
+        """
+        try:
+            from PIL import Image
+            import numpy as np
+            
+            image = Image.open(image_path).convert("L")
+            img_array = np.array(image)
+            
+            # Blur detection using Laplacian variance
+            laplacian_var = np.var(np.gradient(img_array))
+            is_blurry = laplacian_var < 100
+            
+            # Brightness check
+            mean_brightness = np.mean(img_array)
+            is_too_dark = mean_brightness < 50
+            is_too_bright = mean_brightness > 200
+            
+            # Contrast check
+            contrast = np.std(img_array)
+            is_low_contrast = contrast < 30
+            
+            quality_score = 1.0
+            issues = []
+            
+            if is_blurry:
+                quality_score -= 0.3
+                issues.append({"en": "Image is blurry", "hi": "छवि धुंधली है"})
+            if is_too_dark:
+                quality_score -= 0.2
+                issues.append({"en": "Image is too dark", "hi": "छवि बहुत गहरी है"})
+            if is_too_bright:
+                quality_score -= 0.2
+                issues.append({"en": "Image is overexposed", "hi": "छवि अधिक उज्ज्वल है"})
+            if is_low_contrast:
+                quality_score -= 0.2
+                issues.append({"en": "Low contrast", "hi": "कम कंट्रास्ट"})
+            
+            return {
+                "quality_score": max(0, quality_score),
+                "is_acceptable": quality_score > 0.5,
+                "metrics": {
+                    "blur_variance": float(laplacian_var),
+                    "brightness": float(mean_brightness),
+                    "contrast": float(contrast)
+                },
+                "issues": issues
+            }
+            
+        except Exception as e:
+            logger.warning(f"Quality check failed: {e}")
+            return {
+                "quality_score": 0.5,
+                "is_acceptable": True,
+                "metrics": {},
+                "issues": []
+            }
+
+
+class AdvancedDocumentValidator:
+    """
+    Advanced Document Validation Pipeline
+    
+    Combines OCR, CNN classification, and rule-based validation
+    """
+    
+    def __init__(
+        self,
+        models_dir: Optional[str] = None,
+        use_tesseract: bool = True,
+        use_easyocr: bool = False,
+        use_cnn: bool = True
+    ):
+        self.models_dir = Path(models_dir) if models_dir else None
+        
+        # Initialize OCR
+        if use_tesseract:
+            self.ocr = TesseractOCR()
+        elif use_easyocr:
+            self.ocr = EasyOCRExtractor()
+        else:
+            self.ocr = None
+        
+        # Initialize CNN classifier
+        if use_cnn:
+            cnn_path = str(self.models_dir / "doc_classifier.pt") if self.models_dir else None
+            self.cnn_classifier = CNNDocumentClassifier(model_path=cnn_path)
+        else:
+            self.cnn_classifier = None
+        
+        # Rule-based validator
+        self.rule_validator = DocumentValidator()
+    
+    def extract_text(self, image_path: str) -> Dict:
+        """
+        Extract text from document image
+        
+        Args:
+            image_path: Path to document image
+            
+        Returns:
+            Extraction result with text and blocks
+        """
+        if self.ocr:
+            return self.ocr.extract_structured(image_path)
+        return {"text": "", "blocks": []}
+    
+    def classify_document(self, image_path: str) -> Dict:
+        """
+        Classify document type and check quality
+        
+        Args:
+            image_path: Path to document image
+            
+        Returns:
+            Classification result with type and quality
+        """
+        result = {
+            "document_type": "unknown",
+            "type_confidence": 0.0,
+            "quality": {}
+        }
+        
+        if self.cnn_classifier:
+            doc_type, confidence = self.cnn_classifier.classify(image_path)
+            result["document_type"] = doc_type
+            result["type_confidence"] = confidence
+            result["quality"] = self.cnn_classifier.check_quality(image_path)
+        
+        return result
+    
+    def extract_document_fields(self, text: str, document_type: str) -> Dict:
+        """
+        Extract specific fields based on document type
+        
+        Args:
+            text: OCR extracted text
+            document_type: Type of document
+            
+        Returns:
+            Extracted field values
+        """
+        fields = {}
+        
+        if document_type == "aadhar":
+            # Extract Aadhar number (12 digits, possibly with spaces)
+            aadhar_match = re.search(r'\b(\d{4}\s?\d{4}\s?\d{4})\b', text)
+            if aadhar_match:
+                fields["aadhar_number"] = aadhar_match.group(1).replace(" ", "")
+            
+            # Extract name
+            name_match = re.search(r'(?:Name|नाम)[:\s]*([A-Za-z\s]+)', text, re.IGNORECASE)
+            if name_match:
+                fields["name"] = name_match.group(1).strip()
+            
+            # Extract DOB
+            dob_match = re.search(r'(?:DOB|जन्म\s*तिथि)[:\s]*(\d{2}/\d{2}/\d{4})', text, re.IGNORECASE)
+            if dob_match:
+                fields["dob"] = dob_match.group(1)
+        
+        elif document_type == "pan":
+            # Extract PAN number (5 letters + 4 digits + 1 letter)
+            pan_match = re.search(r'\b([A-Z]{5}[0-9]{4}[A-Z])\b', text)
+            if pan_match:
+                fields["pan_number"] = pan_match.group(1)
+            
+            # Extract name
+            name_match = re.search(r'(?:Name|नाम)[:\s]*([A-Za-z\s]+)', text, re.IGNORECASE)
+            if name_match:
+                fields["name"] = name_match.group(1).strip()
+        
+        elif document_type == "voter_id":
+            # Extract Voter ID (3 letters + 7 digits)
+            voter_match = re.search(r'\b([A-Z]{3}[0-9]{7})\b', text)
+            if voter_match:
+                fields["voter_id"] = voter_match.group(1)
+        
+        elif document_type == "driving_license":
+            # Extract DL number
+            dl_match = re.search(r'\b([A-Z]{2}[0-9]{13})\b', text)
+            if dl_match:
+                fields["dl_number"] = dl_match.group(1)
+        
+        # Generic field extraction
+        # Phone number
+        phone_match = re.search(r'\b([6-9]\d{9})\b', text)
+        if phone_match:
+            fields["phone"] = phone_match.group(1)
+        
+        # Email
+        email_match = re.search(r'\b[\w.-]+@[\w.-]+\.\w+\b', text)
+        if email_match:
+            fields["email"] = email_match.group(0)
+        
+        # Address
+        if "address" not in fields:
+            # Try to find address block
+            address_patterns = [
+                r'(?:Address|पता)[:\s]*([A-Za-z0-9\s,.-]+)',
+                r'(?:Residence|निवास)[:\s]*([A-Za-z0-9\s,.-]+)'
+            ]
+            for pattern in address_patterns:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    fields["address"] = match.group(1).strip()[:200]
+                    break
+        
+        return fields
+    
+    def validate_document(self, image_path: str) -> Dict:
+        """
+        Complete document validation pipeline
+        
+        Args:
+            image_path: Path to document image
+            
+        Returns:
+            Comprehensive validation result
+        """
+        result = {
+            "status": "unknown",
+            "document_type": "unknown",
+            "type_confidence": 0.0,
+            "quality": {},
+            "extracted_text": "",
+            "extracted_fields": {},
+            "field_validation": {},
+            "issues": [],
+            "recommendations": []
+        }
+        
+        # Step 1: Classify document and check quality
+        classification = self.classify_document(image_path)
+        result["document_type"] = classification["document_type"]
+        result["type_confidence"] = classification["type_confidence"]
+        result["quality"] = classification["quality"]
+        
+        # Check quality issues
+        if classification.get("quality", {}).get("quality_score", 1) < 0.5:
+            result["issues"].extend(classification["quality"].get("issues", []))
+            result["recommendations"].append({
+                "en": "Please upload a clearer image",
+                "hi": "कृपया एक स्पष्ट छवि अपलोड करें"
+            })
+        
+        # Step 2: Extract text
+        ocr_result = self.extract_text(image_path)
+        result["extracted_text"] = ocr_result.get("text", "")
+        
+        if not result["extracted_text"]:
+            result["issues"].append({
+                "en": "Could not extract text from document",
+                "hi": "दस्तावेज़ से टेक्स्ट नहीं निकाल सका"
+            })
+            result["status"] = "failed"
+            return result
+        
+        # Step 3: Extract fields based on document type
+        result["extracted_fields"] = self.extract_document_fields(
+            result["extracted_text"],
+            result["document_type"]
+        )
+        
+        # Step 4: Validate extracted fields
+        if result["extracted_fields"]:
+            validation = self.rule_validator.validate_form_fields(result["extracted_fields"])
+            result["field_validation"] = validation
+            
+            if validation.get("is_valid"):
+                result["status"] = "valid"
+            else:
+                result["status"] = "invalid"
+                for error in validation.get("errors", []):
+                    result["issues"].append(error)
+        else:
+            result["status"] = "partial"
+            result["recommendations"].append({
+                "en": "Could not extract all required fields",
+                "hi": "सभी आवश्यक फ़ील्ड नहीं निकाल सके"
+            })
+        
+        return result
+    
+    def validate_multiple(self, documents: List[Dict]) -> Dict:
+        """
+        Validate multiple documents
+        
+        Args:
+            documents: List of {"path": str, "expected_type": str}
+            
+        Returns:
+            Validation results for all documents
+        """
+        results = []
+        all_valid = True
+        
+        for doc in documents:
+            result = self.validate_document(doc["path"])
+            
+            # Check if type matches expected
+            if doc.get("expected_type"):
+                if result["document_type"] != doc["expected_type"]:
+                    result["issues"].append({
+                        "en": f"Expected {doc['expected_type']}, got {result['document_type']}",
+                        "hi": f"अपेक्षित {doc['expected_type']}, मिला {result['document_type']}"
+                    })
+                    result["status"] = "invalid"
+            
+            if result["status"] != "valid":
+                all_valid = False
+            
+            results.append({
+                "path": doc["path"],
+                "result": result
+            })
+        
+        return {
+            "all_valid": all_valid,
+            "valid_count": sum(1 for r in results if r["result"]["status"] == "valid"),
+            "total_count": len(results),
+            "documents": results
+        }
+
+
+# Convenience functions for API integration
+def extract_document_text(image_path: str, use_easyocr: bool = False) -> str:
+    """
+    Extract text from document image
+    
+    Args:
+        image_path: Path to document image
+        use_easyocr: Use EasyOCR instead of Tesseract
+        
+    Returns:
+        Extracted text
+    """
+    validator = AdvancedDocumentValidator(use_tesseract=not use_easyocr, use_easyocr=use_easyocr)
+    result = validator.extract_text(image_path)
+    return result.get("text", "")
+
+
+def validate_document(image_path: str, expected_type: Optional[str] = None, models_dir: Optional[str] = None) -> Dict:
+    """
+    Validate a document image
+    
+    Args:
+        image_path: Path to document image
+        expected_type: Expected document type (aadhar, pan, etc.)
+        models_dir: Directory with trained models
+        
+    Returns:
+        Validation result
+    """
+    validator = AdvancedDocumentValidator(models_dir=models_dir)
+    result = validator.validate_document(image_path)
+    
+    if expected_type and result["document_type"] != expected_type:
+        result["issues"].append({
+            "en": f"Document type mismatch: expected {expected_type}",
+            "hi": f"दस्तावेज़ प्रकार मेल नहीं खाता: अपेक्षित {expected_type}"
+        })
+        result["status"] = "invalid"
+    
+    return result
+
+
+def check_document_quality(image_path: str) -> Dict:
+    """
+    Check document image quality
+    
+    Args:
+        image_path: Path to document image
+        
+    Returns:
+        Quality assessment
+    """
+    classifier = CNNDocumentClassifier()
+    return classifier.check_quality(image_path)

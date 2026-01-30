@@ -1,17 +1,28 @@
 """
 Content Summarizer AI Module
 Rewrites and summarizes job/scheme descriptions for uniqueness and clarity
-Uses template-based rewriting + key extraction (no external AI dependency)
+
+Architecture (T5/mT5 Sequence-to-Sequence):
+1. Task Formulation: Summarization as text-to-text problem
+2. Model Choice: T5/mT5 for multilingual Hindi/English output
+3. Abstractive Generation: Generate new sentences for copyright-safe rewrites
+4. Template Fallback: Rule-based templates when ML unavailable
 
 Language Support:
 - Primary: English (en)
 - Secondary: Hindi (hi)
 - All templates and summaries available in both languages
+
+Dependencies (optional for ML mode):
+- transformers (for T5/mT5)
+- torch (for model inference)
 """
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+import os
+from typing import Dict, List, Optional, Any
+from pathlib import Path
 
 from .language_helper import get_language_helper
 
@@ -370,3 +381,421 @@ class ContentSummarizer:
                 }
         
         return bilingual_info
+
+
+# ==============================================================================
+# Advanced ML Components (T5/mT5 Summarization)
+# ==============================================================================
+
+class T5Summarizer:
+    """
+    T5/mT5 based abstractive summarization
+    Generates new sentences for copyright-safe rewrites
+    """
+    
+    def __init__(
+        self,
+        model_name: str = "google/mt5-small",  # Multilingual T5 for Hindi/English
+        model_path: Optional[str] = None,
+        max_length: int = 150,
+        min_length: int = 30
+    ):
+        self.model_name = model_name
+        self.model_path = model_path
+        self.max_length = max_length
+        self.min_length = min_length
+        self.model = None
+        self.tokenizer = None
+        self._load_model()
+    
+    def _load_model(self):
+        """Load T5/mT5 model for summarization"""
+        try:
+            from transformers import T5ForConditionalGeneration, T5Tokenizer, AutoModelForSeq2SeqLM, AutoTokenizer
+            
+            if self.model_path and os.path.exists(self.model_path):
+                self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            else:
+                # Try mT5 for multilingual support
+                try:
+                    self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_name)
+                    self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+                except:
+                    # Fallback to standard T5
+                    self.model = T5ForConditionalGeneration.from_pretrained("t5-small")
+                    self.tokenizer = T5Tokenizer.from_pretrained("t5-small")
+            
+            self.model.eval()
+            logger.info(f"Loaded T5 model: {self.model_name}")
+        except ImportError:
+            logger.warning("transformers not installed, using template-based summarization")
+        except Exception as e:
+            logger.warning(f"Could not load T5 model: {e}")
+    
+    def summarize(self, text: str, language: str = "en") -> str:
+        """
+        Generate abstractive summary using T5
+        
+        Args:
+            text: Input text to summarize
+            language: Output language ("en" or "hi")
+            
+        Returns:
+            Generated summary
+        """
+        if self.model is None or self.tokenizer is None:
+            return self._template_summarize(text, language)
+        
+        try:
+            import torch
+            
+            # Prepare input with task prefix
+            if "mt5" in self.model_name.lower():
+                # mT5 task prefix
+                prefix = "summarize: " if language == "en" else "सारांश: "
+            else:
+                prefix = "summarize: "
+            
+            input_text = prefix + text[:1024]  # Truncate long texts
+            
+            inputs = self.tokenizer(
+                input_text,
+                return_tensors="pt",
+                max_length=512,
+                truncation=True
+            )
+            
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    inputs.input_ids,
+                    max_length=self.max_length,
+                    min_length=self.min_length,
+                    length_penalty=2.0,
+                    num_beams=4,
+                    early_stopping=True
+                )
+            
+            summary = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            return summary
+            
+        except Exception as e:
+            logger.warning(f"T5 summarization failed: {e}")
+            return self._template_summarize(text, language)
+    
+    def _template_summarize(self, text: str, language: str) -> str:
+        """Fallback template-based summarization"""
+        # Extract key sentences
+        sentences = re.split(r'[.।]', text)
+        sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+        
+        if not sentences:
+            return text[:200] + "..."
+        
+        # Take first and most important sentences
+        summary_sentences = sentences[:3]
+        
+        if language == "hi":
+            return "। ".join(summary_sentences) + "।"
+        else:
+            return ". ".join(summary_sentences) + "."
+    
+    def rewrite(self, text: str, style: str = "professional", language: str = "en") -> str:
+        """
+        Rewrite text in a specific style
+        
+        Args:
+            text: Input text
+            style: Writing style ("professional", "casual", "concise")
+            language: Output language
+            
+        Returns:
+            Rewritten text
+        """
+        if self.model is None or self.tokenizer is None:
+            return self._template_rewrite(text, style, language)
+        
+        try:
+            import torch
+            
+            # Style-specific prompts
+            style_prompts = {
+                "professional": "rewrite professionally: ",
+                "casual": "rewrite casually: ",
+                "concise": "summarize concisely: "
+            }
+            
+            prefix = style_prompts.get(style, "rewrite: ")
+            input_text = prefix + text[:1024]
+            
+            inputs = self.tokenizer(
+                input_text,
+                return_tensors="pt",
+                max_length=512,
+                truncation=True
+            )
+            
+            with torch.no_grad():
+                outputs = self.model.generate(
+                    inputs.input_ids,
+                    max_length=256,
+                    num_beams=4,
+                    early_stopping=True,
+                    do_sample=True,
+                    temperature=0.7
+                )
+            
+            rewritten = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            return rewritten
+            
+        except Exception as e:
+            logger.warning(f"T5 rewriting failed: {e}")
+            return self._template_rewrite(text, style, language)
+    
+    def _template_rewrite(self, text: str, style: str, language: str) -> str:
+        """Fallback template-based rewriting"""
+        # Use ContentSummarizer's template rewriting
+        summarizer = ContentSummarizer()
+        return summarizer.rewrite_description(text, style)
+
+
+class TranslationAugmenter:
+    """
+    Translation-based augmentation for multilingual summaries
+    """
+    
+    def __init__(self, model_name: str = "Helsinki-NLP/opus-mt-en-hi"):
+        self.model_name = model_name
+        self.model = None
+        self.tokenizer = None
+        self._load_model()
+    
+    def _load_model(self):
+        """Load translation model"""
+        try:
+            from transformers import MarianMTModel, MarianTokenizer
+            
+            self.model = MarianMTModel.from_pretrained(self.model_name)
+            self.tokenizer = MarianTokenizer.from_pretrained(self.model_name)
+            self.model.eval()
+            logger.info(f"Loaded translation model: {self.model_name}")
+        except ImportError:
+            logger.warning("transformers not installed, translation unavailable")
+        except Exception as e:
+            logger.warning(f"Could not load translation model: {e}")
+    
+    def translate(self, text: str, source: str = "en", target: str = "hi") -> str:
+        """Translate text between languages"""
+        if self.model is None:
+            return self._fallback_translate(text, target)
+        
+        try:
+            import torch
+            
+            inputs = self.tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+            
+            with torch.no_grad():
+                outputs = self.model.generate(**inputs, max_length=512)
+            
+            translated = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            return translated
+            
+        except Exception as e:
+            logger.warning(f"Translation failed: {e}")
+            return self._fallback_translate(text, target)
+    
+    def _fallback_translate(self, text: str, target: str) -> str:
+        """Fallback: return original with note"""
+        if target == "hi":
+            return f"(हिंदी अनुवाद उपलब्ध नहीं) {text}"
+        return text
+
+
+class AdvancedSummarizer:
+    """
+    Advanced Content Summarization & Rewriting
+    
+    Combines T5/mT5 for abstractive summarization with template fallback
+    """
+    
+    def __init__(
+        self,
+        models_dir: Optional[str] = None,
+        use_t5: bool = True,
+        multilingual: bool = True
+    ):
+        self.models_dir = Path(models_dir) if models_dir else None
+        
+        # Initialize T5 summarizer
+        if use_t5:
+            model_name = "google/mt5-small" if multilingual else "t5-small"
+            model_path = str(self.models_dir / "summarizer") if self.models_dir else None
+            self.t5_model = T5Summarizer(model_name=model_name, model_path=model_path)
+        else:
+            self.t5_model = None
+        
+        # Initialize translator
+        if multilingual:
+            self.translator = TranslationAugmenter()
+        else:
+            self.translator = None
+        
+        # Template-based fallback
+        self.template_summarizer = ContentSummarizer()
+    
+    def summarize(self, text: str, language: str = "en", max_length: int = 150) -> str:
+        """
+        Generate abstractive summary
+        
+        Args:
+            text: Input text
+            language: Output language ("en" or "hi")
+            max_length: Maximum summary length
+            
+        Returns:
+            Generated summary
+        """
+        # Try T5 first
+        if self.t5_model and self.t5_model.model is not None:
+            summary = self.t5_model.summarize(text, language)
+            if summary and len(summary) > 20:
+                return summary
+        
+        # Fallback to template
+        template_result = self.template_summarizer.generate_summary({"description": text})
+        
+        if language == "hi":
+            return template_result.get("summary_hi", template_result.get("summary_hindi", ""))
+        return template_result.get("summary_en", template_result.get("summary_english", ""))
+    
+    def rewrite(self, text: str, language: str = "en", style: str = "professional") -> str:
+        """
+        Rewrite text for uniqueness
+        
+        Args:
+            text: Input text
+            language: Output language
+            style: Writing style
+            
+        Returns:
+            Rewritten text
+        """
+        # Try T5 rewriting
+        if self.t5_model and self.t5_model.model is not None:
+            rewritten = self.t5_model.rewrite(text, style, language)
+            if rewritten and len(rewritten) > 20:
+                return rewritten
+        
+        # Fallback to template
+        return self.template_summarizer.rewrite_description(text, style)
+    
+    def generate_bilingual_summary(self, text: str) -> Dict[str, str]:
+        """
+        Generate summaries in both English and Hindi
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            Dictionary with English and Hindi summaries
+        """
+        # Generate English summary
+        english_summary = self.summarize(text, "en")
+        
+        # Generate Hindi summary
+        if self.t5_model and self.t5_model.model is not None:
+            hindi_summary = self.summarize(text, "hi")
+        elif self.translator:
+            hindi_summary = self.translator.translate(english_summary, "en", "hi")
+        else:
+            hindi_summary = self.template_summarizer.generate_summary({"description": text}).get("summary_hi", "")
+        
+        return {
+            "en": english_summary,
+            "hi": hindi_summary,
+            "english": english_summary,
+            "hindi": hindi_summary,
+            "bilingual": f"**English:**\n{english_summary}\n\n**हिंदी:**\n{hindi_summary}"
+        }
+    
+    def process_job_posting(self, job: Dict) -> Dict:
+        """
+        Process a job posting with full summarization
+        
+        Args:
+            job: Job posting dictionary
+            
+        Returns:
+            Processed result with summaries and rewrites
+        """
+        title = job.get("title", "")
+        description = job.get("description", "")
+        
+        # Generate summaries
+        bilingual = self.generate_bilingual_summary(description)
+        
+        # Generate rewrites
+        rewrites = {
+            "professional": self.rewrite(description, "en", "professional"),
+            "casual": self.rewrite(description, "en", "casual"),
+            "concise": self.rewrite(description, "en", "concise")
+        }
+        
+        # Extract key info using template summarizer
+        key_info = self.template_summarizer.extract_key_info(description)
+        
+        return {
+            "title": title,
+            "original": description,
+            "summary_en": bilingual["en"],
+            "summary_hi": bilingual["hi"],
+            "summary_bilingual": bilingual["bilingual"],
+            "rewritten": rewrites,
+            "key_info": key_info,
+            "bullet_points": self.template_summarizer.extract_bullet_points(description)
+        }
+
+
+# Convenience function for API integration
+def rewrite(text: str, language: str = "en", use_ml: bool = False, models_dir: Optional[str] = None) -> str:
+    """
+    Rewrite text for uniqueness
+    
+    Args:
+        text: Input text
+        language: Output language ("en" or "hi")
+        use_ml: Use T5/mT5 for rewriting
+        models_dir: Directory with trained models
+        
+    Returns:
+        Rewritten text
+    """
+    if use_ml:
+        summarizer = AdvancedSummarizer(models_dir=models_dir)
+        return summarizer.rewrite(text, language)
+    else:
+        summarizer = ContentSummarizer()
+        return summarizer.rewrite_description(text)
+
+
+def summarize(text: str, language: str = "en", use_ml: bool = False, models_dir: Optional[str] = None) -> str:
+    """
+    Generate summary of text
+    
+    Args:
+        text: Input text
+        language: Output language
+        use_ml: Use T5/mT5 for summarization
+        models_dir: Directory with trained models
+        
+    Returns:
+        Generated summary
+    """
+    if use_ml:
+        summarizer = AdvancedSummarizer(models_dir=models_dir)
+        return summarizer.summarize(text, language)
+    else:
+        summarizer = ContentSummarizer()
+        result = summarizer.generate_summary({"description": text})
+        key = f"summary_{language}" if language in ["en", "hi"] else "summary_english"
+        return result.get(key, result.get("summary_english", ""))
