@@ -7,7 +7,8 @@ import JobCard from '../components/JobCard';
 import YojanaCard from '../components/YojanaCard';
 import { 
   Briefcase, Building2, FileText, Users, ArrowRight, CheckCircle2, 
-  Zap, Shield, MessageCircle, Star, TrendingUp, Clock
+  Zap, Shield, MessageCircle, Star, TrendingUp, Clock, Home, Search,
+  GraduationCap, Award, ClipboardList, BookOpen, Phone
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL + '/api';
@@ -72,6 +73,18 @@ const HomePage = () => {
     { value: '500+', label: 'सरकारी योजनाएं', icon: Building2 },
     { value: '1L+', label: 'सफल आवेदन', icon: CheckCircle2 },
     { value: '₹20', label: 'सेवा शुल्क मात्र', icon: TrendingUp }
+  ];
+
+  const quickLinks = [
+    { href: '/', label: 'Home', labelHi: 'होम', icon: Home, color: 'bg-blue-500' },
+    { href: '/yojana', label: 'Government Scheme', labelHi: 'सरकारी योजना', icon: Building2, color: 'bg-green-500' },
+    { href: '/jobs', label: 'Latest Jobs', labelHi: 'नई नौकरियां', icon: Briefcase, color: 'bg-orange-500' },
+    { href: '/results', label: 'Results', labelHi: 'रिजल्ट', icon: Award, color: 'bg-purple-500' },
+    { href: '/admit-card', label: 'Admit Card', labelHi: 'एडमिट कार्ड', icon: FileText, color: 'bg-red-500' },
+    { href: '/answer-key', label: 'Answer Key', labelHi: 'आंसर की', icon: ClipboardList, color: 'bg-teal-500' },
+    { href: '/syllabus', label: 'Syllabus', labelHi: 'सिलेबस', icon: BookOpen, color: 'bg-indigo-500' },
+    { href: '/search', label: 'Search', labelHi: 'खोजें', icon: Search, color: 'bg-yellow-500' },
+    { href: '/contact', label: 'Contact Us', labelHi: 'संपर्क करें', icon: Phone, color: 'bg-pink-500' }
   ];
 
   return (
@@ -183,6 +196,31 @@ const HomePage = () => {
           <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 120L60 110C120 100 240 80 360 75C480 70 600 80 720 85C840 90 960 90 1080 85C1200 80 1320 70 1380 65L1440 60V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(var(--background))" />
           </svg>
+        </div>
+      </section>
+
+      {/* Quick Navigation Section */}
+      <section className="py-8 -mt-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6">
+            <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-4">
+              {quickLinks.map((link, idx) => (
+                <Link 
+                  key={idx} 
+                  to={link.href}
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-all duration-200 group"
+                >
+                  <div className={`w-12 h-12 rounded-full ${link.color} flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}>
+                    <link.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-medium text-foreground leading-tight">{link.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{link.labelHi}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
