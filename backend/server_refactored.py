@@ -28,7 +28,7 @@ from routes import (
 )
 
 # Import AI systems
-from ai_learning_system import SelfLearningAI
+from ai.learning_system import SelfLearningAI
 from services.hybrid_matching import HybridMatchingEngine
 from services.form_intelligence import FormIntelligenceEngine
 from services.scheduler import get_scheduler

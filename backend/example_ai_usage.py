@@ -3,7 +3,7 @@ Quick Example: How to use Self-Learning AI System
 """
 
 import asyncio
-from ai_learning_system import SelfLearningAI
+from ai.learning_system import SelfLearningAI
 from openai import OpenAI
 from motor.motor_asyncio import AsyncIOMotorClient
 
