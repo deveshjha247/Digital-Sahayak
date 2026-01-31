@@ -273,9 +273,30 @@ class KnowledgeBase:
     @classmethod
     def detect_intent(cls, text: str) -> tuple:
         """Detect user intent from text"""
-        text_lower = text.lower()
+        text_lower = text.lower().strip()
         
+        # Priority check for time-specific greetings first
+        morning_patterns = ["good morning", "gm", "morning", "सुप्रभात", "शुभ प्रभात", "गुड मॉर्निंग"]
+        evening_patterns = ["good evening", "evening", "शुभ संध्या", "गुड इवनिंग"]
+        night_patterns = ["good night", "gn", "शुभ रात्रि"]
+        
+        for pattern in morning_patterns:
+            if pattern in text_lower:
+                return "morning_greeting", cls.INTENT_RESPONSES.get("morning_greeting", {}).get("responses", [])
+        
+        for pattern in evening_patterns:
+            if pattern in text_lower:
+                return "evening_greeting", cls.INTENT_RESPONSES.get("evening_greeting", {}).get("responses", [])
+        
+        for pattern in night_patterns:
+            if pattern in text_lower:
+                return "night_greeting", cls.INTENT_RESPONSES.get("night_greeting", {}).get("responses", [])
+        
+        # Then check other intents
         for intent, data in cls.INTENT_RESPONSES.items():
+            # Skip the specific greeting types we already checked
+            if intent in ["morning_greeting", "evening_greeting", "night_greeting"]:
+                continue
             for pattern in data['patterns']:
                 if pattern in text_lower:
                     return intent, data['responses']
