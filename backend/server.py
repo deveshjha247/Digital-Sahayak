@@ -1,10 +1,22 @@
+"""
+Digital Sahayak API Server
+==========================
+Main FastAPI server - kept under 50KB by moving services to server_services.py
+
+Size Target: <50KB
+Garbage Collection: gc.collect() after heavy operations
+Logging: logs/server.log
+"""
+
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Request, Query, Body, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import gc
 import logging
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
@@ -18,13 +30,38 @@ import hashlib
 import hmac
 import asyncio
 import re
-from bs4 import BeautifulSoup
 from openai import OpenAI
-import unicodedata
+
+# Lazy imports - only load when needed
+# from bs4 import BeautifulSoup  # Moved to server_services.py
+# import unicodedata  # Not used
+
+# Services imported lazily
+from server_services import (
+    get_job_scraper, get_ai_job_matcher, 
+    rewrite_content_with_ai, generate_slug
+)
 from ai.learning_system import SelfLearningAI
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Setup file logging
+LOG_DIR = ROOT_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
+
+file_handler = RotatingFileHandler(
+    LOG_DIR / 'server.log',
+    maxBytes=5*1024*1024,  # 5MB
+    backupCount=3,
+    encoding='utf-8'
+)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+logger.addHandler(file_handler)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
