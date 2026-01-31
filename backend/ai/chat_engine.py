@@ -1340,10 +1340,12 @@ class AIResponseGenerator:
         
         # Find matching job
         matched_job = None
+        matched_job_name = None
         for job_key, keywords in job_keywords.items():
             for keyword in keywords:
                 if keyword in message_lower:
                     matched_job = job_key
+                    matched_job_name = keyword
                     break
             if matched_job:
                 break
@@ -1355,6 +1357,28 @@ class AIResponseGenerator:
         if not job_data:
             return None
         
+        # ===== CHECK IF THIS NEEDS WEB SEARCH =====
+        # Keywords that need real-time/detailed info from web
+        web_search_keywords = [
+            "syllabus", "slybuss", "silabus", "सिलेबस", "पाठ्यक्रम",
+            "admit card", "एडमिट कार्ड", "hall ticket",
+            "result", "रिजल्ट", "परिणाम",
+            "cutoff", "कटऑफ", "cut off",
+            "answer key", "उत्तर कुंजी", "आंसर की",
+            "notification", "नोटिफिकेशन", "भर्ती",
+            "form", "फॉर्म", "apply", "आवेदन",
+            "last date", "अंतिम तिथि", "तारीख",
+            "exam date", "परीक्षा तिथि",
+            "vacancy", "रिक्ति", "पद",
+            "2025", "2026", "latest", "new"
+        ]
+        
+        needs_web = any(word in message_lower for word in web_search_keywords)
+        if needs_web:
+            # Signal that web search is needed - don't return hardcoded response
+            return None  # This will trigger web search in main flow
+        
+        # ===== BASIC INFO FROM KNOWLEDGE BASE =====
         # Detect what user is asking about
         is_eligibility = any(word in message_lower for word in [
             "eligibility", "eligible", "eligibi", "योग्यता", "पात्रता", "qualification", 
@@ -1366,7 +1390,7 @@ class AIResponseGenerator:
         ])
         
         is_exam_pattern = any(word in message_lower for word in [
-            "exam", "pattern", "syllabus", "परीक्षा", "पैटर्न", "सिलेबस"
+            "exam pattern", "परीक्षा पैटर्न", "pattern", "पैटर्न"
         ])
         
         # Format response based on what user asked
