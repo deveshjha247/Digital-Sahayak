@@ -1012,22 +1012,18 @@ class AIResponseGenerator:
                                       user_id: str = None) -> str:
         """
         Generate AI response with DS-Search capability (async version).
+        SMART AI: Checks if web search is needed FIRST before using hardcoded data.
         """
         # Detect intent
         intent, preset_responses = self.kb.detect_intent(user_message)
         
-        # Check for specific queries in knowledge base
-        response = self._handle_specific_queries(user_message, user_profile, language)
-        if response:
-            return response
+        # ===== SMART CHECK: Does this query need FRESH web data? =====
+        # For things like syllabus, result, admit card - ALWAYS search web first
+        needs_fresh_data = self._needs_web_search(user_message)
         
-        # Use preset responses for known intents
-        if preset_responses:
-            import random
-            return random.choice(preset_responses)
-        
-        # Check if web search is needed
-        if self._needs_web_search(user_message):
+        if needs_fresh_data:
+            logger.info(f"🔍 Query needs fresh web data: {user_message}")
+            
             # Try DS-Search first (smarter, policy-based)
             ds_response = await self._ds_search_and_respond(user_message, language, user_id)
             if ds_response:
@@ -1037,6 +1033,20 @@ class AIResponseGenerator:
             web_response = await self._search_and_respond(user_message, language)
             if web_response:
                 return web_response
+            
+            # If web search fails, try our knowledge base as fallback
+            logger.info(f"⚠️ Web search failed, trying knowledge base")
+        
+        # ===== CHECK: Can we answer from our STATIC knowledge? =====
+        # Only use hardcoded data if web search wasn't needed or failed
+        response = self._handle_specific_queries(user_message, user_profile, language)
+        if response:
+            return response
+        
+        # Use preset responses for known intents (greetings, thanks, etc.)
+        if preset_responses:
+            import random
+            return random.choice(preset_responses)
         
         # Generate contextual response
         return self._generate_contextual_response(user_message, context, user_profile, language)
@@ -1359,6 +1369,7 @@ class AIResponseGenerator:
         """
         Generate AI response based on user message and context.
         Sync version - for backward compatibility.
+        NOTE: For web search queries, use generate_response_async instead!
         
         Args:
             user_message: Current user message
@@ -1372,7 +1383,12 @@ class AIResponseGenerator:
         # Detect intent
         intent, preset_responses = self.kb.detect_intent(user_message)
         
-        # Check for specific queries
+        # ===== SMART CHECK: Does this need FRESH web data? =====
+        if self._needs_web_search(user_message):
+            # Signal to calling code that async version should be used
+            return "NEEDS_WEB_SEARCH"
+        
+        # Check for specific queries (only if not needing web search)
         response = self._handle_specific_queries(user_message, user_profile, language)
         if response:
             return response
@@ -1381,10 +1397,6 @@ class AIResponseGenerator:
         if preset_responses:
             import random
             return random.choice(preset_responses)
-        
-        # For queries needing web search, return a message to use async version
-        if self._needs_web_search(user_message):
-            return "NEEDS_WEB_SEARCH"  # Signal to use async version
         
         # Generate contextual response
         return self._generate_contextual_response(user_message, context, user_profile, language)
