@@ -213,6 +213,37 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
   - Learning statistics dashboard
   - Analysis visualization (strengths/weaknesses)
 
+### Phase 9: DS-Search & Natural Language Generation (Completed - January 2026)
+- ✅ **DS-Search v2.0** (`ai/search/`)
+  - **Policy Router**: Decides search strategy (web/cache/knowledge)
+  - **Query Generator**: Optimizes queries for Indian govt portals
+  - **Source Manager**: Maintains trusted source registry
+  - **Smart Crawler**: Content extraction with trust scoring
+  - **Search API**: DuckDuckGo integration with caching
+  - **Result Ranker**: Re-ranks by relevance and trust
+  - **Response Cache**: 6-hour TTL for search results
+- ✅ **Evidence Extractor** (`ai/evidence/`)
+  - **50+ Regex Patterns**: Dates, fees, eligibility, documents
+  - **Trust Scorer**: .gov.in=1.0, aggregators=0.7, others=0.3
+  - **Facts Engine**: Extracts structured data from raw results
+  - **Content Scraper**: URL scraping for detailed info
+- ✅ **DS-Talk NLG** (`ai/nlg/`)
+  - **100+ Templates**: Hindi & English for jobs, schemes, results
+  - **Response Planner**: Decides sections to include
+  - **Surface Realizer**: Converts plans to natural text
+  - **Style Controller**: formal/friendly/concise/chatbot modes
+  - **Synonym Dictionary**: Word variation for natural feel
+  - **Safety Checker**: Content validation
+- ✅ **Hyperparameter Configuration** (`ai/config/`)
+  - **YAML Config**: All hyperparameters in one file
+  - **ConfigManager**: `config.get("model.training.learning_rate")`
+  - **Model Registry**: Track trained models & versions
+  - **Validation**: Automatic hyperparameter validation
+- ✅ **Training Infrastructure**
+  - **Jupyter Notebooks**: `notebooks/` for experiments
+  - **Raw Data**: `ai/data/raw/` (intent samples, job catalog)
+  - **Model Storage**: `models/checkpoints/`, `models/production/`
+
 ### Phase 8: Advanced AI/ML Architecture (Completed - January 2026)
 - ✅ **Job/Yojana Recommendation Engine** (`ai/job_recommender.py`)
   - **LambdaMART Ranker**: Gradient-boosted decision trees with NDCG optimization via LightGBM
@@ -283,6 +314,8 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
 - ✅ ai_improvements (batch learning patterns)
 - ✅ ai_project_context (project structure analysis)
 - ✅ ai_web_search_cache (cached search results)
+- ✅ ai_search_cache (DS-Search results cache)
+- ✅ ai_learned_knowledge (learned from web searches)
 - ✅ matching_logs (user behavior tracking)
 - ✅ matching_rules (dynamic rule weights)
 - ✅ matching_heuristics (learned patterns)
@@ -372,6 +405,10 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
 - **Portal Training**: Learns from government portal datasets
 - **Continuous Improvement**: Gets smarter with every interaction
 - **API Ready**: Productized as Apply AI Engine v1 for SaaS
+- **DS-Search v2.0**: Intelligent search with policy routing & trust scoring
+- **Evidence Extractor**: Transforms raw results into structured facts
+- **DS-Talk NLG**: 100+ templates for natural Hindi/English responses
+- **YAML Config**: Centralized hyperparameter management
 ---
 
 ## Technical Stack
@@ -401,6 +438,10 @@ Digital Sahayak - India's First AI-Assisted "One-Click" Job & Yojana Apply Ecosy
 | Summarizer | `summarizer.py` | `AdvancedSummarizer`, `T5Summarizer` | Abstractive Hindi/English |
 | Intent Classifier | `intent_classifier.py` | `AdvancedIntentClassifier`, `DistilBERTIntentClassifier` | 19 intents, ensemble |
 | Validator | `validator.py` | `AdvancedDocumentValidator`, `CNNDocumentClassifier` | OCR + quality checks |
+| DS-Search | `ai/search/` | `DSSearch`, `PolicyRouter`, `ResultRanker` | Intelligent web search v2.0 |
+| Evidence Extractor | `ai/evidence/` | `EvidenceExtractor`, `TrustScorer` | Facts extraction from search |
+| DS-Talk NLG | `ai/nlg/` | `DSTalk`, `ResponsePlanner`, `SurfaceRealizer` | 100+ templates, Hindi/English |
+| Config Manager | `ai/config/` | `ConfigManager`, `get_hyperparams()` | YAML-based hyperparameters |
 
 ## Admin Credentials
 - Phone: 6200184827

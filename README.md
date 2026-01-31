@@ -8,6 +8,9 @@ A comprehensive platform connecting citizens with government schemes and job opp
 - **Yojana Discovery**: Browse and search government schemes (Yojanas)
 - **Job Listings**: Explore available job opportunities
 - **Digital Sahayak AI**: Custom-built AI for intelligent job matching and recommendations
+- **DS-Search**: Intelligent web search with policy-based query routing
+- **Evidence Extractor**: Converts raw search results into structured facts
+- **DS-Talk NLG**: Natural language generation with 100+ Hindi/English templates
 - **Hybrid Matching Engine**: Rule-based + ML approach for accurate matching
 - **Form Intelligence**: Smart form filling and error prediction
 - **Self-Learning System**: Continuously improves from user interactions
@@ -26,9 +29,11 @@ A comprehensive platform connecting citizens with government schemes and job opp
 **Backend**
 - Python FastAPI server
 - **Digital Sahayak AI** - Custom ML engine built from scratch
+- **DS-Search v2.0** - Intelligent search with Evidence Extractor & DS-Talk NLG
 - MongoDB for data persistence
 - Hybrid Matching Engine (Rule-based + Heuristics + ML)
 - Form Intelligence System (Field classification & error prediction)
+- YAML-based Hyperparameter Configuration
 - RESTful API architecture
 
 **Tools & Libraries**
@@ -50,17 +55,25 @@ Digital-Sahayak/
 │   │   └── lib/          # Utility functions
 │   └── plugins/          # Webpack and build plugins
 ├── backend/              # Python FastAPI server
-│   ├── server_refactored.py  # Main application (modular)
+│   ├── server.py         # Main application
 │   ├── ai_learning_system.py # Digital Sahayak AI core
-│   ├── config/          # Configuration files
-│   ├── models/          # Data models
-│   ├── routes/          # API endpoints
-│   ├── services/        # Business logic (AI engines)
-│   ├── middleware/      # Authentication
-│   ├── utils/           # Helper functions
-│   └── requirements.txt # Python dependencies
-├── memory/              # Documentation and PRD
-└── tests/              # Test files
+│   ├── ai/               # AI Modules
+│   │   ├── config/       # Hyperparameters (YAML) & model registry
+│   │   ├── search/       # DS-Search (policy, crawler, ranker, cache)
+│   │   ├── evidence/     # Evidence Extractor (facts engine)
+│   │   ├── nlg/          # DS-Talk NLG (100+ templates)
+│   │   ├── data/         # Training data (raw, processed)
+│   │   └── training/     # Model training configs
+│   ├── models/           # Data models & checkpoints
+│   │   ├── checkpoints/  # Training checkpoints
+│   │   ├── production/   # Production models
+│   │   └── experiments/  # Experimental models
+│   ├── notebooks/        # Jupyter notebooks for experiments
+│   ├── routes/           # API endpoints
+│   ├── services/         # Business logic
+│   └── requirements.txt  # Python dependencies
+├── memory/               # Documentation and PRD
+└── tests/                # Test files
 ```
 
 ## Getting Started
@@ -133,7 +146,20 @@ Our custom-built **Digital Sahayak AI** is developed from scratch and includes:
 - **Smart Auto-fill**: Suggests values based on user profile
 - **Portal Training**: Learns from portal-specific form datasets
 
-### 📊 Continuous Learning
+### � DS-Search v2.0
+- **Policy Router**: Decides when to search web vs use cached knowledge
+- **Query Generator**: Optimizes queries for Indian government portals
+- **Smart Crawler**: Extracts content with trust scoring (.gov.in = 1.0)
+- **Evidence Extractor**: Transforms raw results into structured facts
+- **DS-Talk NLG**: 100+ Hindi/English templates for natural responses
+- **Result Ranker**: Re-ranks results based on relevance and trust
+
+### ⚙️ Configuration Management
+- **YAML-based Hyperparameters**: Easy to modify without code changes
+- **Model Registry**: Track trained models and versions
+- **Jupyter Notebooks**: Experiments and training
+
+### �📊 Continuous Learning
 - Tracks user interactions (applied, ignored, saved jobs/schemes)
 - Updates matching patterns based on successful applications
 - Improves recommendations over time
