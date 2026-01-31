@@ -1104,6 +1104,12 @@ app.add_middleware(
 async def startup():
     global chat_ai
     
+    # Setup admin routes (Admin stats, Content drafts, Scraper)
+    setup_admin_routes(
+        api_router, db, openai_client, get_admin_user, get_current_user,
+        job_scraper, rewrite_content_with_ai, generate_slug, get_unique_slug
+    )
+    
     # Setup advanced routes (DS-Search, Self-Learning AI)
     self_learning_ai = setup_advanced_routes(
         app, api_router, db, openai_client, get_current_user, SelfLearningAI
