@@ -1032,7 +1032,7 @@ async def ai_rewrite_draft(draft_id: str, admin: dict = Depends(get_admin_user))
         raise HTTPException(status_code=404, detail="Draft not found")
     
     content_type = draft.get("content_type", "job")
-    rewritten = await rewrite_content_with_ai(draft, content_type)
+    rewritten = await rewrite_content_with_ai(openai_client, draft, content_type)
     
     # Update draft with rewritten content
     await db.content_drafts.update_one(
