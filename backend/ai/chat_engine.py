@@ -1567,65 +1567,112 @@ class AIResponseGenerator:
         return response
     
     def _get_job_info(self, message: str, language: str) -> str:
-        """Get job information"""
+        """Get general job information (fallback when specific job not matched)"""
         message_lower = message.lower()
         
         if "ssc" in message_lower:
-            return """📋 **SSC (Staff Selection Commission)**
+            return """📋 **SSC (Staff Selection Commission) - सभी परीक्षाएं**
 
-🎯 **Popular Exams**:
-• SSC CGL - Graduate Level (₹25,500 - ₹1,51,100)
-• SSC CHSL - 12th Pass (₹25,500 - ₹81,100)
-• SSC MTS - 10th Pass (₹18,000 - ₹56,900)
-• SSC GD - Constable (₹21,700 - ₹69,100)
+🎯 **Available Exams:**
 
-📅 **Exam Pattern**:
-• Tier 1: Online (100 marks, 60 min)
-• Tier 2: Online (200 marks, 120 min)
-• Tier 3: Descriptive (pen & paper)
+1️⃣ **SSC MTS** (10th Pass)
+   • Posts: Peon, Daftary, Mali
+   • Salary: ₹18,000 - ₹56,900
+   
+2️⃣ **SSC CHSL** (12th Pass)
+   • Posts: LDC, DEO, PA/SA
+   • Salary: ₹25,500 - ₹81,100
 
-📝 **Apply**: ssc.nic.in
+3️⃣ **SSC CGL** (Graduate)
+   • Posts: Inspector, Assistant, Tax Officer
+   • Salary: ₹25,500 - ₹1,51,100
 
-💡 *Latest notifications के लिए 'Jobs' section देखें।*"""
+4️⃣ **SSC GD** (10th Pass + Physical)
+   • Posts: BSF, CISF, CRPF Constable
+   • Salary: ₹21,700 - ₹69,100
+
+🔗 **Website:** ssc.nic.in
+
+💡 *किसी specific exam के बारे में पूछें जैसे "SSC MTS eligibility" या "SSC CGL salary"*"""
 
         elif "upsc" in message_lower:
             return """📋 **UPSC (Union Public Service Commission)**
 
-🎯 **Major Exams**:
-• Civil Services (IAS/IPS/IFS)
-• CDS - Combined Defence Services
-• NDA - National Defence Academy
-• CAPF - Central Armed Police Forces
+🎯 **Major Exams:**
 
-📅 **Civil Services Pattern**:
-• Prelims: Objective (GS + CSAT)
-• Mains: Descriptive (9 papers)
-• Interview: Personality Test
+1️⃣ **Civil Services (IAS/IPS)**
+   • Education: Graduate
+   • Age: 21-32 years
+   • Salary: ₹56,100 - ₹2,50,000
 
-📝 **Apply**: upsc.gov.in
+2️⃣ **NDA** (Army/Navy/Air Force)
+   • Education: 12th Pass
+   • Age: 16.5-19.5 years
+   • For: Defence Officers
 
-💡 *Preparation tips के लिए मुझसे पूछें!*"""
+3️⃣ **CDS** (Combined Defence)
+   • Education: Graduate
+   • Age: 19-25 years
+   
+4️⃣ **CAPF** (Police Forces)
+   • Education: Graduate
+   • Posts: AC in BSF, CRPF etc.
+
+🔗 **Website:** upsc.gov.in
+
+💡 *"UPSC eligibility", "NDA age limit" जैसे specific questions पूछें!*"""
 
         elif "railway" in message_lower:
-            return """📋 **Railway Recruitment**
+            return """🚂 **Railway Recruitment - सभी भर्तियां**
 
-🎯 **Popular Posts**:
-• RRB NTPC - Graduate Posts (₹35,400+)
-• RRB Group D - 10th Pass (₹18,000+)
-• RRB JE - Junior Engineer
-• RRB ALP - Loco Pilot
+🎯 **Popular Exams:**
 
-📅 **Apply Process**:
-1. RRB Zone website पर जाएं
-2. One-time registration करें
-3. Online form भरें
-4. Admit card download करें
+1️⃣ **RRB Group D** (10th Pass)
+   • Posts: Helper, Track Maintainer
+   • Salary: ₹18,000 - ₹56,900
 
-📝 **Websites**: rrbcdg.gov.in (zone-wise)
+2️⃣ **RRB NTPC** (Graduate)
+   • Posts: Station Master, Clerk
+   • Salary: ₹19,900 - ₹1,12,400
 
-💡 *Railway jobs में 7th Pay Commission benefits मिलते हैं!*"""
+3️⃣ **RRB ALP** (10th + ITI)
+   • Posts: Loco Pilot, Technician
+   • Salary: ₹19,900 - ₹63,200
 
-        return "नौकरी की जानकारी के लिए 'Jobs' section देखें या specific exam का नाम बताएं। 💼"
+4️⃣ **RRB JE** (Diploma/B.Tech)
+   • Posts: Junior Engineer
+   • Salary: ₹35,400+
+
+🔗 **Website:** rrbcdg.gov.in (zone-wise)
+
+💡 *Railway 7th Pay Commission + DA/HRA benefits देता है!*"""
+
+        elif "bank" in message_lower:
+            return """🏦 **Bank Jobs - बैंक भर्तियां**
+
+🎯 **Popular Exams:**
+
+1️⃣ **IBPS PO** (Graduate)
+   • Posts: Probationary Officer
+   • Salary: ₹52,000 - ₹55,000 (approx)
+
+2️⃣ **IBPS Clerk** (Graduate)
+   • Posts: Clerical Cadre
+   • Salary: ₹28,000 - ₹32,000
+
+3️⃣ **SBI PO** (Graduate)
+   • Posts: SBI Officers
+   • Salary: ₹60,000 - ₹65,000 (metro)
+
+4️⃣ **SBI Clerk** (Graduate)
+   • Posts: SBI Clerks
+   • Salary: ₹26,000 - ₹30,000
+
+🔗 **Website:** ibps.in | sbi.co.in
+
+💡 *"Bank PO eligibility" या "IBPS salary" पूछ सकते हैं!*"""
+
+        return "💼 नौकरी की जानकारी के लिए specific exam का नाम बताएं जैसे SSC MTS, Railway NTPC, Bank PO आदि।"
     
     def _generate_contextual_response(self, message: str, context: List[Dict], 
                                        user_profile: Dict, language: str) -> str:
