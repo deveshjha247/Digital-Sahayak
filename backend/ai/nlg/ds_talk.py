@@ -3,17 +3,31 @@ DS-Talk: Main Orchestrator
 ==========================
 Converts structured facts into natural language responses.
 Coordinates planner, surface realizer, style, and safety modules.
+Enhanced with regional Hindi, urgency detection, and messaging templates.
 """
 
 import logging
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+from datetime import datetime
 
 from .planner import ResponsePlanner, plan_sections
 from .surface import SurfaceRealizer, realise_section
 from .style import StyleController, StyleConfig, StyleTone, get_style
 from .safety import SafetyChecker, check_safety
 from .synonyms import get_emoji
+from .templates_enhanced import (
+    get_greeting,
+    get_urgency_template,
+    get_urgency_level,
+    get_regional_template,
+    get_messaging_template,
+    get_category_template,
+    get_conversational_template,
+    get_state_name,
+    get_salary_template,
+    get_qualification_text
+)
 
 logger = logging.getLogger(__name__)
 
@@ -306,3 +320,194 @@ def compose_full(
     """
     ds_talk = DSTalk(style=style)
     return ds_talk.compose(facts, language, source_texts)
+
+
+# ===================== ENHANCED COMPOSE FUNCTIONS =====================
+
+def compose_with_greeting(
+    facts: Dict[str, Any],
+    language: str = "hi",
+    style: str = "default"
+) -> str:
+    """
+    Compose answer with time-appropriate greeting.
+    
+    Args:
+        facts: Structured facts
+        language: 'hi' or 'en'
+        style: Style preset
+        
+    Returns:
+        Composed text with greeting
+    """
+    greeting = get_greeting(language)
+    ds_talk = DSTalk(style=style)
+    response = ds_talk.compose_quick(facts, language)
+    return f"{greeting}\n\n{response}"
+
+
+def compose_with_urgency(
+    facts: Dict[str, Any],
+    days_left: int,
+    language: str = "hi",
+    style: str = "default"
+) -> str:
+    """
+    Compose answer with urgency indicator.
+    
+    Args:
+        facts: Structured facts
+        days_left: Days left for deadline
+        language: 'hi' or 'en'
+        style: Style preset
+        
+    Returns:
+        Composed text with urgency
+    """
+    urgency_text = get_urgency_template(days_left, language)
+    ds_talk = DSTalk(style=style)
+    response = ds_talk.compose_quick(facts, language)
+    return f"{urgency_text}\n\n{response}"
+
+
+def compose_regional(
+    facts: Dict[str, Any],
+    region: str,
+    language: str = "hi",
+    style: str = "default"
+) -> str:
+    """
+    Compose answer with regional Hindi variation.
+    
+    Args:
+        facts: Structured facts
+        region: Region code ('bihar', 'up', 'jharkhand', etc.)
+        language: 'hi' or 'en'
+        style: Style preset
+        
+    Returns:
+        Composed text with regional flavor
+    """
+    greeting = get_regional_template(region, "greeting", language)
+    ds_talk = DSTalk(style=style)
+    response = ds_talk.compose_quick(facts, language)
+    closing = get_regional_template(region, "closing", language)
+    
+    parts = []
+    if greeting:
+        parts.append(greeting)
+    parts.append(response)
+    if closing:
+        parts.append(closing)
+    
+    return "\n\n".join(parts)
+
+
+def compose_for_messaging(
+    facts: Dict[str, Any],
+    template_type: str = "job_alert",
+    language: str = "hi"
+) -> str:
+    """
+    Compose short message for any messaging platform.
+    Works with WhatsApp, Telegram, SMS, Custom Chat, etc.
+    
+    Args:
+        facts: Structured facts
+        template_type: 'job_alert', 'result_alert', 'admit_card', 'reminder', etc.
+        language: 'hi' or 'en'
+        
+    Returns:
+        Short formatted message
+    """
+    template = get_messaging_template(template_type, language)
+    
+    if template:
+        return template.format(
+            title=facts.get("title", ""),
+            last_date=facts.get("last_date", ""),
+            vacancies=facts.get("vacancies", ""),
+            link=facts.get("link", facts.get("links", [""])[0] if facts.get("links") else ""),
+            exam_date=facts.get("exam_date", ""),
+            benefit=facts.get("benefit", ""),
+            days=facts.get("days_left", "")
+        )
+    
+    # Fallback to regular compose
+    ds_talk = DSTalk(style="quick")
+    return ds_talk.compose_quick(facts, language)
+
+
+def compose_conversational(
+    facts: Dict[str, Any],
+    user_query: str,
+    language: str = "hi",
+    style: str = "chatbot"
+) -> str:
+    """
+    Compose conversational response for chatbot.
+    
+    Args:
+        facts: Structured facts
+        user_query: Original user query
+        language: 'hi' or 'en'
+        style: Style preset
+        
+    Returns:
+        Conversational response
+    """
+    if not facts:
+        no_info = get_conversational_template("no_info", language)
+        if no_info:
+            return no_info.format(query=user_query)
+        return "जानकारी नहीं मिली।" if language == "hi" else "Information not found."
+    
+    # Opening
+    question_response = get_conversational_template("question_response", language)
+    if question_response:
+        opening = question_response.format(title=facts.get("title", user_query))
+    else:
+        opening = ""
+    
+    # Main content
+    ds_talk = DSTalk(style=style)
+    content = ds_talk.compose_quick(facts, language)
+    
+    # Follow up
+    follow_up = get_conversational_template("follow_up", language)
+    
+    parts = [p for p in [opening, content, follow_up] if p]
+    return "\n\n".join(parts)
+
+
+def compose_category_specific(
+    facts: Dict[str, Any],
+    category: str,
+    language: str = "hi",
+    style: str = "default"
+) -> str:
+    """
+    Compose answer with category-specific opening.
+    
+    Args:
+        facts: Structured facts
+        category: Job category ('railway', 'bank', 'ssc', 'police', 'defence', etc.)
+        language: 'hi' or 'en'
+        style: Style preset
+        
+    Returns:
+        Composed text with category-specific intro
+    """
+    category_intro = get_category_template(category, language)
+    
+    if category_intro:
+        intro = category_intro.format(title=facts.get("title", ""))
+    else:
+        intro = ""
+    
+    ds_talk = DSTalk(style=style)
+    content = ds_talk.compose_quick(facts, language)
+    
+    if intro:
+        return f"{intro}\n\n{content}"
+    return content
