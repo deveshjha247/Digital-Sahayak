@@ -320,6 +320,274 @@ class OGDIndiaScraper:
             logger.error(f"Error normalizing employment record: {e}")
             return None
     
+    # ===================== RAILWAY DATA =====================
+    
+    async def fetch_railway_data(
+        self, 
+        zone: Optional[str] = None,
+        limit: int = 100
+    ) -> List[Dict]:
+        """
+        Fetch Railway employment and recruitment data
+        
+        Args:
+            zone: Filter by railway zone (CR, ER, NR, etc.)
+            limit: Max records
+            
+        Returns:
+            List of railway records
+        """
+        all_records = []
+        
+        for resource_key in OGD_CONFIG['categories']['railway']:
+            resource_id = OGD_CONFIG['resources'].get(resource_key)
+            if not resource_id:
+                continue
+            
+            filters = {}
+            if zone:
+                filters['filters[zone]'] = zone
+            
+            data = await self.fetch_resource(
+                resource_id=resource_id,
+                limit=limit,
+                filters=filters
+            )
+            
+            records = data.get('records', [])
+            
+            for record in records:
+                normalized = self._normalize_railway_record(record, resource_key)
+                if normalized:
+                    all_records.append(normalized)
+        
+        # Also load from local training data
+        local_data = await self._load_local_railway_data()
+        all_records.extend(local_data)
+        
+        logger.info(f"Fetched {len(all_records)} railway records")
+        return all_records
+    
+    def _normalize_railway_record(self, record: Dict, source: str) -> Optional[Dict]:
+        """Normalize railway record to standard format"""
+        try:
+            return {
+                "id": record.get('id') or record.get('_id'),
+                "title": record.get('title') or record.get('post_name') or "Railway Recruitment",
+                "organization": "Indian Railways",
+                "zone": record.get('zone') or record.get('railway_zone'),
+                "zone_name": record.get('zone_name'),
+                "vacancies": int(record.get('vacancies') or record.get('total_posts') or record.get('number') or 0),
+                "year": record.get('year'),
+                "qualification": record.get('qualification') or record.get('eligibility'),
+                "last_date": record.get('last_date') or record.get('closing_date'),
+                "salary": record.get('salary') or record.get('pay_scale'),
+                "rrb": record.get('rrb') or record.get('recruitment_board'),
+                "category": "railway",
+                "source": f"data.gov.in/{source}",
+                "source_url": record.get('link') or "https://indianrailways.gov.in",
+                "fetched_at": datetime.utcnow().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error normalizing railway record: {e}")
+            return None
+    
+    async def _load_local_railway_data(self) -> List[Dict]:
+        """Load railway data from local training file"""
+        try:
+            import json
+            data_path = Path(__file__).parent.parent / "raw" / "government_employment_data.json"
+            
+            if not data_path.exists():
+                return []
+            
+            with open(data_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            records = []
+            railway_data = data.get('railway_employment', {})
+            
+            # Add zone information
+            for zone in railway_data.get('zones', []):
+                records.append({
+                    "type": "zone_info",
+                    "code": zone.get('code'),
+                    "name": zone.get('name'),
+                    "name_hi": zone.get('name_hi'),
+                    "headquarters": zone.get('headquarters'),
+                    "category": "railway",
+                    "source": "local_training_data"
+                })
+            
+            # Add yearly employment data
+            for year_data in railway_data.get('yearly_data', []):
+                records.append({
+                    "type": "employment_stats",
+                    "year": year_data.get('year'),
+                    "total_employees": year_data.get('total'),
+                    "central_zone": year_data.get('central'),
+                    "eastern_zone": year_data.get('eastern'),
+                    "northern_zone": year_data.get('northern'),
+                    "southern_zone": year_data.get('southern'),
+                    "western_zone": year_data.get('western'),
+                    "category": "railway",
+                    "source": "local_training_data"
+                })
+            
+            # Add RRB exam data
+            rrb_data = data.get('railway_recruitment', {})
+            for exam in rrb_data.get('exams', []):
+                records.append({
+                    "type": "recruitment_exam",
+                    "title": exam.get('name'),
+                    "title_hi": exam.get('name_hi'),
+                    "full_name": exam.get('full_name'),
+                    "eligibility": exam.get('eligibility'),
+                    "age_limit": exam.get('age_limit'),
+                    "posts": exam.get('posts', []),
+                    "annual_vacancies": exam.get('annual_vacancies'),
+                    "salary_range": exam.get('salary_range'),
+                    "category": "railway",
+                    "source": "local_training_data"
+                })
+            
+            return records
+        except Exception as e:
+            logger.error(f"Error loading local railway data: {e}")
+            return []
+    
+    # ===================== SSC/UPSC DATA =====================
+    
+    async def fetch_ssc_data(self, limit: int = 100) -> List[Dict]:
+        """Fetch SSC recruitment data"""
+        records = []
+        
+        # Load from local training data
+        try:
+            import json
+            data_path = Path(__file__).parent.parent / "raw" / "government_employment_data.json"
+            
+            if data_path.exists():
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                for exam in data.get('ssc_recruitment', {}).get('exams', []):
+                    records.append({
+                        "title": exam.get('name'),
+                        "title_hi": exam.get('name_hi'),
+                        "full_name": exam.get('full_name'),
+                        "eligibility": exam.get('eligibility'),
+                        "age_limit": exam.get('age_limit'),
+                        "posts": exam.get('posts', []),
+                        "annual_vacancies": exam.get('annual_vacancies'),
+                        "salary_range": exam.get('salary_range'),
+                        "organization": "Staff Selection Commission",
+                        "category": "ssc",
+                        "source": "ssc.nic.in",
+                        "source_url": "https://ssc.nic.in"
+                    })
+        except Exception as e:
+            logger.error(f"Error loading SSC data: {e}")
+        
+        return records
+    
+    async def fetch_upsc_data(self, limit: int = 100) -> List[Dict]:
+        """Fetch UPSC recruitment data"""
+        records = []
+        
+        try:
+            import json
+            data_path = Path(__file__).parent.parent / "raw" / "government_employment_data.json"
+            
+            if data_path.exists():
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                for exam in data.get('upsc_recruitment', {}).get('exams', []):
+                    records.append({
+                        "title": exam.get('name'),
+                        "title_hi": exam.get('name_hi'),
+                        "full_name": exam.get('full_name'),
+                        "eligibility": exam.get('eligibility'),
+                        "age_limit": exam.get('age_limit'),
+                        "attempts": exam.get('attempts'),
+                        "posts": exam.get('posts', []),
+                        "annual_vacancies": exam.get('annual_vacancies'),
+                        "salary_range": exam.get('salary_range'),
+                        "organization": "Union Public Service Commission",
+                        "category": "upsc",
+                        "source": "upsc.gov.in",
+                        "source_url": "https://upsc.gov.in"
+                    })
+        except Exception as e:
+            logger.error(f"Error loading UPSC data: {e}")
+        
+        return records
+    
+    async def fetch_banking_data(self, limit: int = 100) -> List[Dict]:
+        """Fetch Banking recruitment data"""
+        records = []
+        
+        try:
+            import json
+            data_path = Path(__file__).parent.parent / "raw" / "government_employment_data.json"
+            
+            if data_path.exists():
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                for exam in data.get('banking_recruitment', {}).get('exams', []):
+                    records.append({
+                        "title": exam.get('name'),
+                        "title_hi": exam.get('name_hi'),
+                        "full_name": exam.get('full_name'),
+                        "eligibility": exam.get('eligibility'),
+                        "age_limit": exam.get('age_limit'),
+                        "posts": exam.get('posts', []),
+                        "annual_vacancies": exam.get('annual_vacancies'),
+                        "salary_range": exam.get('salary_range'),
+                        "organization": "IBPS/SBI/RBI",
+                        "category": "banking",
+                        "source": "ibps.in",
+                        "source_url": "https://ibps.in"
+                    })
+        except Exception as e:
+            logger.error(f"Error loading banking data: {e}")
+        
+        return records
+    
+    async def fetch_state_psc_data(self, state: str = None, limit: int = 100) -> List[Dict]:
+        """Fetch State PSC data"""
+        records = []
+        
+        try:
+            import json
+            data_path = Path(__file__).parent.parent / "raw" / "government_employment_data.json"
+            
+            if data_path.exists():
+                with open(data_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                for psc in data.get('state_psc_data', {}).get('states', []):
+                    if state and psc.get('state', '').lower() != state.lower():
+                        continue
+                    
+                    records.append({
+                        "state": psc.get('state'),
+                        "psc_name": psc.get('psc'),
+                        "name_hi": psc.get('name_hi'),
+                        "website": psc.get('website'),
+                        "major_exams": psc.get('major_exams', []),
+                        "annual_vacancies": psc.get('annual_vacancies'),
+                        "organization": psc.get('psc'),
+                        "category": "state_psc",
+                        "source": psc.get('website')
+                    })
+        except Exception as e:
+            logger.error(f"Error loading state PSC data: {e}")
+        
+        return records
+
     # ===================== SCHEMES DATA =====================
     
     async def fetch_schemes_data(
