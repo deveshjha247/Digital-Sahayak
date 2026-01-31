@@ -1,0 +1,74 @@
+[
+  {
+    "scheme_id": "pm_kisan",
+    "name": "PM-KISAN",
+    "name_hi": "पीएम-किसान सम्मान निधि",
+    "category": "Agriculture",
+    "benefit_amount": 6000,
+    "benefit_type": "Direct Cash Transfer",
+    "eligibility": {
+      "occupation": ["Farmer"],
+      "land_requirement": true,
+      "income_limit": null
+    },
+    "documents": ["Aadhar Card", "Land Records", "Bank Account"],
+    "state": "All India"
+  },
+  {
+    "scheme_id": "ayushman_bharat",
+    "name": "Ayushman Bharat",
+    "name_hi": "आयुष्मान भारत",
+    "category": "Health",
+    "benefit_amount": 500000,
+    "benefit_type": "Health Insurance",
+    "eligibility": {
+      "income_category": ["BPL"],
+      "secc_listed": true
+    },
+    "documents": ["Aadhar Card", "Ration Card", "Income Certificate"],
+    "state": "All India"
+  },
+  {
+    "scheme_id": "pm_ujjwala",
+    "name": "PM Ujjwala Yojana",
+    "name_hi": "पीएम उज्ज्वला योजना",
+    "category": "Energy",
+    "benefit_amount": 1600,
+    "benefit_type": "Free LPG Connection",
+    "eligibility": {
+      "gender": ["Female"],
+      "income_category": ["BPL"],
+      "no_existing_lpg": true
+    },
+    "documents": ["Aadhar Card", "BPL Card", "Bank Account"],
+    "state": "All India"
+  },
+  {
+    "scheme_id": "pm_mudra",
+    "name": "PM MUDRA Yojana",
+    "name_hi": "पीएम मुद्रा योजना",
+    "category": "Business",
+    "benefit_amount": 1000000,
+    "benefit_type": "Business Loan",
+    "eligibility": {
+      "business_owner": true,
+      "non_farm_activity": true
+    },
+    "documents": ["Aadhar Card", "PAN Card", "Business Plan", "Bank Statement"],
+    "state": "All India"
+  },
+  {
+    "scheme_id": "sukanya_samriddhi",
+    "name": "Sukanya Samriddhi Yojana",
+    "name_hi": "सुकन्या समृद्धि योजना",
+    "category": "Savings",
+    "benefit_amount": null,
+    "benefit_type": "Savings Account",
+    "eligibility": {
+      "beneficiary_gender": ["Female"],
+      "beneficiary_age_max": 10
+    },
+    "documents": ["Birth Certificate", "Aadhar Card", "Parent Aadhar"],
+    "state": "All India"
+  }
+]

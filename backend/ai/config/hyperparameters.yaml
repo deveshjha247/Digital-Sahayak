@@ -1,0 +1,217 @@
+# ============================================================
+# Digital Sahayak AI - Hyperparameters Configuration
+# ============================================================
+# This file contains all hyperparameters for ML models.
+# Modify these values instead of changing code directly.
+# ============================================================
+
+version: "1.0.0"
+last_updated: "2026-01-31"
+
+# ============================================================
+# GLOBAL SETTINGS
+# ============================================================
+global:
+  seed: 42
+  device: "auto"  # auto, cpu, cuda, mps
+  mixed_precision: true
+  num_workers: 4
+  pin_memory: true
+  deterministic: false
+
+# ============================================================
+# INTENT CLASSIFIER MODEL
+# ============================================================
+intent_classifier:
+  # Model Architecture
+  model:
+    type: "transformer"  # transformer, lstm, cnn
+    pretrained_model: "ai4bharat/indic-bert"
+    hidden_size: 768
+    num_labels: 15
+    dropout: 0.3
+    use_attention: true
+    
+  # Training Parameters
+  training:
+    epochs: 10
+    batch_size: 32
+    learning_rate: 2.0e-5
+    weight_decay: 0.01
+    warmup_steps: 500
+    max_grad_norm: 1.0
+    
+  # Optimizer
+  optimizer:
+    type: "adamw"  # adam, adamw, sgd, rmsprop
+    betas: [0.9, 0.999]
+    eps: 1.0e-8
+    
+  # Scheduler
+  scheduler:
+    type: "linear_warmup"  # linear_warmup, cosine, step, plateau
+    warmup_ratio: 0.1
+    
+  # Early Stopping
+  early_stopping:
+    enabled: true
+    patience: 3
+    min_delta: 0.001
+    monitor: "val_loss"
+
+# ============================================================
+# FIELD CLASSIFIER MODEL (Document Field Detection)
+# ============================================================
+field_classifier:
+  # Model Architecture
+  model:
+    type: "cnn"  # cnn, resnet, efficientnet
+    backbone: "resnet18"
+    pretrained: true
+    num_classes: 20
+    dropout: 0.5
+    
+  # Training Parameters
+  training:
+    epochs: 50
+    batch_size: 16
+    learning_rate: 1.0e-4
+    weight_decay: 1.0e-4
+    
+  # Optimizer
+  optimizer:
+    type: "adam"
+    betas: [0.9, 0.999]
+    
+  # Scheduler
+  scheduler:
+    type: "step"
+    step_size: 10
+    gamma: 0.5
+    
+  # Data Augmentation
+  augmentation:
+    enabled: true
+    rotation_range: 15
+    zoom_range: 0.1
+    horizontal_flip: false
+    brightness_range: [0.8, 1.2]
+
+# ============================================================
+# JOB RECOMMENDER MODEL
+# ============================================================
+job_recommender:
+  # Model Architecture
+  model:
+    type: "two_tower"  # two_tower, matrix_factorization, neural_cf
+    embedding_dim: 128
+    hidden_layers: [256, 128, 64]
+    dropout: 0.2
+    use_features: true
+    
+  # Training Parameters
+  training:
+    epochs: 20
+    batch_size: 256
+    learning_rate: 1.0e-3
+    weight_decay: 1.0e-5
+    negative_samples: 5
+    
+  # Loss Function
+  loss:
+    type: "bpr"  # bpr, cross_entropy, triplet
+    margin: 0.5
+    
+  # Optimizer
+  optimizer:
+    type: "adam"
+    
+  # Evaluation
+  evaluation:
+    metrics: ["ndcg@10", "hit_rate@10", "mrr"]
+    eval_batch_size: 512
+
+# ============================================================
+# CONTENT REWRITER MODEL
+# ============================================================
+content_rewriter:
+  # Model Architecture
+  model:
+    type: "seq2seq"
+    encoder: "mbart"
+    decoder: "mbart"
+    max_length: 512
+    
+  # Training Parameters
+  training:
+    epochs: 5
+    batch_size: 8
+    learning_rate: 5.0e-5
+    gradient_accumulation_steps: 4
+    
+  # Generation Parameters
+  generation:
+    max_new_tokens: 256
+    num_beams: 4
+    temperature: 0.7
+    top_p: 0.9
+    repetition_penalty: 1.2
+
+# ============================================================
+# OCR & DOCUMENT PROCESSING
+# ============================================================
+document_processor:
+  ocr:
+    engine: "tesseract"  # tesseract, easyocr, paddleocr
+    languages: ["hin", "eng"]
+    confidence_threshold: 0.6
+    
+  preprocessing:
+    deskew: true
+    denoise: true
+    binarize: true
+    resize_max: 2000
+
+# ============================================================
+# DATA PROCESSING
+# ============================================================
+data:
+  # Train/Val/Test Split
+  split:
+    train_ratio: 0.8
+    val_ratio: 0.1
+    test_ratio: 0.1
+    stratify: true
+    
+  # Text Preprocessing
+  text:
+    max_length: 256
+    lowercase: false
+    remove_punctuation: false
+    remove_stopwords: false
+    
+  # Data Augmentation (Text)
+  text_augmentation:
+    enabled: true
+    synonym_replacement: true
+    random_insertion: false
+    random_swap: false
+    back_translation: false
+    augmentation_factor: 2
+
+# ============================================================
+# LOGGING & CHECKPOINTS
+# ============================================================
+logging:
+  level: "INFO"
+  tensorboard: true
+  wandb:
+    enabled: false
+    project: "digital-sahayak"
+    entity: null
+    
+checkpoints:
+  save_dir: "models/checkpoints"
+  save_best_only: true
+  save_every_n_epochs: 5
+  max_checkpoints: 3

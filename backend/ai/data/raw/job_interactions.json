@@ -1,0 +1,90 @@
+[
+  {
+    "user_id": "user_001",
+    "education": "Graduate",
+    "age": 25,
+    "state": "Bihar",
+    "caste_category": "OBC",
+    "gender": "Male",
+    "job_id": "job_ssc_cgl_2025",
+    "interaction": "applied",
+    "timestamp": "2026-01-15T10:30:00"
+  },
+  {
+    "user_id": "user_001",
+    "education": "Graduate",
+    "age": 25,
+    "state": "Bihar",
+    "caste_category": "OBC",
+    "gender": "Male",
+    "job_id": "job_railway_ntpc",
+    "interaction": "saved",
+    "timestamp": "2026-01-16T14:20:00"
+  },
+  {
+    "user_id": "user_002",
+    "education": "12th",
+    "age": 20,
+    "state": "UP",
+    "caste_category": "General",
+    "gender": "Female",
+    "job_id": "job_ssc_chsl_2025",
+    "interaction": "clicked",
+    "timestamp": "2026-01-17T09:15:00"
+  },
+  {
+    "user_id": "user_002",
+    "education": "12th",
+    "age": 20,
+    "state": "UP",
+    "caste_category": "General",
+    "gender": "Female",
+    "job_id": "job_bank_clerk",
+    "interaction": "applied",
+    "timestamp": "2026-01-18T11:00:00"
+  },
+  {
+    "user_id": "user_003",
+    "education": "10th",
+    "age": 19,
+    "state": "Rajasthan",
+    "caste_category": "SC",
+    "gender": "Male",
+    "job_id": "job_railway_group_d",
+    "interaction": "applied",
+    "timestamp": "2026-01-19T16:45:00"
+  },
+  {
+    "user_id": "user_003",
+    "education": "10th",
+    "age": 19,
+    "state": "Rajasthan",
+    "caste_category": "SC",
+    "gender": "Male",
+    "job_id": "job_army_gd",
+    "interaction": "saved",
+    "timestamp": "2026-01-20T08:30:00"
+  },
+  {
+    "user_id": "user_004",
+    "education": "Post-Graduate",
+    "age": 28,
+    "state": "Maharashtra",
+    "caste_category": "OBC",
+    "gender": "Female",
+    "job_id": "job_upsc_cse",
+    "interaction": "applied",
+    "timestamp": "2026-01-21T12:00:00"
+  },
+  {
+    "user_id": "user_005",
+    "education": "Graduate",
+    "age": 24,
+    "state": "MP",
+    "caste_category": "ST",
+    "gender": "Male",
+    "job_id": "job_bank_po",
+    "interaction": "clicked",
+    "timestamp": "2026-01-22T15:30:00"
+  }
+]

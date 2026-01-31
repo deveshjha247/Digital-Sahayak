@@ -1,0 +1,69 @@
+# ============================================================
+# Digital Sahayak AI - Model Registry
+# ============================================================
+# Track all trained models, their versions, and metadata.
+# ============================================================
+
+version: "1.0.0"
+
+# Model storage paths
+paths:
+  base_dir: "models"
+  checkpoints: "models/checkpoints"
+  production: "models/production"
+  experiments: "models/experiments"
+
+# ============================================================
+# REGISTERED MODELS
+# ============================================================
+models:
+  intent_classifier:
+    name: "Intent Classifier"
+    description: "Classifies user intent from Hindi/English text"
+    current_version: null  # No model trained yet
+    versions: []
+    # Example version entry:
+    # - version: "1.0.0"
+    #   path: "models/production/intent_classifier_v1.0.0.pt"
+    #   created: "2026-01-31"
+    #   metrics:
+    #     accuracy: 0.92
+    #     f1_score: 0.89
+    #   hyperparams_hash: "abc123"
+    
+  field_classifier:
+    name: "Document Field Classifier"
+    description: "Detects and classifies fields in document images"
+    current_version: null
+    versions: []
+    
+  job_recommender:
+    name: "Job Recommender"
+    description: "Recommends jobs based on user profile"
+    current_version: null
+    versions: []
+    
+  content_rewriter:
+    name: "Content Rewriter"
+    description: "Rewrites content for simplification"
+    current_version: null
+    versions: []
+
+# ============================================================
+# EXPERIMENT TRACKING
+# ============================================================
+experiments:
+  # Latest experiments will be logged here
+  latest: []
+  # Example:
+  # - id: "exp_001"
+  #   model: "intent_classifier"
+  #   timestamp: "2026-01-31T10:30:00"
+  #   hyperparams:
+  #     learning_rate: 2e-5
+  #     batch_size: 32
+  #   metrics:
+  #     train_loss: 0.15
+  #     val_loss: 0.22
+  #     accuracy: 0.91
+  #   notes: "Baseline experiment"
