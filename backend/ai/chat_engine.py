@@ -1652,29 +1652,164 @@ class AIResponseGenerator:
         return self._generate_contextual_response(user_message, context, user_profile, language)
     
     def _handle_specific_queries(self, message: str, user_profile: Dict, language: str) -> Optional[str]:
-        """Handle specific types of queries with smart detection"""
+        """
+        Handle specific types of queries with smart detection.
+        This is the BRAIN of Digital Sahayak AI - checks all knowledge bases.
+        """
         message_lower = message.lower()
         
-        # Check for specific job/exam queries FIRST (most important)
+        # ===== 1. CHECK GENERAL KNOWLEDGE (What/When/How type questions) =====
+        gk_response = self._check_general_knowledge(message_lower, language)
+        if gk_response:
+            return gk_response
+        
+        # ===== 2. CHECK INDIA KNOWLEDGE (States, Cities, Universities, etc.) =====
+        india_response = self._check_india_knowledge(message_lower, language)
+        if india_response:
+            return india_response
+        
+        # ===== 3. CHECK JOB/EXAM QUERIES =====
         job_response = self._get_specific_job_info(message_lower, language)
         if job_response:
             return job_response
         
-        # Scheme specific queries
+        # ===== 4. CHECK SCHEME QUERIES =====
         for scheme_key, scheme_data in KnowledgeBase.SCHEMES_KNOWLEDGE.items():
             if scheme_key.replace("_", " ") in message_lower or \
                scheme_data['name'].lower() in message_lower:
                 return self._format_scheme_info(scheme_data, language)
         
-        # Eligibility calculation
+        # ===== 5. CHECK ELIGIBILITY =====
         if "eligible" in message_lower or "पात्र" in message_lower:
             if user_profile:
                 return self._check_eligibility(user_profile, language)
         
-        # Document help
+        # ===== 6. CHECK DOCUMENT QUERIES =====
         for doc_key, doc_data in KnowledgeBase.DOCUMENTS.items():
             if doc_key in message_lower or doc_data['hindi'] in message:
                 return self._format_document_info(doc_data, language)
+        
+        return None
+    
+    def _check_general_knowledge(self, message: str, language: str) -> Optional[str]:
+        """Check if query matches any general knowledge pattern"""
+        import re
+        
+        for key, data in KnowledgeBase.GENERAL_KNOWLEDGE.items():
+            for pattern in data.get('patterns', []):
+                if re.search(pattern, message, re.IGNORECASE):
+                    return data.get(f'answer_{language}', data.get('answer_hi', data.get('answer_en')))
+        
+        return None
+    
+    def _check_india_knowledge(self, message: str, language: str) -> Optional[str]:
+        """Check queries about India - states, cities, universities, boards, etc."""
+        message_lower = message.lower()
+        india_kb = KnowledgeBase.INDIA_KNOWLEDGE
+        
+        # ===== STATE QUERIES =====
+        # "Bihar ka capital kya hai", "UP mein kitne district hain", etc.
+        for state_key, state_data in india_kb.get("states", {}).items():
+            state_name = state_data.get("name", "").lower()
+            state_hindi = state_data.get("hindi", "").lower()
+            
+            # Check if state is mentioned
+            if state_name in message_lower or state_hindi in message_lower or state_key in message_lower:
+                
+                # Capital query
+                if any(word in message_lower for word in ["capital", "rajdhani", "राजधानी", "कैपिटल"]):
+                    cap = state_data.get("capital_hi" if language == "hi" else "capital", state_data.get("capital"))
+                    return f"🏛️ **{state_data['name']}** ({state_data.get('hindi', '')}) की राजधानी **{cap}** है।"
+                
+                # District query
+                if any(word in message_lower for word in ["district", "jila", "जिला", "kitne district", "कितने जिले"]):
+                    districts = state_data.get("districts", "N/A")
+                    return f"📍 **{state_data['name']}** में कुल **{districts} जिले** हैं।\n\n🏙️ **प्रमुख शहर:** {', '.join(state_data.get('major_cities', [])[:5])}"
+                
+                # Board query
+                if any(word in message_lower for word in ["board", "बोर्ड", "exam board"]):
+                    board = state_data.get("board", "N/A")
+                    psc = state_data.get("psc", "")
+                    response = f"📚 **{state_data['name']} Education Board:** {board}\n"
+                    if psc:
+                        response += f"🏛️ **State PSC:** {psc}"
+                    return response
+                
+                # University query
+                if any(word in message_lower for word in ["university", "vishwavidyalaya", "विश्वविद्यालय", "college"]):
+                    unis = state_data.get("universities", [])
+                    if unis:
+                        response = f"🎓 **{state_data['name']} के प्रमुख विश्वविद्यालय:**\n\n"
+                        for uni in unis[:8]:
+                            response += f"• {uni}\n"
+                        return response
+                
+                # CM query
+                if any(word in message_lower for word in ["cm", "chief minister", "मुख्यमंत्री", "mukhyamantri"]):
+                    cm = state_data.get("cm", "N/A")
+                    return f"👤 **{state_data['name']} के मुख्यमंत्री:** {cm}"
+                
+                # General state info
+                if any(word in message_lower for word in ["about", "bataao", "batao", "बताओ", "info", "jankari", "जानकारी"]):
+                    response = f"📍 **{state_data['name']}** ({state_data.get('hindi', '')})\n\n"
+                    response += f"🏛️ **राजधानी:** {state_data.get('capital_hi', state_data.get('capital', 'N/A'))}\n"
+                    response += f"📊 **जिले:** {state_data.get('districts', 'N/A')}\n"
+                    response += f"📚 **Board:** {state_data.get('board', 'N/A')}\n"
+                    response += f"🏛️ **PSC:** {state_data.get('psc', 'N/A')}\n"
+                    if state_data.get('cm'):
+                        response += f"👤 **CM:** {state_data.get('cm')}\n"
+                    response += f"\n🏙️ **प्रमुख शहर:** {', '.join(state_data.get('major_cities', [])[:5])}"
+                    return response
+        
+        # ===== BOARD QUERIES =====
+        for board_key, board_data in india_kb.get("boards", {}).items():
+            board_name = board_data.get("name", "").lower()
+            
+            if board_name in message_lower or board_key in message_lower:
+                # Result query - needs web search
+                if any(word in message_lower for word in ["result", "रिजल्ट", "परिणाम"]):
+                    return None  # Trigger web search
+                
+                # Date query - needs web search
+                if any(word in message_lower for word in ["date", "तारीख", "exam date", "kab"]):
+                    return None  # Trigger web search
+                
+                # General info
+                response = f"📚 **{board_data['name']}** - {board_data.get('full_name', '')}\n"
+                response += f"({board_data.get('hindi', '')})\n\n"
+                response += f"📝 **Exams:** {', '.join(board_data.get('exams', []))}\n"
+                response += f"🌐 **Website:** {board_data.get('website', 'N/A')}\n"
+                if board_data.get('result_site'):
+                    response += f"📊 **Result Site:** {board_data.get('result_site')}"
+                return response
+        
+        # ===== ENTRANCE EXAM QUERIES =====
+        entrance_exams = india_kb.get("entrance_exams", {})
+        for category, exams in entrance_exams.items():
+            for exam_name, exam_data in exams.items():
+                if exam_name.lower() in message_lower:
+                    response = f"🎯 **{exam_name}**"
+                    if exam_data.get("full"):
+                        response += f" - {exam_data['full']}"
+                    response += "\n\n"
+                    if exam_data.get("for"):
+                        response += f"📝 **For:** {exam_data['for']}\n"
+                    if exam_data.get("conducted_by"):
+                        response += f"🏛️ **Conducted by:** {exam_data['conducted_by']}\n"
+                    
+                    # If asking about dates/schedule - needs web
+                    if any(word in message_lower for word in ["date", "schedule", "kab", "registration"]):
+                        return None  # Trigger web search
+                    
+                    return response
+        
+        # ===== ORGANIZATION QUERIES =====
+        for org_key, org_data in india_kb.get("organizations", {}).items():
+            if org_key in message_lower or org_data.get("name", "").lower() in message_lower:
+                response = f"🏛️ **{org_data['name']}** - {org_data.get('full', '')}\n"
+                response += f"({org_data.get('hindi', '')})\n\n"
+                response += f"🌐 **Website:** {org_data.get('website', 'N/A')}"
+                return response
         
         return None
     
