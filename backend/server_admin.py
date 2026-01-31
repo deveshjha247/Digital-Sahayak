@@ -419,5 +419,215 @@ def setup_admin_routes(
         )
         return {"message": "Document deleted"}
 
+    # ===================== OGD INDIA (Data.gov.in) ENDPOINTS =====================
+    
+    from ai.data.scrapers import OGDIndiaScraper
+    import os
+    
+    # Lazy load OGD scraper
+    _ogd_scraper = None
+    
+    async def get_ogd_scraper():
+        nonlocal _ogd_scraper
+        if _ogd_scraper is None:
+            api_key = os.getenv('OGD_API_KEY')
+            _ogd_scraper = OGDIndiaScraper(api_key=api_key, db=db)
+        return _ogd_scraper
+    
+    @api_router.get("/admin/ogd/employment")
+    async def fetch_ogd_employment(
+        admin: dict = Depends(get_admin_user),
+        state: str = Query(None, description="Filter by state (Bihar, UP, etc.)"),
+        limit: int = Query(50, description="Max records to fetch")
+    ):
+        """
+        Fetch employment data from Data.gov.in
+        Source: Open Government Data Platform India
+        """
+        try:
+            scraper = await get_ogd_scraper()
+            data = await scraper.fetch_employment_data(state=state, limit=limit)
+            return {
+                "success": True,
+                "source": "data.gov.in",
+                "records": data,
+                "count": len(data),
+                "state_filter": state
+            }
+        except Exception as e:
+            logger.error(f"OGD employment fetch error: {e}")
+            raise HTTPException(500, f"Error fetching employment data: {str(e)}")
+    
+    @api_router.get("/admin/ogd/schemes")
+    async def fetch_ogd_schemes(
+        admin: dict = Depends(get_admin_user),
+        state: str = Query(None, description="Filter by state"),
+        category: str = Query(None, description="Category: welfare, education, health")
+    ):
+        """
+        Fetch government schemes from Data.gov.in
+        """
+        try:
+            scraper = await get_ogd_scraper()
+            data = await scraper.fetch_schemes_data(state=state, category=category)
+            return {
+                "success": True,
+                "source": "data.gov.in",
+                "records": data,
+                "count": len(data),
+                "filters": {"state": state, "category": category}
+            }
+        except Exception as e:
+            logger.error(f"OGD schemes fetch error: {e}")
+            raise HTTPException(500, f"Error fetching schemes: {str(e)}")
+    
+    @api_router.get("/admin/ogd/welfare")
+    async def fetch_ogd_welfare(
+        admin: dict = Depends(get_admin_user),
+        welfare_type: str = Query(None, description="Type: pension, scholarship, health"),
+        state: str = Query(None, description="Filter by state")
+    ):
+        """
+        Fetch social welfare data (pension, scholarship, health schemes)
+        """
+        try:
+            scraper = await get_ogd_scraper()
+            data = await scraper.fetch_welfare_data(welfare_type=welfare_type, state=state)
+            return {
+                "success": True,
+                "source": "data.gov.in",
+                "records": data,
+                "count": len(data),
+                "filters": {"welfare_type": welfare_type, "state": state}
+            }
+        except Exception as e:
+            logger.error(f"OGD welfare fetch error: {e}")
+            raise HTTPException(500, f"Error fetching welfare data: {str(e)}")
+    
+    @api_router.get("/admin/ogd/search")
+    async def search_ogd_datasets(
+        admin: dict = Depends(get_admin_user),
+        query: str = Query(..., description="Search query"),
+        sector: str = Query(None, description="Sector filter")
+    ):
+        """
+        Search Data.gov.in catalog for datasets
+        """
+        try:
+            scraper = await get_ogd_scraper()
+            results = await scraper.search_datasets(query=query, sector=sector)
+            return {
+                "success": True,
+                "source": "data.gov.in",
+                "query": query,
+                "results": results,
+                "count": len(results)
+            }
+        except Exception as e:
+            logger.error(f"OGD search error: {e}")
+            raise HTTPException(500, f"Error searching datasets: {str(e)}")
+    
+    @api_router.post("/admin/ogd/fetch-all")
+    async def fetch_all_ogd_data(
+        background_tasks: BackgroundTasks,
+        admin: dict = Depends(get_admin_user),
+        state: str = Query(None, description="Filter by state"),
+        save_to_drafts: bool = Query(True, description="Save to content drafts")
+    ):
+        """
+        Fetch ALL data from Data.gov.in (employment, schemes, welfare)
+        Saves to draft queue for review
+        """
+        async def fetch_and_save():
+            try:
+                scraper = await get_ogd_scraper()
+                all_data = await scraper.fetch_all_data(state=state)
+                
+                saved_count = 0
+                
+                if save_to_drafts:
+                    # Save employment as job drafts
+                    for record in all_data.get('employment', []):
+                        if record.get('title'):
+                            draft_doc = {
+                                "id": str(uuid.uuid4()),
+                                "title": record.get('title'),
+                                "organization": record.get('organization'),
+                                "qualification": record.get('qualification'),
+                                "vacancies": record.get('vacancies', 0),
+                                "salary": record.get('salary'),
+                                "last_date": record.get('last_date'),
+                                "apply_link": record.get('source_url'),
+                                "source_url": record.get('source_url'),
+                                "state": record.get('state', 'all'),
+                                "category": "government",
+                                "content_type": "job",
+                                "status": "pending",
+                                "source": "data.gov.in",
+                                "is_rewritten": False,
+                                "created_at": datetime.now(timezone.utc).isoformat()
+                            }
+                            await db.content_drafts.insert_one(draft_doc)
+                            saved_count += 1
+                    
+                    # Save schemes as yojana drafts
+                    for record in all_data.get('schemes', []) + all_data.get('welfare', []):
+                        if record.get('name'):
+                            draft_doc = {
+                                "id": str(uuid.uuid4()),
+                                "name": record.get('name'),
+                                "name_hi": record.get('name_hi'),
+                                "ministry": record.get('ministry'),
+                                "description": record.get('description'),
+                                "benefits": record.get('benefits'),
+                                "eligibility": record.get('eligibility'),
+                                "documents_required": record.get('documents_required', []),
+                                "apply_link": record.get('apply_link'),
+                                "source_url": record.get('source_url'),
+                                "state": record.get('state', 'all'),
+                                "category": record.get('category', 'welfare'),
+                                "content_type": "yojana",
+                                "status": "pending",
+                                "source": "data.gov.in",
+                                "is_rewritten": False,
+                                "created_at": datetime.now(timezone.utc).isoformat()
+                            }
+                            await db.content_drafts.insert_one(draft_doc)
+                            saved_count += 1
+                
+                # Garbage collection
+                gc.collect()
+                
+                logger.info(f"OGD fetch complete: {saved_count} drafts created")
+                
+                # Log the fetch
+                await db.scrape_logs.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "source": "data.gov.in",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "total_fetched": all_data.get('total_records', 0),
+                    "drafts_created": saved_count,
+                    "state_filter": state,
+                    "status": "success"
+                })
+                
+            except Exception as e:
+                logger.error(f"OGD fetch-all error: {e}")
+                await db.scrape_logs.insert_one({
+                    "id": str(uuid.uuid4()),
+                    "source": "data.gov.in",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "error": str(e),
+                    "status": "failed"
+                })
+        
+        background_tasks.add_task(fetch_and_save)
+        return {
+            "success": True,
+            "message": "OGD data fetch started - content will be saved to draft queue",
+            "status": "processing",
+            "state_filter": state
+        }
+
     logger.info("Admin routes initialized")
     return True
