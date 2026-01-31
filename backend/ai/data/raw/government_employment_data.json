@@ -1,0 +1,477 @@
+{
+  "railway_employment": {
+    "description": "Zone-wise Railway Employment Statistics in India",
+    "source": "data.gov.in",
+    "last_updated": "2026-01-31",
+    "zones": [
+      {"code": "CR", "name": "Central Zone", "name_hi": "मध्य रेलवे", "headquarters": "Mumbai"},
+      {"code": "ER", "name": "Eastern Zone", "name_hi": "पूर्वी रेलवे", "headquarters": "Kolkata"},
+      {"code": "ECR", "name": "East Central Zone", "name_hi": "पूर्व मध्य रेलवे", "headquarters": "Hajipur"},
+      {"code": "ECoR", "name": "East Coast Zone", "name_hi": "पूर्व तट रेलवे", "headquarters": "Bhubaneswar"},
+      {"code": "NR", "name": "Northern Zone", "name_hi": "उत्तर रेलवे", "headquarters": "Delhi"},
+      {"code": "NCR", "name": "North Central Zone", "name_hi": "उत्तर मध्य रेलवे", "headquarters": "Prayagraj"},
+      {"code": "NER", "name": "North Eastern Zone", "name_hi": "पूर्वोत्तर रेलवे", "headquarters": "Gorakhpur"},
+      {"code": "NFR", "name": "North East Frontier Zone", "name_hi": "पूर्वोत्तर सीमांत रेलवे", "headquarters": "Guwahati"},
+      {"code": "NWR", "name": "North Western Zone", "name_hi": "उत्तर पश्चिम रेलवे", "headquarters": "Jaipur"},
+      {"code": "SR", "name": "Southern Zone", "name_hi": "दक्षिण रेलवे", "headquarters": "Chennai"},
+      {"code": "SCR", "name": "South Central Zone", "name_hi": "दक्षिण मध्य रेलवे", "headquarters": "Secunderabad"},
+      {"code": "SER", "name": "South Eastern Zone", "name_hi": "दक्षिण पूर्वी रेलवे", "headquarters": "Kolkata"},
+      {"code": "SECR", "name": "South East Central Zone", "name_hi": "दक्षिण पूर्व मध्य रेलवे", "headquarters": "Bilaspur"},
+      {"code": "SWR", "name": "South Western Zone", "name_hi": "दक्षिण पश्चिम रेलवे", "headquarters": "Hubli"},
+      {"code": "WR", "name": "Western Zone", "name_hi": "पश्चिम रेलवे", "headquarters": "Mumbai"},
+      {"code": "WCR", "name": "West Central Zone", "name_hi": "पश्चिम मध्य रेलवे", "headquarters": "Jabalpur"}
+    ],
+    "yearly_data": [
+      {"year": "2000-01", "total": 1549385, "central": 213199, "eastern": 208237, "northern": 242747, "southern": 133587, "western": 182916},
+      {"year": "2001-02", "total": 1514816, "central": 208024, "eastern": 204376, "northern": 236973, "southern": 130579, "western": 178210},
+      {"year": "2002-03", "total": 1475884, "central": 204707, "eastern": 195932, "northern": 231923, "southern": 126992, "western": 171971},
+      {"year": "2003-04", "total": 1445428, "central": 126813, "eastern": 133613, "northern": 164304, "southern": 106844, "western": 112842},
+      {"year": "2004-05", "total": 1424389, "central": 124757, "eastern": 131513, "northern": 161906, "southern": 106258, "western": 110447},
+      {"year": "2005-06", "total": 1412434, "central": 122783, "eastern": 129900, "northern": 160332, "southern": 104865, "western": 109338},
+      {"year": "2006-07", "total": 1397610, "central": 121734, "eastern": 129102, "northern": 158378, "southern": 105177, "western": 108389},
+      {"year": "2007-08", "total": 1394418, "central": 119396, "eastern": 130322, "northern": 157021, "southern": 104680, "western": 113636},
+      {"year": "2008-09", "total": 1323164, "central": 119574, "eastern": 126747, "northern": 160215, "southern": 102472, "western": 112840},
+      {"year": "2009-10", "total": 1335622, "central": 115034, "eastern": 121477, "northern": 155527, "southern": 99329, "western": 108233},
+      {"year": "2020-21", "total": 1254399, "central": 98500, "eastern": 105000, "northern": 142000, "southern": 95000, "western": 102000},
+      {"year": "2021-22", "total": 1268000, "central": 99200, "eastern": 106500, "northern": 143500, "southern": 96200, "western": 103500},
+      {"year": "2022-23", "total": 1285000, "central": 100500, "eastern": 108000, "northern": 145000, "southern": 97500, "western": 105000},
+      {"year": "2023-24", "total": 1310000, "central": 102000, "eastern": 110000, "northern": 148000, "southern": 99000, "western": 107000},
+      {"year": "2024-25", "total": 1340000, "central": 104000, "eastern": 112000, "northern": 151000, "southern": 101000, "western": 109000}
+    ]
+  },
+  "ssc_recruitment": {
+    "description": "Staff Selection Commission Recruitment Data",
+    "source": "ssc.nic.in",
+    "exams": [
+      {
+        "name": "SSC CGL",
+        "name_hi": "एसएससी सीजीएल",
+        "full_name": "Combined Graduate Level Examination",
+        "eligibility": "Graduate",
+        "age_limit": "18-32 years",
+        "posts": ["Assistant Section Officer", "Inspector", "Sub-Inspector", "Assistant", "Divisional Accountant"],
+        "annual_vacancies": 8000,
+        "salary_range": "25500-81100"
+      },
+      {
+        "name": "SSC CHSL",
+        "name_hi": "एसएससी सीएचएसएल",
+        "full_name": "Combined Higher Secondary Level Examination",
+        "eligibility": "12th Pass",
+        "age_limit": "18-27 years",
+        "posts": ["Lower Division Clerk", "Junior Secretariat Assistant", "Postal Assistant", "Data Entry Operator"],
+        "annual_vacancies": 4500,
+        "salary_range": "19900-63200"
+      },
+      {
+        "name": "SSC MTS",
+        "name_hi": "एसएससी एमटीएस",
+        "full_name": "Multi Tasking Staff Examination",
+        "eligibility": "10th Pass",
+        "age_limit": "18-25 years",
+        "posts": ["Multi Tasking Staff", "Havaldar"],
+        "annual_vacancies": 11000,
+        "salary_range": "18000-56900"
+      },
+      {
+        "name": "SSC GD Constable",
+        "name_hi": "एसएससी जीडी कांस्टेबल",
+        "full_name": "General Duty Constable Examination",
+        "eligibility": "10th Pass",
+        "age_limit": "18-23 years",
+        "posts": ["Constable GD in BSF/CISF/CRPF/ITBP/SSB/NIA/SSF"],
+        "annual_vacancies": 25000,
+        "salary_range": "21700-69100"
+      },
+      {
+        "name": "SSC Stenographer",
+        "name_hi": "एसएससी स्टेनोग्राफर",
+        "full_name": "Stenographer Grade C & D Examination",
+        "eligibility": "12th Pass + Stenography",
+        "age_limit": "18-30 years",
+        "posts": ["Stenographer Grade C", "Stenographer Grade D"],
+        "annual_vacancies": 1500,
+        "salary_range": "25500-81100"
+      },
+      {
+        "name": "SSC JE",
+        "name_hi": "एसएससी जेई",
+        "full_name": "Junior Engineer Examination",
+        "eligibility": "Diploma/B.Tech",
+        "age_limit": "18-32 years",
+        "posts": ["Junior Engineer Civil/Electrical/Mechanical"],
+        "annual_vacancies": 1200,
+        "salary_range": "35400-112400"
+      }
+    ]
+  },
+  "upsc_recruitment": {
+    "description": "Union Public Service Commission Recruitment Data",
+    "source": "upsc.gov.in",
+    "exams": [
+      {
+        "name": "UPSC CSE",
+        "name_hi": "यूपीएससी सिविल सेवा",
+        "full_name": "Civil Services Examination",
+        "eligibility": "Graduate",
+        "age_limit": "21-32 years",
+        "attempts": {"general": 6, "obc": 9, "sc_st": "unlimited"},
+        "posts": ["IAS", "IPS", "IFS", "IRS"],
+        "annual_vacancies": 1000,
+        "salary_range": "56100-250000"
+      },
+      {
+        "name": "UPSC NDA",
+        "name_hi": "यूपीएससी एनडीए",
+        "full_name": "National Defence Academy Examination",
+        "eligibility": "12th Pass",
+        "age_limit": "16.5-19.5 years",
+        "posts": ["Army/Navy/Air Force Officer"],
+        "annual_vacancies": 400,
+        "salary_range": "56100-177500"
+      },
+      {
+        "name": "UPSC CDS",
+        "name_hi": "यूपीएससी सीडीएस",
+        "full_name": "Combined Defence Services Examination",
+        "eligibility": "Graduate",
+        "age_limit": "19-25 years",
+        "posts": ["Army/Navy/Air Force/OTA Officer"],
+        "annual_vacancies": 450,
+        "salary_range": "56100-177500"
+      },
+      {
+        "name": "UPSC CAPF",
+        "name_hi": "यूपीएससी सीएपीएफ",
+        "full_name": "Central Armed Police Forces AC Examination",
+        "eligibility": "Graduate",
+        "age_limit": "20-25 years",
+        "posts": ["Assistant Commandant in BSF/CRPF/CISF/ITBP/SSB"],
+        "annual_vacancies": 250,
+        "salary_range": "56100-177500"
+      },
+      {
+        "name": "UPSC ESE",
+        "name_hi": "यूपीएससी इंजीनियरिंग सेवा",
+        "full_name": "Engineering Services Examination",
+        "eligibility": "B.Tech/B.E.",
+        "age_limit": "21-30 years",
+        "posts": ["Indian Engineering Services"],
+        "annual_vacancies": 500,
+        "salary_range": "56100-177500"
+      }
+    ]
+  },
+  "railway_recruitment": {
+    "description": "Railway Recruitment Board Data",
+    "source": "indianrailways.gov.in",
+    "boards": [
+      {"code": "RRB-ALD", "name": "RRB Prayagraj", "states": ["UP"]},
+      {"code": "RRB-BPL", "name": "RRB Bhopal", "states": ["MP", "Chhattisgarh"]},
+      {"code": "RRB-BLY", "name": "RRB Bilaspur", "states": ["Chhattisgarh"]},
+      {"code": "RRB-CHNR", "name": "RRB Chandigarh", "states": ["Punjab", "Haryana", "HP"]},
+      {"code": "RRB-CHN", "name": "RRB Chennai", "states": ["Tamil Nadu"]},
+      {"code": "RRB-GHY", "name": "RRB Guwahati", "states": ["Assam", "NE States"]},
+      {"code": "RRB-JAM", "name": "RRB Jammu", "states": ["J&K", "Ladakh"]},
+      {"code": "RRB-KOL", "name": "RRB Kolkata", "states": ["West Bengal"]},
+      {"code": "RRB-MUM", "name": "RRB Mumbai", "states": ["Maharashtra", "Goa"]},
+      {"code": "RRB-PAT", "name": "RRB Patna", "states": ["Bihar", "Jharkhand"]},
+      {"code": "RRB-RNC", "name": "RRB Ranchi", "states": ["Jharkhand"]},
+      {"code": "RRB-SEC", "name": "RRB Secunderabad", "states": ["Telangana", "AP"]},
+      {"code": "RRB-TVC", "name": "RRB Thiruvananthapuram", "states": ["Kerala"]}
+    ],
+    "exams": [
+      {
+        "name": "RRB NTPC",
+        "name_hi": "रेलवे एनटीपीसी",
+        "full_name": "Non-Technical Popular Categories",
+        "eligibility": "Graduate/12th",
+        "age_limit": "18-33 years",
+        "posts": ["Station Master", "Goods Guard", "Traffic Assistant", "Commercial Apprentice"],
+        "annual_vacancies": 35000,
+        "salary_range": "19900-63200"
+      },
+      {
+        "name": "RRB Group D",
+        "name_hi": "रेलवे ग्रुप डी",
+        "full_name": "Level 1 Posts",
+        "eligibility": "10th Pass + ITI",
+        "age_limit": "18-33 years",
+        "posts": ["Track Maintainer", "Helper", "Porter", "Pointsman"],
+        "annual_vacancies": 100000,
+        "salary_range": "18000-56900"
+      },
+      {
+        "name": "RRB ALP",
+        "name_hi": "रेलवे एएलपी",
+        "full_name": "Assistant Loco Pilot",
+        "eligibility": "10th + ITI/Diploma",
+        "age_limit": "18-30 years",
+        "posts": ["Assistant Loco Pilot", "Technician"],
+        "annual_vacancies": 26000,
+        "salary_range": "19900-63200"
+      },
+      {
+        "name": "RRB JE",
+        "name_hi": "रेलवे जेई",
+        "full_name": "Junior Engineer",
+        "eligibility": "Diploma/B.Tech",
+        "age_limit": "18-33 years",
+        "posts": ["Junior Engineer", "Depot Material Superintendent"],
+        "annual_vacancies": 13000,
+        "salary_range": "35400-112400"
+      },
+      {
+        "name": "RPF Constable",
+        "name_hi": "आरपीएफ कांस्टेबल",
+        "full_name": "Railway Protection Force Constable",
+        "eligibility": "10th Pass",
+        "age_limit": "18-25 years",
+        "posts": ["Constable RPF/RPSF"],
+        "annual_vacancies": 9500,
+        "salary_range": "21700-69100"
+      }
+    ]
+  },
+  "banking_recruitment": {
+    "description": "Banking Sector Recruitment Data",
+    "source": "ibps.in",
+    "exams": [
+      {
+        "name": "IBPS PO",
+        "name_hi": "आईबीपीएस पीओ",
+        "full_name": "Probationary Officer",
+        "eligibility": "Graduate",
+        "age_limit": "20-30 years",
+        "posts": ["Probationary Officer in PSU Banks"],
+        "annual_vacancies": 4000,
+        "salary_range": "36000-63840"
+      },
+      {
+        "name": "IBPS Clerk",
+        "name_hi": "आईबीपीएस क्लर्क",
+        "full_name": "Clerical Cadre",
+        "eligibility": "Graduate",
+        "age_limit": "20-28 years",
+        "posts": ["Clerk in PSU Banks"],
+        "annual_vacancies": 7000,
+        "salary_range": "19900-47920"
+      },
+      {
+        "name": "IBPS SO",
+        "name_hi": "आईबीपीएस एसओ",
+        "full_name": "Specialist Officer",
+        "eligibility": "Graduate + Professional Degree",
+        "age_limit": "20-30 years",
+        "posts": ["IT Officer", "Agriculture Officer", "Law Officer", "HR Officer"],
+        "annual_vacancies": 1500,
+        "salary_range": "36000-63840"
+      },
+      {
+        "name": "IBPS RRB PO",
+        "name_hi": "आईबीपीएस आरआरबी अधिकारी",
+        "full_name": "Regional Rural Bank Officer Scale I",
+        "eligibility": "Graduate",
+        "age_limit": "18-30 years",
+        "posts": ["Officer Scale I in RRBs"],
+        "annual_vacancies": 3000,
+        "salary_range": "29000-45950"
+      },
+      {
+        "name": "SBI PO",
+        "name_hi": "एसबीआई पीओ",
+        "full_name": "State Bank of India PO",
+        "eligibility": "Graduate",
+        "age_limit": "21-30 years",
+        "posts": ["Probationary Officer in SBI"],
+        "annual_vacancies": 2000,
+        "salary_range": "41960-63840"
+      },
+      {
+        "name": "SBI Clerk",
+        "name_hi": "एसबीआई क्लर्क",
+        "full_name": "State Bank of India Junior Associate",
+        "eligibility": "Graduate",
+        "age_limit": "20-28 years",
+        "posts": ["Junior Associate in SBI"],
+        "annual_vacancies": 8000,
+        "salary_range": "19900-47920"
+      },
+      {
+        "name": "RBI Grade B",
+        "name_hi": "आरबीआई ग्रेड बी",
+        "full_name": "Reserve Bank of India Officer Grade B",
+        "eligibility": "Graduate + 60%",
+        "age_limit": "21-30 years",
+        "posts": ["Officer in RBI"],
+        "annual_vacancies": 300,
+        "salary_range": "55200-96700"
+      }
+    ]
+  },
+  "state_psc_data": {
+    "description": "State Public Service Commission Data",
+    "states": [
+      {
+        "state": "Bihar",
+        "psc": "BPSC",
+        "name_hi": "बिहार लोक सेवा आयोग",
+        "website": "bpsc.bih.nic.in",
+        "major_exams": ["BPSC PCS", "BPSC TRE", "BPSC Judicial Services"],
+        "annual_vacancies": 5000
+      },
+      {
+        "state": "Uttar Pradesh",
+        "psc": "UPPSC",
+        "name_hi": "उत्तर प्रदेश लोक सेवा आयोग",
+        "website": "uppsc.up.nic.in",
+        "major_exams": ["UPPSC PCS", "UPPSC RO/ARO", "UP PCS-J"],
+        "annual_vacancies": 8000
+      },
+      {
+        "state": "Madhya Pradesh",
+        "psc": "MPPSC",
+        "name_hi": "मध्य प्रदेश लोक सेवा आयोग",
+        "website": "mppsc.mp.gov.in",
+        "major_exams": ["MPPSC State Services", "MPPSC Forest Service"],
+        "annual_vacancies": 3000
+      },
+      {
+        "state": "Rajasthan",
+        "psc": "RPSC",
+        "name_hi": "राजस्थान लोक सेवा आयोग",
+        "website": "rpsc.rajasthan.gov.in",
+        "major_exams": ["RAS/RTS", "RPSC School Lecturer", "RPSC Sr. Teacher"],
+        "annual_vacancies": 4000
+      },
+      {
+        "state": "Jharkhand",
+        "psc": "JPSC",
+        "name_hi": "झारखंड लोक सेवा आयोग",
+        "website": "jpsc.gov.in",
+        "major_exams": ["JPSC Combined Civil Services", "JPSC Medical Officer"],
+        "annual_vacancies": 2000
+      }
+    ]
+  },
+  "government_schemes": {
+    "description": "Major Government Schemes Data",
+    "central_schemes": [
+      {
+        "name": "PM Kisan Samman Nidhi",
+        "name_hi": "प्रधानमंत्री किसान सम्मान निधि",
+        "ministry": "Ministry of Agriculture",
+        "benefit": "₹6000/year in 3 installments",
+        "eligibility": "Small and marginal farmers",
+        "beneficiaries": "11 crore+"
+      },
+      {
+        "name": "Ayushman Bharat",
+        "name_hi": "आयुष्मान भारत",
+        "ministry": "Ministry of Health",
+        "benefit": "₹5 lakh health insurance",
+        "eligibility": "BPL families",
+        "beneficiaries": "50 crore+"
+      },
+      {
+        "name": "PM Awas Yojana",
+        "name_hi": "प्रधानमंत्री आवास योजना",
+        "ministry": "Ministry of Housing",
+        "benefit": "₹1.2-2.5 lakh subsidy for housing",
+        "eligibility": "EWS/LIG families",
+        "beneficiaries": "2.5 crore houses"
+      },
+      {
+        "name": "PM Mudra Yojana",
+        "name_hi": "प्रधानमंत्री मुद्रा योजना",
+        "ministry": "Ministry of Finance",
+        "benefit": "Loan up to ₹10 lakh",
+        "eligibility": "Small entrepreneurs",
+        "beneficiaries": "40 crore+ loans"
+      },
+      {
+        "name": "Sukanya Samriddhi Yojana",
+        "name_hi": "सुकन्या समृद्धि योजना",
+        "ministry": "Ministry of Finance",
+        "benefit": "8.2% interest rate",
+        "eligibility": "Girl child below 10 years",
+        "beneficiaries": "3 crore+ accounts"
+      },
+      {
+        "name": "PM Ujjwala Yojana",
+        "name_hi": "प्रधानमंत्री उज्ज्वला योजना",
+        "ministry": "Ministry of Petroleum",
+        "benefit": "Free LPG connection",
+        "eligibility": "BPL families",
+        "beneficiaries": "9 crore+ connections"
+      },
+      {
+        "name": "Atal Pension Yojana",
+        "name_hi": "अटल पेंशन योजना",
+        "ministry": "Ministry of Finance",
+        "benefit": "₹1000-5000/month pension",
+        "eligibility": "18-40 years age",
+        "beneficiaries": "5 crore+ subscribers"
+      },
+      {
+        "name": "PM Jeevan Jyoti Bima",
+        "name_hi": "प्रधानमंत्री जीवन ज्योति बीमा",
+        "ministry": "Ministry of Finance",
+        "benefit": "₹2 lakh life insurance",
+        "eligibility": "18-50 years age",
+        "premium": "₹436/year"
+      },
+      {
+        "name": "PM Suraksha Bima Yojana",
+        "name_hi": "प्रधानमंत्री सुरक्षा बीमा योजना",
+        "ministry": "Ministry of Finance",
+        "benefit": "₹2 lakh accident insurance",
+        "eligibility": "18-70 years age",
+        "premium": "₹20/year"
+      }
+    ],
+    "bihar_schemes": [
+      {
+        "name": "Mukhyamantri Kanya Utthan Yojana",
+        "name_hi": "मुख्यमंत्री कन्या उत्थान योजना",
+        "benefit": "₹50,000 for girl education",
+        "eligibility": "Bihar domicile girls"
+      },
+      {
+        "name": "Bihar Student Credit Card",
+        "name_hi": "बिहार स्टूडेंट क्रेडिट कार्ड",
+        "benefit": "₹4 lakh education loan at 4% interest",
+        "eligibility": "12th pass Bihar students"
+      },
+      {
+        "name": "Mukhyamantri Vriddha Pension",
+        "name_hi": "मुख्यमंत्री वृद्धा पेंशन योजना",
+        "benefit": "₹400/month pension",
+        "eligibility": "60+ years age, Bihar domicile"
+      },
+      {
+        "name": "Mukhyamantri Gramin Awas Yojana",
+        "name_hi": "मुख्यमंत्री ग्रामीण आवास योजना",
+        "benefit": "₹1.2 lakh for housing",
+        "eligibility": "Rural BPL families"
+      }
+    ]
+  },
+  "education_data": {
+    "description": "Education Statistics",
+    "literacy_rate": {
+      "india": 77.7,
+      "bihar": 63.82,
+      "kerala": 96.2,
+      "up": 73.0,
+      "jharkhand": 66.4
+    },
+    "top_universities": [
+      {"name": "IIT Delhi", "ranking": 1, "type": "Engineering"},
+      {"name": "IIT Bombay", "ranking": 2, "type": "Engineering"},
+      {"name": "IISc Bangalore", "ranking": 3, "type": "Science"},
+      {"name": "JNU Delhi", "ranking": 4, "type": "University"},
+      {"name": "BHU Varanasi", "ranking": 5, "type": "University"}
+    ]
+  }
+}

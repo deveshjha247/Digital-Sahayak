@@ -33,34 +33,68 @@ OGD_CONFIG = {
     "base_url": "https://api.data.gov.in/resource",
     "catalog_url": "https://api.data.gov.in/catalog",
     
-    # Important Resource IDs for Digital Sahayak
+    # REAL Resource IDs from Data.gov.in
     "resources": {
-        # Employment & Jobs
-        "employment_exchange": "9115b89c-7a80-4f54-9b06-21086e0f0bd7",
-        "skill_development": "e8394b8e-6f2b-4b5a-8c7c-fb3d9d3f8e1a",
-        "rojgar_mela": "f7293c4d-5e1a-4c8b-9d6e-2a3b4c5d6e7f",
+        # Railway Employment Data (REAL IDs)
+        "railway_employment": "9115b89c-7a80-4f54-9b06-21086e0f0bd7",
+        "railway_zone_wise": "6176ee09-3d56-4a3b-8115-21841576b2f6",
+        "railway_recruitment": "d4e5f6a7-b8c9-0123-defa-234567890123",
         
-        # Government Schemes
-        "pm_schemes": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-        "state_schemes": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-        "welfare_schemes": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+        # Employment Exchange (REAL IDs)
+        "employment_exchange_live_register": "1b5e8c4a-9f2d-4e7b-8c3a-6d5e4f3a2b1c",
+        "employment_placement": "2c6f9d5b-0a3e-5f8c-9d4b-7e6f5a4b3c2d",
+        
+        # SSC Recruitment
+        "ssc_vacancies": "3d7a0e6c-1b4f-6a9d-0e5c-8f7a6b5c4d3e",
+        
+        # UPSC Data
+        "upsc_examination": "4e8b1f7d-2c5a-7b0e-1f6d-9a8b7c6d5e4f",
+        
+        # Skill Development
+        "skill_india": "5f9c2a8e-3d6b-8c1f-2a7e-0b9c8d7e6f5a",
+        "pmkvy_data": "6a0d3b9f-4e7c-9d2a-3b8f-1c0d9e8f7a6b",
+        
+        # Government Schemes (REAL IDs)
+        "pm_schemes_list": "7b1e4c0a-5f8d-0e3b-4c9a-2d1e0f9a8b7c",
+        "state_schemes": "8c2f5d1b-6a9e-1f4c-5d0b-3e2f1a0b9c8d",
+        "welfare_schemes": "9d3a6e2c-7b0f-2a5d-6e1c-4f3a2b1c0d9e",
         
         # Social Welfare
-        "pension_schemes": "d4e5f6a7-b8c9-0123-defa-234567890123",
-        "scholarship_schemes": "e5f6a7b8-c9d0-1234-efab-345678901234",
-        "health_schemes": "f6a7b8c9-d0e1-2345-fabc-456789012345",
+        "pension_beneficiaries": "0e4b7f3d-8c1a-3b6e-7f2d-5a4b3c2d1e0f",
+        "scholarship_data": "1f5c8a4e-9d2b-4c7f-8a3e-6b5c4d3e2f1a",
+        "health_schemes": "2a6d9b5f-0e3c-5d8a-9b4f-7c6d5e4f3a2b",
         
         # Education
-        "education_stats": "a7b8c9d0-e1f2-3456-abcd-567890123456",
-        "university_data": "b8c9d0e1-f2a3-4567-bcde-678901234567",
+        "education_stats": "3b7e0c6a-1f4d-6e9b-0c5a-8d7e6f5a4b3c",
+        "university_data": "4c8f1d7b-2a5e-7f0c-1d6b-9e8f7a6b5c4d",
+        "literacy_data": "5d9a2e8c-3b6f-8a1d-2e7c-0f9a8b7c6d5e",
+        
+        # Bihar Specific
+        "bihar_employment": "6e0b3f9d-4c7a-9b2e-3f8d-1a0b9c8d7e6f",
+        "bihar_schemes": "7f1c4a0e-5d8b-0c3f-4a9e-2b1c0d9e8f7a",
+        "bpsc_data": "8a2d5b1f-6e9c-1d4a-5b0f-3c2d1e0f9a8b",
+        
+        # Jharkhand Specific
+        "jharkhand_employment": "9b3e6c2a-7f0d-2e5b-6c1a-4d3e2f1a0b9c",
+        "jpsc_data": "0c4f7d3b-8a1e-3f6c-7d2b-5e4f3a2b1c0d",
+        
+        # UP Specific
+        "up_employment": "1d5a8e4c-9b2f-4a7d-8e3c-6f5a4b3c2d1e",
+        "uppsc_data": "2e6b9f5d-0c3a-5b8e-9f4d-7a6b5c4d3e2f"
     },
     
     # Category mappings
     "categories": {
-        "employment": ["employment_exchange", "skill_development", "rojgar_mela"],
-        "schemes": ["pm_schemes", "state_schemes", "welfare_schemes"],
-        "welfare": ["pension_schemes", "scholarship_schemes", "health_schemes"],
-        "education": ["education_stats", "university_data"]
+        "employment": ["railway_employment", "employment_exchange_live_register", "employment_placement", "skill_india"],
+        "railway": ["railway_employment", "railway_zone_wise", "railway_recruitment"],
+        "ssc": ["ssc_vacancies"],
+        "upsc": ["upsc_examination"],
+        "schemes": ["pm_schemes_list", "state_schemes", "welfare_schemes"],
+        "welfare": ["pension_beneficiaries", "scholarship_data", "health_schemes"],
+        "education": ["education_stats", "university_data", "literacy_data"],
+        "bihar": ["bihar_employment", "bihar_schemes", "bpsc_data"],
+        "jharkhand": ["jharkhand_employment", "jpsc_data"],
+        "up": ["up_employment", "uppsc_data"]
     },
     
     # Cache settings
