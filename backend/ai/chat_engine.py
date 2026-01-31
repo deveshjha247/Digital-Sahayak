@@ -172,6 +172,383 @@ class KnowledgeBase:
         "domicile": {"name": "Domicile Certificate", "hindi": "मूल निवास प्रमाण पत्र"}
     }
     
+    # ==================== DETAILED JOB KNOWLEDGE ====================
+    JOB_KNOWLEDGE = {
+        # SSC Exams
+        "ssc_mts": {
+            "name": "SSC MTS",
+            "full_name": "Multi Tasking Staff",
+            "hindi": "एसएससी एमटीएस",
+            "organization": "Staff Selection Commission",
+            "eligibility": {
+                "education": "10th Pass (Matric/High School)",
+                "education_hi": "10वीं पास (मैट्रिक)",
+                "age_min": 18,
+                "age_max": 25,
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years",
+                    "PwD": "10 years",
+                    "Ex-Servicemen": "3 years after deduction"
+                }
+            },
+            "salary": {
+                "pay_level": "Level 1",
+                "pay_scale": "₹18,000 - ₹56,900",
+                "gross_salary": "₹22,000 - ₹25,000 approx (with DA)"
+            },
+            "posts": ["Peon", "Daftary", "Jamadar", "Junior Gestetner Operator", "Safaiwala", "Mali"],
+            "exam_pattern": {
+                "Paper 1": "Computer Based (100 marks, 90 min)",
+                "Paper 2": "Descriptive - Short Essay/Letter (50 marks, 30 min)",
+                "subjects": ["General Intelligence", "English", "Numerical Aptitude", "General Awareness"]
+            },
+            "apply_link": "https://ssc.nic.in",
+            "selection": ["Computer Based Exam", "Paper 2 (Descriptive)", "Document Verification"]
+        },
+        "ssc_cgl": {
+            "name": "SSC CGL",
+            "full_name": "Combined Graduate Level",
+            "hindi": "एसएससी सीजीएल",
+            "organization": "Staff Selection Commission",
+            "eligibility": {
+                "education": "Bachelor's Degree (Graduation)",
+                "education_hi": "स्नातक (ग्रेजुएशन)",
+                "age_min": 18,
+                "age_max": 32,
+                "age_varies": "Age limit varies by post (20-30 for some)",
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years",
+                    "PwD": "10 years"
+                }
+            },
+            "salary": {
+                "pay_level": "Level 4 to Level 7",
+                "pay_scale": "₹25,500 - ₹1,51,100",
+                "posts_salary": {
+                    "Inspector": "₹44,900 - ₹1,42,400 (Level 7)",
+                    "Assistant": "₹35,400 - ₹1,12,400 (Level 6)",
+                    "Tax Assistant": "₹25,500 - ₹81,100 (Level 4)"
+                }
+            },
+            "posts": ["Inspector (Income Tax/CBI/Customs)", "Assistant (CSS/MEA)", "Tax Assistant", "Auditor", "Sub-Inspector"],
+            "exam_pattern": {
+                "Tier 1": "Computer Based (100 Qs, 200 marks, 60 min)",
+                "Tier 2": "Computer Based (Paper 1,2,3 - varies by post)",
+                "Tier 3": "Descriptive (Essay/Précis/Letter)",
+                "Tier 4": "Skill Test (where applicable)"
+            },
+            "apply_link": "https://ssc.nic.in",
+            "selection": ["Tier 1", "Tier 2", "Tier 3", "Tier 4/Skill Test", "Document Verification"]
+        },
+        "ssc_chsl": {
+            "name": "SSC CHSL",
+            "full_name": "Combined Higher Secondary Level",
+            "hindi": "एसएससी सीएचएसएल",
+            "organization": "Staff Selection Commission",
+            "eligibility": {
+                "education": "12th Pass (Intermediate)",
+                "education_hi": "12वीं पास (इंटरमीडिएट)",
+                "age_min": 18,
+                "age_max": 27,
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years",
+                    "PwD": "10 years"
+                }
+            },
+            "salary": {
+                "pay_level": "Level 2 to Level 4",
+                "pay_scale": "₹25,500 - ₹81,100"
+            },
+            "posts": ["LDC (Lower Division Clerk)", "JSA (Junior Secretariat Assistant)", "PA/SA (Postal Assistant)", "DEO (Data Entry Operator)"],
+            "exam_pattern": {
+                "Tier 1": "Computer Based (100 Qs, 200 marks, 60 min)",
+                "Tier 2": "Descriptive - Essay/Letter (100 marks, 60 min)",
+                "Tier 3": "Typing/Skill Test"
+            },
+            "apply_link": "https://ssc.nic.in"
+        },
+        "ssc_gd": {
+            "name": "SSC GD Constable",
+            "full_name": "General Duty Constable",
+            "hindi": "एसएससी जीडी कांस्टेबल",
+            "organization": "Staff Selection Commission",
+            "eligibility": {
+                "education": "10th Pass (Matric)",
+                "education_hi": "10वीं पास",
+                "age_min": 18,
+                "age_max": 23,
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years"
+                },
+                "physical": {
+                    "height_male": "170 cm",
+                    "height_female": "157 cm",
+                    "chest_male": "80 cm (expanded 85 cm)"
+                }
+            },
+            "salary": {
+                "pay_level": "Level 3",
+                "pay_scale": "₹21,700 - ₹69,100"
+            },
+            "posts": ["BSF", "CISF", "CRPF", "SSB", "ITBP", "AR", "NIA", "SSF"],
+            "exam_pattern": {
+                "CBT": "Computer Based (100 Qs, 160 marks, 60 min)",
+                "PET/PST": "Physical Efficiency Test & Physical Standard Test",
+                "Medical": "Detailed Medical Examination"
+            },
+            "apply_link": "https://ssc.nic.in"
+        },
+        # Railway Exams
+        "rrb_ntpc": {
+            "name": "RRB NTPC",
+            "full_name": "Non-Technical Popular Categories",
+            "hindi": "आरआरबी एनटीपीसी",
+            "organization": "Railway Recruitment Board",
+            "eligibility": {
+                "education": "Graduate (for most posts)",
+                "education_hi": "स्नातक (ज्यादातर पदों के लिए)",
+                "age_min": 18,
+                "age_max": 33,
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years"
+                }
+            },
+            "salary": {
+                "pay_level": "Level 2 to Level 6",
+                "pay_scale": "₹19,900 - ₹1,12,400"
+            },
+            "posts": ["Station Master", "Goods Guard", "Commercial Apprentice", "Clerk", "Traffic Assistant", "Accounts Clerk"],
+            "exam_pattern": {
+                "CBT 1": "Computer Based (100 Qs, 100 marks, 90 min)",
+                "CBT 2": "Computer Based (120 Qs, 120 marks, 90 min)",
+                "Typing Test": "For Clerk posts"
+            },
+            "apply_link": "https://rrbcdg.gov.in"
+        },
+        "rrb_group_d": {
+            "name": "RRB Group D",
+            "full_name": "Railway Group D",
+            "hindi": "रेलवे ग्रुप डी",
+            "organization": "Railway Recruitment Board",
+            "eligibility": {
+                "education": "10th Pass + ITI or 10th Pass (for some)",
+                "education_hi": "10वीं पास + ITI या सिर्फ 10वीं पास",
+                "age_min": 18,
+                "age_max": 33,
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years"
+                }
+            },
+            "salary": {
+                "pay_level": "Level 1",
+                "pay_scale": "₹18,000 - ₹56,900"
+            },
+            "posts": ["Track Maintainer", "Helper", "Porter", "Pointsman", "Gateman"],
+            "exam_pattern": {
+                "CBT": "Computer Based (100 Qs, 100 marks, 90 min)",
+                "PET": "Physical Efficiency Test",
+                "Medical": "Medical Examination"
+            },
+            "apply_link": "https://rrbcdg.gov.in"
+        },
+        "rrb_alp": {
+            "name": "RRB ALP",
+            "full_name": "Assistant Loco Pilot",
+            "hindi": "सहायक लोको पायलट",
+            "organization": "Railway Recruitment Board",
+            "eligibility": {
+                "education": "10th + ITI in relevant trade OR Diploma in Engineering",
+                "education_hi": "10वीं + ITI या इंजीनियरिंग डिप्लोमा",
+                "age_min": 18,
+                "age_max": 30
+            },
+            "salary": {
+                "pay_level": "Level 2",
+                "pay_scale": "₹19,900 - ₹63,200"
+            },
+            "posts": ["Assistant Loco Pilot", "Technician Grade III"],
+            "apply_link": "https://rrbcdg.gov.in"
+        },
+        # Bank Exams
+        "ibps_po": {
+            "name": "IBPS PO",
+            "full_name": "Probationary Officer",
+            "hindi": "आईबीपीएस पीओ",
+            "organization": "Institute of Banking Personnel Selection",
+            "eligibility": {
+                "education": "Graduate in any discipline",
+                "education_hi": "किसी भी विषय में स्नातक",
+                "age_min": 20,
+                "age_max": 30,
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years"
+                }
+            },
+            "salary": {
+                "pay_scale": "₹36,000 - ₹63,840 (Basic)",
+                "gross": "₹52,000 - ₹55,000 approx"
+            },
+            "posts": ["Probationary Officer in PSU Banks"],
+            "exam_pattern": {
+                "Prelims": "Online (100 Qs, 100 marks, 60 min)",
+                "Mains": "Online (155 Qs + Descriptive, 200+25 marks)",
+                "Interview": "Personal Interview"
+            },
+            "apply_link": "https://ibps.in"
+        },
+        "ibps_clerk": {
+            "name": "IBPS Clerk",
+            "full_name": "Clerical Cadre",
+            "hindi": "आईबीपीएस क्लर्क",
+            "organization": "Institute of Banking Personnel Selection",
+            "eligibility": {
+                "education": "Graduate in any discipline",
+                "education_hi": "किसी भी विषय में स्नातक",
+                "age_min": 20,
+                "age_max": 28
+            },
+            "salary": {
+                "pay_scale": "₹19,900 - ₹47,920 (Basic)",
+                "gross": "₹28,000 - ₹32,000 approx"
+            },
+            "posts": ["Clerk in PSU Banks"],
+            "exam_pattern": {
+                "Prelims": "Online (100 Qs, 100 marks, 60 min)",
+                "Mains": "Online (190 Qs, 200 marks, 160 min)"
+            },
+            "apply_link": "https://ibps.in"
+        },
+        "sbi_po": {
+            "name": "SBI PO",
+            "full_name": "State Bank of India Probationary Officer",
+            "hindi": "एसबीआई पीओ",
+            "organization": "State Bank of India",
+            "eligibility": {
+                "education": "Graduate in any discipline",
+                "education_hi": "किसी भी विषय में स्नातक",
+                "age_min": 21,
+                "age_max": 30
+            },
+            "salary": {
+                "pay_scale": "₹41,960 - ₹63,840 (Basic)",
+                "gross": "₹60,000 - ₹65,000 approx (metro)"
+            },
+            "posts": ["Probationary Officer in SBI"],
+            "apply_link": "https://sbi.co.in/careers"
+        },
+        # UPSC Exams
+        "upsc_cse": {
+            "name": "UPSC CSE",
+            "full_name": "Civil Services Examination",
+            "hindi": "यूपीएससी सिविल सेवा",
+            "organization": "Union Public Service Commission",
+            "eligibility": {
+                "education": "Graduate in any discipline from recognized university",
+                "education_hi": "किसी भी मान्यता प्राप्त विश्वविद्यालय से स्नातक",
+                "age_min": 21,
+                "age_max": 32,
+                "attempts": {
+                    "General": "6 attempts",
+                    "OBC": "9 attempts",
+                    "SC/ST": "Unlimited (till age)"
+                },
+                "age_relaxation": {
+                    "OBC": "3 years",
+                    "SC/ST": "5 years"
+                }
+            },
+            "salary": {
+                "IAS": "₹56,100 - ₹2,50,000",
+                "IPS": "₹56,100 - ₹2,25,000",
+                "IFS": "₹56,100 - ₹2,50,000"
+            },
+            "posts": ["IAS", "IPS", "IFS", "IRS", "IRTS", "IDAS", "ICAS"],
+            "exam_pattern": {
+                "Prelims": "Objective (GS Paper 1 + CSAT)",
+                "Mains": "9 Papers - 4 GS + Essay + Optional + Language",
+                "Interview": "Personality Test (275 marks)"
+            },
+            "apply_link": "https://upsc.gov.in"
+        },
+        "upsc_nda": {
+            "name": "UPSC NDA",
+            "full_name": "National Defence Academy",
+            "hindi": "राष्ट्रीय रक्षा अकादमी",
+            "organization": "Union Public Service Commission",
+            "eligibility": {
+                "education": "12th Pass (Science for Air Force & Navy)",
+                "education_hi": "12वीं पास (Air Force/Navy के लिए Science)",
+                "age_min": 16.5,
+                "age_max": 19.5,
+                "gender": "Male & Female",
+                "marital_status": "Unmarried"
+            },
+            "salary": {
+                "during_training": "₹56,100 (Fixed)",
+                "after_commission": "₹56,100 - ₹1,77,500"
+            },
+            "posts": ["Army", "Navy", "Air Force - through NDA"],
+            "exam_pattern": {
+                "Written": "Maths (300) + GAT (600) = 900 marks",
+                "SSB": "5 Days - Psychological + Interview + Group Testing"
+            },
+            "apply_link": "https://upsc.gov.in"
+        },
+        "upsc_cds": {
+            "name": "UPSC CDS",
+            "full_name": "Combined Defence Services",
+            "hindi": "संयुक्त रक्षा सेवा",
+            "organization": "Union Public Service Commission",
+            "eligibility": {
+                "education": "Graduate (Engineering for OTA Technical)",
+                "education_hi": "स्नातक",
+                "age_min": 19,
+                "age_max": 25,
+                "gender": "Male & Female (for OTA)",
+                "marital_status": "Unmarried (for IMA/INA/AFA)"
+            },
+            "posts": ["IMA Dehradun", "OTA Chennai", "INA Ezhimala", "AFA Hyderabad"],
+            "apply_link": "https://upsc.gov.in"
+        },
+        # State PSC
+        "bpsc": {
+            "name": "BPSC",
+            "full_name": "Bihar Public Service Commission",
+            "hindi": "बिहार लोक सेवा आयोग",
+            "organization": "Bihar Government",
+            "eligibility": {
+                "education": "Graduate from recognized university",
+                "education_hi": "मान्यता प्राप्त विश्वविद्यालय से स्नातक",
+                "age_min": 20,
+                "age_max": 37,
+                "domicile": "Bihar Domicile required for some posts"
+            },
+            "posts": ["SDM", "DSP", "BDO", "CO", "District Officers"],
+            "apply_link": "https://bpsc.bih.nic.in"
+        },
+        "uppsc": {
+            "name": "UPPSC",
+            "full_name": "Uttar Pradesh Public Service Commission",
+            "hindi": "उत्तर प्रदेश लोक सेवा आयोग",
+            "organization": "UP Government",
+            "eligibility": {
+                "education": "Graduate from recognized university",
+                "education_hi": "मान्यता प्राप्त विश्वविद्यालय से स्नातक",
+                "age_min": 21,
+                "age_max": 40
+            },
+            "posts": ["SDM", "DSP", "BDO", "RO/ARO", "District Officers"],
+            "apply_link": "https://uppsc.up.nic.in"
+        }
+    }
+    
     # Common intents and responses
     INTENT_RESPONSES = {
         "greeting": {
@@ -912,8 +1289,13 @@ class AIResponseGenerator:
         return self._generate_contextual_response(user_message, context, user_profile, language)
     
     def _handle_specific_queries(self, message: str, user_profile: Dict, language: str) -> Optional[str]:
-        """Handle specific types of queries"""
+        """Handle specific types of queries with smart detection"""
         message_lower = message.lower()
+        
+        # Check for specific job/exam queries FIRST (most important)
+        job_response = self._get_specific_job_info(message_lower, language)
+        if job_response:
+            return job_response
         
         # Scheme specific queries
         for scheme_key, scheme_data in KnowledgeBase.SCHEMES_KNOWLEDGE.items():
@@ -926,16 +1308,192 @@ class AIResponseGenerator:
             if user_profile:
                 return self._check_eligibility(user_profile, language)
         
-        # Job specific
-        if "ssc" in message_lower or "upsc" in message_lower or "railway" in message_lower:
-            return self._get_job_info(message, language)
-        
         # Document help
         for doc_key, doc_data in KnowledgeBase.DOCUMENTS.items():
             if doc_key in message_lower or doc_data['hindi'] in message:
                 return self._format_document_info(doc_data, language)
         
         return None
+    
+    def _get_specific_job_info(self, message: str, language: str) -> Optional[str]:
+        """Get specific job/exam information based on query"""
+        message_lower = message.lower()
+        
+        # Define keywords for each job
+        job_keywords = {
+            "ssc_mts": ["ssc mts", "mts", "multi tasking", "एमटीएस", "मल्टी टास्किंग"],
+            "ssc_cgl": ["ssc cgl", "cgl", "सीजीएल", "combined graduate"],
+            "ssc_chsl": ["ssc chsl", "chsl", "सीएचएसएल", "higher secondary"],
+            "ssc_gd": ["ssc gd", "gd constable", "जीडी", "general duty"],
+            "rrb_ntpc": ["rrb ntpc", "ntpc", "एनटीपीसी", "railway ntpc"],
+            "rrb_group_d": ["rrb group d", "group d", "railway group d", "ग्रुप डी"],
+            "rrb_alp": ["rrb alp", "alp", "loco pilot", "लोको पायलट"],
+            "ibps_po": ["ibps po", "bank po", "बैंक पीओ"],
+            "ibps_clerk": ["ibps clerk", "bank clerk", "बैंक क्लर्क"],
+            "sbi_po": ["sbi po", "sbi पीओ"],
+            "upsc_cse": ["upsc", "civil services", "ias", "ips", "सिविल सेवा", "आईएएस"],
+            "upsc_nda": ["nda", "एनडीए", "national defence academy"],
+            "upsc_cds": ["cds", "सीडीएस", "combined defence"],
+            "bpsc": ["bpsc", "बीपीएससी", "bihar psc"],
+            "uppsc": ["uppsc", "यूपीपीएससी", "up psc"]
+        }
+        
+        # Find matching job
+        matched_job = None
+        for job_key, keywords in job_keywords.items():
+            for keyword in keywords:
+                if keyword in message_lower:
+                    matched_job = job_key
+                    break
+            if matched_job:
+                break
+        
+        if not matched_job:
+            return None
+        
+        job_data = KnowledgeBase.JOB_KNOWLEDGE.get(matched_job)
+        if not job_data:
+            return None
+        
+        # Detect what user is asking about
+        is_eligibility = any(word in message_lower for word in [
+            "eligibility", "eligible", "eligibi", "योग्यता", "पात्रता", "qualification", 
+            "required", "kon", "kaun", "कौन", "age", "उम्र", "education", "शिक्षा"
+        ])
+        
+        is_salary = any(word in message_lower for word in [
+            "salary", "सैलरी", "वेतन", "pay", "income", "kitna milta", "कितना मिलता", "package"
+        ])
+        
+        is_exam_pattern = any(word in message_lower for word in [
+            "exam", "pattern", "syllabus", "परीक्षा", "पैटर्न", "सिलेबस"
+        ])
+        
+        # Format response based on what user asked
+        if is_eligibility:
+            return self._format_job_eligibility(job_data, language)
+        elif is_salary:
+            return self._format_job_salary(job_data, language)
+        elif is_exam_pattern:
+            return self._format_job_exam_pattern(job_data, language)
+        else:
+            # Give complete info
+            return self._format_complete_job_info(job_data, language)
+    
+    def _format_job_eligibility(self, job: Dict, language: str) -> str:
+        """Format eligibility information for a job"""
+        name = job.get('hindi', job['name']) if language == "hi" else job['name']
+        full_name = job.get('full_name', '')
+        elig = job.get('eligibility', {})
+        
+        response = f"📋 **{name}** ({full_name})\n\n"
+        response += "✅ **पात्रता / Eligibility:**\n\n"
+        
+        # Education
+        edu = elig.get('education_hi' if language == 'hi' else 'education', elig.get('education', 'N/A'))
+        response += f"📚 **शिक्षा (Education):** {edu}\n\n"
+        
+        # Age
+        age_min = elig.get('age_min', 'N/A')
+        age_max = elig.get('age_max', 'N/A')
+        response += f"🎂 **आयु सीमा (Age):** {age_min} - {age_max} वर्ष\n\n"
+        
+        # Age Relaxation
+        if 'age_relaxation' in elig:
+            response += "🔄 **आयु में छूट (Age Relaxation):**\n"
+            for category, relaxation in elig['age_relaxation'].items():
+                response += f"  • {category}: {relaxation}\n"
+            response += "\n"
+        
+        # Physical requirements (if any)
+        if 'physical' in elig:
+            response += "💪 **Physical Requirements:**\n"
+            for req, value in elig['physical'].items():
+                response += f"  • {req.replace('_', ' ').title()}: {value}\n"
+            response += "\n"
+        
+        # Apply link
+        if job.get('apply_link'):
+            response += f"🔗 **Apply:** {job['apply_link']}\n"
+        
+        response += "\n💡 *और कोई सवाल हो तो पूछें!*"
+        return response
+    
+    def _format_job_salary(self, job: Dict, language: str) -> str:
+        """Format salary information"""
+        name = job.get('hindi', job['name']) if language == "hi" else job['name']
+        salary = job.get('salary', {})
+        
+        response = f"💰 **{name} - वेतन/Salary**\n\n"
+        
+        if 'pay_level' in salary:
+            response += f"📊 **Pay Level:** {salary['pay_level']}\n"
+        
+        if 'pay_scale' in salary:
+            response += f"💵 **Pay Scale:** {salary['pay_scale']}\n"
+        
+        if 'gross' in salary or 'gross_salary' in salary:
+            gross = salary.get('gross', salary.get('gross_salary', ''))
+            response += f"💰 **Gross Salary:** {gross}\n"
+        
+        if 'posts_salary' in salary:
+            response += "\n📋 **Post-wise Salary:**\n"
+            for post, sal in salary['posts_salary'].items():
+                response += f"  • {post}: {sal}\n"
+        
+        response += "\n📌 *Note: Salary includes DA, HRA and other allowances*"
+        return response
+    
+    def _format_job_exam_pattern(self, job: Dict, language: str) -> str:
+        """Format exam pattern information"""
+        name = job.get('hindi', job['name']) if language == "hi" else job['name']
+        pattern = job.get('exam_pattern', {})
+        
+        response = f"📝 **{name} - परीक्षा पैटर्न / Exam Pattern**\n\n"
+        
+        for stage, details in pattern.items():
+            if stage == 'subjects':
+                response += f"📚 **Subjects:** {', '.join(details)}\n"
+            else:
+                response += f"• **{stage}:** {details}\n"
+        
+        if job.get('selection'):
+            response += f"\n🎯 **Selection Process:** {' → '.join(job['selection'])}\n"
+        
+        if job.get('apply_link'):
+            response += f"\n🔗 **Official Website:** {job['apply_link']}"
+        
+        return response
+    
+    def _format_complete_job_info(self, job: Dict, language: str) -> str:
+        """Format complete job information"""
+        name = job.get('hindi', job['name']) if language == "hi" else job['name']
+        full_name = job.get('full_name', '')
+        
+        response = f"📋 **{name}** ({full_name})\n"
+        response += f"🏛️ *{job.get('organization', '')}*\n\n"
+        
+        # Eligibility summary
+        elig = job.get('eligibility', {})
+        edu = elig.get('education_hi' if language == 'hi' else 'education', elig.get('education', ''))
+        response += f"📚 **Education:** {edu}\n"
+        response += f"🎂 **Age:** {elig.get('age_min', 'N/A')} - {elig.get('age_max', 'N/A')} years\n\n"
+        
+        # Salary
+        salary = job.get('salary', {})
+        if salary.get('pay_scale'):
+            response += f"💰 **Salary:** {salary['pay_scale']}\n\n"
+        
+        # Posts
+        if job.get('posts'):
+            response += f"👥 **Posts:** {', '.join(job['posts'][:5])}\n\n"
+        
+        # Apply link
+        if job.get('apply_link'):
+            response += f"🔗 **Apply:** {job['apply_link']}\n"
+        
+        response += "\n💡 *Eligibility, Salary या Exam Pattern के बारे में और पूछ सकते हैं!*"
+        return response
     
     def _format_scheme_info(self, scheme: Dict, language: str) -> str:
         """Format scheme information"""
