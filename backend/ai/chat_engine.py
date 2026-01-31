@@ -940,11 +940,71 @@ class AIResponseGenerator:
         return self.ds_search
     
     def _needs_web_search(self, message: str) -> bool:
-        """Check if the query needs web search for real-time info"""
+        """
+        Smart detection: Check if the query needs web search for real-time info.
+        Handles typos and variations in user input.
+        """
         message_lower = message.lower()
+        
+        # ===== SMART KEYWORD DETECTION =====
+        # Keywords that ALWAYS need web search (with typo variations)
+        web_search_keywords = [
+            # Syllabus variations (including typos)
+            "syllabus", "slybuss", "sllabus", "silabus", "syllabu", "सिलेबस", "पाठ्यक्रम",
+            # Admit card
+            "admit card", "admit", "admitcard", "एडमिट", "हॉल टिकट", "hall ticket",
+            # Result
+            "result", "रिजल्ट", "परिणाम", "rezult",
+            # Cutoff
+            "cutoff", "cut off", "कटऑफ", "cut-off",
+            # Answer key
+            "answer key", "answerkey", "उत्तर कुंजी", "आंसर की",
+            # Notifications
+            "notification", "notificaton", "नोटिफिकेशन", "भर्ती अधिसूचना",
+            # Form/Apply
+            "form date", "apply date", "application", "आवेदन", "फॉर्म कब",
+            # Dates
+            "last date", "अंतिम तिथि", "exam date", "परीक्षा तिथि", "तारीख",
+            # Vacancy
+            "vacancy", "vacancies", "रिक्ति", "पद कितने",
+            # Latest/New
+            "latest", "new", "2025", "2026", "ताजा", "नया",
+            # Schedule
+            "schedule", "time table", "timetable", "शेड्यूल",
+            # Previous papers
+            "previous", "paper", "question", "पिछले साल",
+            # Preparation
+            "preparation", "tips", "strategy", "तैयारी कैसे",
+        ]
+        
+        # Check for these keywords
+        for keyword in web_search_keywords:
+            if keyword in message_lower:
+                return True
+        
+        # ===== CHECK REGEX PATTERNS =====
         for pattern in self.web_search_triggers:
             if re.search(pattern, message_lower, re.IGNORECASE):
                 return True
+        
+        # ===== SMART TYPO DETECTION =====
+        # If message seems like a question but we don't have hardcoded answer
+        question_indicators = [
+            "kya hai", "क्या है", "kab", "कब", "kaise", "कैसे", 
+            "batao", "बताओ", "bata do", "बता दो",
+            "chahiye", "चाहिए", "milega", "मिलेगा",
+            "?", "kahan", "कहाँ"
+        ]
+        
+        has_question = any(q in message_lower for q in question_indicators)
+        
+        # If it's a question about exam/job, likely needs web search
+        exam_keywords = ["ssc", "upsc", "railway", "rrb", "bank", "ibps", "board", "bpsc", "uppsc"]
+        has_exam = any(e in message_lower for e in exam_keywords)
+        
+        if has_question and has_exam:
+            return True
+        
         return False
     
     async def generate_response_async(self, user_message: str, context: List[Dict] = None, 
@@ -1139,35 +1199,76 @@ class AIResponseGenerator:
             return None
     
     def _enhance_search_query(self, query: str) -> str:
-        """Enhance user query for better search results"""
-        # Add context for Indian government related queries
+        """
+        Enhance user query for better search results.
+        Fix typos, add context, make it searchable.
+        """
         query_lower = query.lower()
+        
+        # ===== FIX COMMON TYPOS =====
+        typo_fixes = {
+            "slybuss": "syllabus",
+            "sllabus": "syllabus",
+            "silabus": "syllabus",
+            "syllabu": "syllabus",
+            "eligibi": "eligibility",
+            "eligi": "eligibility",
+            "notificaton": "notification",
+            "rezult": "result",
+            "admitcard": "admit card",
+        }
+        
+        enhanced_query = query_lower
+        for typo, correct in typo_fixes.items():
+            if typo in enhanced_query:
+                enhanced_query = enhanced_query.replace(typo, correct)
+        
+        # ===== ADD CONTEXT BASED ON EXAM TYPE =====
         
         # Board exam queries
         if "bihar board" in query_lower or "bseb" in query_lower:
-            return f"{query} BSEB official 2026"
+            return f"{enhanced_query} BSEB official 2026"
+        
+        if "up board" in query_lower:
+            return f"{enhanced_query} UP Board official 2026"
+        
+        if "cbse" in query_lower:
+            return f"{enhanced_query} CBSE official 2026"
         
         # SSC queries
         if "ssc" in query_lower:
-            return f"{query} ssc.nic.in official"
+            if "syllabus" in enhanced_query or "सिलेबस" in query_lower:
+                return f"SSC {enhanced_query} 2025 2026 official ssc.nic.in"
+            return f"{enhanced_query} ssc.nic.in official 2025 2026"
         
         # Railway queries
         if "railway" in query_lower or "rrb" in query_lower:
-            return f"{query} indianrailways.gov.in official"
+            return f"{enhanced_query} indianrailways.gov.in RRB official 2025 2026"
         
         # UPSC queries
         if "upsc" in query_lower:
-            return f"{query} upsc.gov.in official"
+            return f"{enhanced_query} upsc.gov.in official 2025 2026"
         
         # Bank exams
-        if "bank" in query_lower or "ibps" in query_lower:
-            return f"{query} ibps.in official"
+        if "bank" in query_lower or "ibps" in query_lower or "sbi" in query_lower:
+            return f"{enhanced_query} IBPS official ibps.in 2025 2026"
+        
+        # State PSC
+        if "bpsc" in query_lower:
+            return f"{enhanced_query} BPSC Bihar official bpsc.bih.nic.in 2025 2026"
+        
+        if "uppsc" in query_lower:
+            return f"{enhanced_query} UPPSC UP official uppsc.up.nic.in 2025 2026"
         
         # General government queries
         if any(word in query_lower for word in ["sarkari", "government", "govt", "सरकारी"]):
-            return f"{query} official india.gov.in"
+            return f"{enhanced_query} official india.gov.in 2025 2026"
         
-        return query
+        # Add year for freshness
+        if "2025" not in enhanced_query and "2026" not in enhanced_query:
+            enhanced_query += " 2025 2026"
+        
+        return enhanced_query
     
     def _build_response_from_search(self, original_query: str, results: List[Dict], language: str) -> str:
         """Build a natural summarized response from search results"""
