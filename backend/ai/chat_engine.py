@@ -549,6 +549,256 @@ class KnowledgeBase:
         }
     }
     
+    # ==================== INDIA KNOWLEDGE BASE ====================
+    # Comprehensive knowledge about India - States, Education, Government, etc.
+    
+    INDIA_KNOWLEDGE = {
+        # ===== STATES & UNION TERRITORIES =====
+        "states": {
+            "bihar": {
+                "name": "Bihar", "hindi": "बिहार", "capital": "Patna", "capital_hi": "पटना",
+                "districts": 38, "major_cities": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga", "Purnia", "Arrah", "Begusarai"],
+                "board": "BSEB", "psc": "BPSC", "universities": ["Patna University", "Nalanda University", "LNMU", "BRABU", "VKSU", "Magadh University"],
+                "population": "12.4 crore", "language": ["Hindi", "Maithili", "Bhojpuri", "Magahi"],
+                "cm": "Nitish Kumar", "governor": "Rajendra Vishwanath Arlekar"
+            },
+            "uttar_pradesh": {
+                "name": "Uttar Pradesh", "hindi": "उत्तर प्रदेश", "capital": "Lucknow", "capital_hi": "लखनऊ",
+                "districts": 75, "major_cities": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Prayagraj", "Meerut", "Ghaziabad", "Noida", "Gorakhpur"],
+                "board": "UP Board", "psc": "UPPSC", "universities": ["BHU", "AMU", "Lucknow University", "AKTU", "CSJMU"],
+                "population": "23.5 crore", "language": ["Hindi", "Urdu", "Awadhi", "Bhojpuri"],
+                "cm": "Yogi Adityanath"
+            },
+            "madhya_pradesh": {
+                "name": "Madhya Pradesh", "hindi": "मध्य प्रदेश", "capital": "Bhopal", "capital_hi": "भोपाल",
+                "districts": 55, "major_cities": ["Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain"],
+                "board": "MPBSE", "psc": "MPPSC"
+            },
+            "rajasthan": {
+                "name": "Rajasthan", "hindi": "राजस्थान", "capital": "Jaipur", "capital_hi": "जयपुर",
+                "districts": 50, "major_cities": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner"],
+                "board": "RBSE", "psc": "RPSC"
+            },
+            "maharashtra": {
+                "name": "Maharashtra", "hindi": "महाराष्ट्र", "capital": "Mumbai", "capital_hi": "मुंबई",
+                "districts": 36, "major_cities": ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Thane"],
+                "board": "Maharashtra Board", "psc": "MPSC"
+            },
+            "west_bengal": {
+                "name": "West Bengal", "hindi": "पश्चिम बंगाल", "capital": "Kolkata", "capital_hi": "कोलकाता",
+                "districts": 23, "major_cities": ["Kolkata", "Howrah", "Durgapur", "Siliguri", "Asansol"],
+                "board": "WBBSE", "psc": "WBPSC"
+            },
+            "tamil_nadu": {
+                "name": "Tamil Nadu", "hindi": "तमिलनाडु", "capital": "Chennai", "capital_hi": "चेन्नई",
+                "districts": 38, "major_cities": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem"],
+                "board": "TN Board", "psc": "TNPSC"
+            },
+            "karnataka": {
+                "name": "Karnataka", "hindi": "कर्नाटक", "capital": "Bengaluru", "capital_hi": "बेंगलुरु",
+                "districts": 31, "major_cities": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi"],
+                "board": "Karnataka Board", "psc": "KPSC"
+            },
+            "gujarat": {
+                "name": "Gujarat", "hindi": "गुजरात", "capital": "Gandhinagar", "capital_hi": "गांधीनगर",
+                "districts": 33, "major_cities": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar"],
+                "board": "GSEB", "psc": "GPSC"
+            },
+            "andhra_pradesh": {
+                "name": "Andhra Pradesh", "hindi": "आंध्र प्रदेश", "capital": "Amaravati", "capital_hi": "अमरावती",
+                "districts": 26, "major_cities": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati"],
+                "board": "AP Board", "psc": "APPSC"
+            },
+            "telangana": {
+                "name": "Telangana", "hindi": "तेलंगाना", "capital": "Hyderabad", "capital_hi": "हैदराबाद",
+                "districts": 33, "major_cities": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+                "board": "Telangana Board", "psc": "TSPSC"
+            },
+            "delhi": {
+                "name": "Delhi", "hindi": "दिल्ली", "capital": "New Delhi", "capital_hi": "नई दिल्ली",
+                "districts": 11, "major_areas": ["Central Delhi", "South Delhi", "North Delhi", "East Delhi", "West Delhi"],
+                "board": "CBSE/Delhi Board", "universities": ["DU", "JNU", "Jamia Millia Islamia", "GGSIPU"],
+                "cm": "Atishi"
+            },
+            "jharkhand": {
+                "name": "Jharkhand", "hindi": "झारखंड", "capital": "Ranchi", "capital_hi": "रांची",
+                "districts": 24, "major_cities": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Hazaribagh"],
+                "board": "JAC", "psc": "JPSC"
+            },
+            "odisha": {
+                "name": "Odisha", "hindi": "ओडिशा", "capital": "Bhubaneswar", "capital_hi": "भुवनेश्वर",
+                "districts": 30, "major_cities": ["Bhubaneswar", "Cuttack", "Rourkela", "Berhampur"],
+                "board": "CHSE Odisha", "psc": "OPSC"
+            },
+            "kerala": {
+                "name": "Kerala", "hindi": "केरल", "capital": "Thiruvananthapuram", "capital_hi": "तिरुवनंतपुरम",
+                "districts": 14, "major_cities": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur"],
+                "board": "Kerala Board", "psc": "Kerala PSC"
+            },
+            "punjab": {
+                "name": "Punjab", "hindi": "पंजाब", "capital": "Chandigarh", "capital_hi": "चंडीगढ़",
+                "districts": 23, "major_cities": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Chandigarh"],
+                "board": "PSEB", "psc": "PPSC"
+            },
+            "haryana": {
+                "name": "Haryana", "hindi": "हरियाणा", "capital": "Chandigarh", "capital_hi": "चंडीगढ़",
+                "districts": 22, "major_cities": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Karnal", "Rohtak"],
+                "board": "HBSE", "psc": "HPSC"
+            },
+            "assam": {
+                "name": "Assam", "hindi": "असम", "capital": "Dispur", "capital_hi": "दिसपुर",
+                "districts": 35, "major_cities": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat"],
+                "board": "SEBA/AHSEC", "psc": "APSC"
+            },
+            "chhattisgarh": {
+                "name": "Chhattisgarh", "hindi": "छत्तीसगढ़", "capital": "Raipur", "capital_hi": "रायपुर",
+                "districts": 33, "major_cities": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg"],
+                "board": "CGBSE", "psc": "CGPSC"
+            },
+            "uttarakhand": {
+                "name": "Uttarakhand", "hindi": "उत्तराखंड", "capital": "Dehradun", "capital_hi": "देहरादून",
+                "districts": 13, "major_cities": ["Dehradun", "Haridwar", "Haldwani", "Rishikesh", "Roorkee"],
+                "board": "UK Board", "psc": "UKPSC"
+            },
+            "himachal_pradesh": {
+                "name": "Himachal Pradesh", "hindi": "हिमाचल प्रदेश", "capital": "Shimla", "capital_hi": "शिमला",
+                "districts": 12, "major_cities": ["Shimla", "Dharamshala", "Manali", "Kullu", "Solan"],
+                "board": "HPBOSE", "psc": "HPPSC"
+            },
+            "jammu_kashmir": {
+                "name": "Jammu & Kashmir", "hindi": "जम्मू और कश्मीर", "capital": "Srinagar/Jammu", "capital_hi": "श्रीनगर/जम्मू",
+                "districts": 20, "major_cities": ["Srinagar", "Jammu", "Anantnag", "Baramulla"],
+                "board": "JKBOSE", "psc": "JKPSC"
+            },
+            "goa": {
+                "name": "Goa", "hindi": "गोवा", "capital": "Panaji", "capital_hi": "पणजी",
+                "districts": 2, "major_cities": ["Panaji", "Margao", "Vasco da Gama"],
+                "board": "Goa Board", "psc": "Goa PSC"
+            }
+        },
+        
+        # ===== EDUCATION BOARDS =====
+        "boards": {
+            "cbse": {
+                "name": "CBSE", "full_name": "Central Board of Secondary Education",
+                "hindi": "केंद्रीय माध्यमिक शिक्षा बोर्ड",
+                "exams": ["Class 10", "Class 12"],
+                "website": "cbse.gov.in", "result_site": "cbseresults.nic.in",
+                "affiliation": "Central Government", "medium": ["English", "Hindi"]
+            },
+            "bseb": {
+                "name": "BSEB", "full_name": "Bihar School Examination Board",
+                "hindi": "बिहार विद्यालय परीक्षा समिति",
+                "exams": ["Matric (10th)", "Intermediate (12th)"],
+                "website": "biharboardonline.bihar.gov.in", "result_site": "biharboardonline.com",
+                "state": "Bihar", "medium": ["Hindi", "English", "Urdu"]
+            },
+            "up_board": {
+                "name": "UP Board", "full_name": "Uttar Pradesh Madhyamik Shiksha Parishad",
+                "hindi": "उत्तर प्रदेश माध्यमिक शिक्षा परिषद",
+                "exams": ["High School (10th)", "Intermediate (12th)"],
+                "website": "upmsp.edu.in", "result_site": "upresults.nic.in",
+                "state": "Uttar Pradesh"
+            },
+            "icse": {
+                "name": "ICSE/ISC", "full_name": "Indian Certificate of Secondary Education",
+                "hindi": "आईसीएसई बोर्ड",
+                "exams": ["ICSE (10th)", "ISC (12th)"],
+                "website": "cisce.org"
+            }
+        },
+        
+        # ===== TOP UNIVERSITIES =====
+        "universities": {
+            "central": {
+                "DU": {"name": "Delhi University", "city": "Delhi", "type": "Central", "ranking": "Top 5"},
+                "JNU": {"name": "Jawaharlal Nehru University", "city": "Delhi", "type": "Central"},
+                "BHU": {"name": "Banaras Hindu University", "city": "Varanasi", "type": "Central", "ranking": "Top 3"},
+                "AMU": {"name": "Aligarh Muslim University", "city": "Aligarh", "type": "Central"},
+                "CU": {"name": "Calcutta University", "city": "Kolkata", "type": "State"},
+                "PU": {"name": "Patna University", "city": "Patna", "state": "Bihar"}
+            },
+            "iit": ["IIT Bombay", "IIT Delhi", "IIT Kanpur", "IIT Kharagpur", "IIT Madras", "IIT Roorkee", "IIT Guwahati", "IIT BHU"],
+            "nit": ["NIT Trichy", "NIT Warangal", "NIT Surathkal", "NIT Rourkela", "NIT Patna", "NIT Allahabad"],
+            "iim": ["IIM Ahmedabad", "IIM Bangalore", "IIM Calcutta", "IIM Lucknow", "IIM Indore", "IIM Kozhikode"],
+            "aiims": ["AIIMS Delhi", "AIIMS Patna", "AIIMS Jodhpur", "AIIMS Bhopal", "AIIMS Rishikesh"]
+        },
+        
+        # ===== ENTRANCE EXAMS =====
+        "entrance_exams": {
+            "engineering": {
+                "JEE Main": {"full": "Joint Entrance Examination Main", "for": "NITs, IIITs, GFTIs", "conducted_by": "NTA"},
+                "JEE Advanced": {"full": "Joint Entrance Examination Advanced", "for": "IITs", "conducted_by": "IITs"},
+                "BITSAT": {"full": "BITS Admission Test", "for": "BITS Pilani campuses"},
+                "VITEEE": {"full": "VIT Engineering Entrance Exam", "for": "VIT University"},
+                "WBJEE": {"full": "West Bengal JEE", "for": "WB Engineering Colleges"},
+                "MHT CET": {"full": "Maharashtra Common Entrance Test", "for": "Maharashtra Colleges"},
+                "KCET": {"full": "Karnataka CET", "for": "Karnataka Colleges"},
+                "AP EAMCET": {"for": "Andhra Pradesh Engineering Colleges"},
+                "TS EAMCET": {"for": "Telangana Engineering Colleges"}
+            },
+            "medical": {
+                "NEET": {"full": "National Eligibility cum Entrance Test", "for": "MBBS, BDS, AYUSH", "conducted_by": "NTA"},
+                "AIIMS": {"for": "AIIMS Institutes (now merged with NEET)"},
+                "JIPMER": {"for": "JIPMER Institutes (now merged with NEET)"}
+            },
+            "law": {
+                "CLAT": {"full": "Common Law Admission Test", "for": "NLUs"},
+                "AILET": {"full": "All India Law Entrance Test", "for": "NLU Delhi"},
+                "LSAT India": {"for": "Various Law Schools"}
+            },
+            "mba": {
+                "CAT": {"full": "Common Admission Test", "for": "IIMs", "conducted_by": "IIMs"},
+                "XAT": {"full": "Xavier Aptitude Test", "for": "XLRI, XIM"},
+                "MAT": {"full": "Management Aptitude Test"},
+                "CMAT": {"full": "Common Management Admission Test", "conducted_by": "NTA"},
+                "SNAP": {"for": "Symbiosis Universities"}
+            },
+            "defence": {
+                "NDA": {"full": "National Defence Academy", "for": "Army, Navy, Air Force", "conducted_by": "UPSC"},
+                "CDS": {"full": "Combined Defence Services", "for": "IMA, OTA, INA, AFA", "conducted_by": "UPSC"},
+                "AFCAT": {"full": "Air Force Common Admission Test", "for": "Indian Air Force"}
+            }
+        },
+        
+        # ===== GOVERNMENT ORGANIZATIONS =====
+        "organizations": {
+            "upsc": {"name": "UPSC", "full": "Union Public Service Commission", "website": "upsc.gov.in", "hindi": "संघ लोक सेवा आयोग"},
+            "ssc": {"name": "SSC", "full": "Staff Selection Commission", "website": "ssc.nic.in", "hindi": "कर्मचारी चयन आयोग"},
+            "ibps": {"name": "IBPS", "full": "Institute of Banking Personnel Selection", "website": "ibps.in", "hindi": "बैंकिंग कार्मिक चयन संस्थान"},
+            "rrb": {"name": "RRB", "full": "Railway Recruitment Board", "website": "indianrailways.gov.in", "hindi": "रेलवे भर्ती बोर्ड"},
+            "nta": {"name": "NTA", "full": "National Testing Agency", "website": "nta.ac.in", "hindi": "राष्ट्रीय परीक्षण एजेंसी"}
+        },
+        
+        # ===== IMPORTANT DATES/FESTIVALS =====
+        "important_dates": {
+            "republic_day": {"date": "26 January", "hindi": "गणतंत्र दिवस"},
+            "independence_day": {"date": "15 August", "hindi": "स्वतंत्रता दिवस"},
+            "gandhi_jayanti": {"date": "2 October", "hindi": "गांधी जयंती"},
+            "teachers_day": {"date": "5 September", "hindi": "शिक्षक दिवस"},
+            "children_day": {"date": "14 November", "hindi": "बाल दिवस"}
+        }
+    }
+    
+    # ===== COMMON QUESTIONS KNOWLEDGE =====
+    GENERAL_KNOWLEDGE = {
+        # What/When/Why type questions
+        "pm_kisan_start": {
+            "patterns": ["pm kisan.*start", "pm-kisan.*shuru", "किसान सम्मान.*शुरू", "pm kisan kab"],
+            "answer_hi": "🌾 **PM-KISAN योजना की शुरुआत:**\n\n📅 **शुरू हुई:** 1 दिसंबर 2018\n👤 **शुरू की:** प्रधानमंत्री नरेंद्र मोदी जी ने\n📍 **पहली किस्त:** 24 फरवरी 2019 (गोरखपुर, UP में लॉन्च)\n💰 **लाभ:** ₹6,000 प्रति वर्ष (3 किस्तों में ₹2,000)\n🎯 **उद्देश्य:** किसानों को आर्थिक सहायता देना\n\n🔗 **Official Website:** pmkisan.gov.in",
+            "answer_en": "🌾 **PM-KISAN Scheme Launch:**\n\n📅 **Started:** December 1, 2018\n👤 **Launched by:** PM Narendra Modi\n📍 **First Installment:** February 24, 2019\n💰 **Benefit:** ₹6,000 per year (₹2,000 in 3 installments)\n\n🔗 **Official Website:** pmkisan.gov.in"
+        },
+        "ayushman_bharat_start": {
+            "patterns": ["ayushman.*start", "ayushman.*shuru", "आयुष्मान.*शुरू", "ayushman kab"],
+            "answer_hi": "🏥 **आयुष्मान भारत योजना:**\n\n📅 **शुरू हुई:** 23 सितंबर 2018\n📍 **कहाँ से:** झारखंड के रांची से\n👤 **शुरू की:** प्रधानमंत्री नरेंद्र मोदी जी ने\n💰 **लाभ:** ₹5 लाख का स्वास्थ्य बीमा प्रति परिवार\n🎯 **लाभार्थी:** 10 करोड़+ गरीब परिवार\n\n🔗 **Official Website:** pmjay.gov.in",
+            "answer_en": "🏥 **Ayushman Bharat Scheme:**\n\n📅 **Started:** September 23, 2018\n📍 **Launched from:** Ranchi, Jharkhand\n👤 **Launched by:** PM Narendra Modi\n💰 **Benefit:** ₹5 Lakh health insurance per family\n\n🔗 **Official Website:** pmjay.gov.in"
+        },
+        "ujjwala_start": {
+            "patterns": ["ujjwala.*start", "ujjwala.*shuru", "उज्ज्वला.*शुरू"],
+            "answer_hi": "🔥 **PM उज्ज्वला योजना:**\n\n📅 **शुरू हुई:** 1 मई 2016\n📍 **कहाँ से:** बलिया, उत्तर प्रदेश से\n💰 **लाभ:** मुफ्त LPG कनेक्शन\n🎯 **लक्ष्य:** BPL महिलाओं को स्वच्छ ईंधन\n\n🔗 **Website:** pmuy.gov.in"
+        }
+    }
+    
     # Common intents and responses
     INTENT_RESPONSES = {
         "greeting": {
