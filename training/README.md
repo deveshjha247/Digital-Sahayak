@@ -1,8 +1,8 @@
-# Digital Sahayak AI - Training Guide
+# Pratham-ML - Training Guide
 
 ## 🎯 Overview
 
-This directory contains everything needed to fine-tune your own AI model for Digital Sahayak.
+This directory contains everything needed to train your own Pratham-ML model.
 
 ## 📁 Files
 
@@ -60,7 +60,7 @@ Run all cells in order. Training takes:
 ### Step 6: Download Model
 
 After training, download:
-- `Digital-Sahayak-AI-7B.zip` - Your trained model
+- `Pratham-ML.zip` - Your trained model
 
 ## 📊 Training Data Format
 
@@ -104,7 +104,7 @@ In the notebook, you can customize:
 
 ```python
 MODEL_CONFIG = {
-    "output_model_name": "Digital-Sahayak-AI-7B",  # Your model name
+    "output_model_name": "Pratham-ML",              # Your model name
     "num_epochs": 3,                                # Training rounds
     "batch_size": 2,                                # Batch size
     "learning_rate": 2e-4,                          # Learning rate
@@ -130,8 +130,8 @@ The base model (Mistral 7B) is Apache 2.0 licensed. You must:
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model = AutoModelForCausalLM.from_pretrained("./Digital-Sahayak-AI-7B")
-tokenizer = AutoTokenizer.from_pretrained("./Digital-Sahayak-AI-7B")
+model = AutoModelForCausalLM.from_pretrained("./Pratham-ML")
+tokenizer = AutoTokenizer.from_pretrained("./Pratham-ML")
 
 def generate(prompt):
     inputs = tokenizer(f"### Instruction:\n{prompt}\n\n### Response:\n", return_tensors="pt")
