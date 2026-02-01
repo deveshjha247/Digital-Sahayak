@@ -1,0 +1,106 @@
+[
+  {
+    "instruction": "Good morning",
+    "response": "🌅 Suprabhat! Aapka din shubh ho! Main Digital Sahayak AI hoon - aapka sarkari sahayak. Sarkari yojana, naukri, documents - kisme madad chahiye?"
+  },
+  {
+    "instruction": "Good evening",
+    "response": "🌆 Shubh sandhya! Digital Sahayak AI aapki seva mein. Aaj kya janna chahte hain?"
+  },
+  {
+    "instruction": "Hello",
+    "response": "🙏 Namaste! Main Digital Sahayak AI hoon. Sarkari yojanaon, naukariyon, aur documents ke baare mein poochiye!"
+  },
+  {
+    "instruction": "PM-KISAN yojana kya hai?",
+    "response": "🌾 **PM-KISAN (Pradhan Mantri Kisan Samman Nidhi):**\n\n📅 Shuruat: 1 December 2018\n💰 Labh: ₹6,000 per year (3 kisht mein ₹2,000)\n\n✅ **Patrata:**\n- Chhote aur seemant kisan\n- Land records zaroori\n\n📄 **Documents:**\n- Aadhar Card\n- Bank Account\n- Land Papers\n\n🔗 Website: pmkisan.gov.in"
+  },
+  {
+    "instruction": "Ayushman Bharat yojana kya hai?",
+    "response": "🏥 **Ayushman Bharat (PM-JAY):**\n\n📅 Shuruat: 23 September 2018\n💰 Labh: ₹5 Lakh health insurance per family/year\n\n✅ **Patrata:**\n- BPL families\n- SECC database mein naam\n\n📄 **Documents:**\n- Aadhar Card\n- Ration Card\n- Income Certificate\n\n🔗 Website: pmjay.gov.in"
+  },
+  {
+    "instruction": "SSC MTS ki eligibility kya hai?",
+    "response": "📋 **SSC MTS (Multi Tasking Staff):**\n\n✅ **Eligibility:**\n📚 Education: 10th Pass (Matric)\n🎂 Age: 18-25 years\n\n🔄 **Age Relaxation:**\n- OBC: 3 years\n- SC/ST: 5 years\n- PwD: 10 years\n\n💰 Salary: ₹18,000 - ₹56,900 (Level 1)\n\n🔗 Apply: ssc.nic.in"
+  },
+  {
+    "instruction": "SSC CGL ki eligibility batao",
+    "response": "📋 **SSC CGL (Combined Graduate Level):**\n\n✅ **Eligibility:**\n📚 Education: Graduation (Bachelor's Degree)\n🎂 Age: 18-32 years (varies by post)\n\n🔄 **Age Relaxation:**\n- OBC: 3 years\n- SC/ST: 5 years\n\n💰 Salary: ₹44,900 - ₹1,42,400 (Inspector level)\n\n🔗 Apply: ssc.nic.in"
+  },
+  {
+    "instruction": "Railway Group D ki eligibility kya hai?",
+    "response": "📋 **RRB Group D:**\n\n✅ **Eligibility:**\n📚 Education: 10th Pass + ITI (kuch posts ke liye)\n🎂 Age: 18-33 years\n\n🔄 **Age Relaxation:**\n- OBC: 3 years\n- SC/ST: 5 years\n\n💰 Salary: ₹18,000 - ₹56,900\n\n🔗 Apply: indianrailways.gov.in"
+  },
+  {
+    "instruction": "Bihar ka capital kya hai?",
+    "response": "🏛️ Bihar ki rajdhani **Patna** hai.\n\n📍 Patna Ganga nadi ke kinare basa ek pracheen sheher hai.\n📊 Bihar mein kul 38 jile hain.\n👤 Current CM: Nitish Kumar"
+  },
+  {
+    "instruction": "UP mein kitne district hain?",
+    "response": "📍 **Uttar Pradesh** mein kul **75 jile** hain.\n\n🏛️ Rajdhani: Lucknow\n🏙️ Pramukh sheher: Lucknow, Kanpur, Varanasi, Agra, Prayagraj, Meerut, Noida\n👤 Current CM: Yogi Adityanath"
+  },
+  {
+    "instruction": "Aadhar card kaise banwaye?",
+    "response": "📄 **Aadhar Card Banwane ka Process:**\n\n1️⃣ Najdiki Aadhar Enrollment Center jaye\n2️⃣ Documents le jaye:\n   - ID Proof (Voter ID/Passport)\n   - Address Proof (Bijli Bill/Ration Card)\n   - DOB Proof (Birth Certificate/10th Marksheet)\n3️⃣ Biometric de (Fingerprint, Iris, Photo)\n4️⃣ Form bhare aur submit kare\n5️⃣ Acknowledgment slip le\n\n⏰ 90 din mein Aadhar post se aayega\n🔗 Online appointment: uidai.gov.in"
+  },
+  {
+    "instruction": "PAN card kaise apply kare?",
+    "response": "📄 **PAN Card Apply Karne ka Tarika:**\n\n**Online Process:**\n1️⃣ Visit: tin.tin.nsdl.com ya utiitsl.com\n2️⃣ Form 49A bhare (Indian citizens ke liye)\n3️⃣ Documents upload kare:\n   - ID Proof (Aadhar/Passport)\n   - Address Proof\n   - DOB Proof\n   - Photo\n4️⃣ Fee pay kare (₹110 approx)\n5️⃣ E-PAN 2-3 din mein, Physical 15-20 din\n\n🔗 Website: incometax.gov.in"
+  },
+  {
+    "instruction": "UPSC CSE ki eligibility kya hai?",
+    "response": "📋 **UPSC Civil Services (IAS/IPS/IFS):**\n\n✅ **Eligibility:**\n📚 Education: Graduation in any stream\n🎂 Age: 21-32 years\n\n📝 **Attempts:**\n- General: 6 attempts\n- OBC: 9 attempts\n- SC/ST: Unlimited (till age)\n\n🔄 **Age Relaxation:**\n- OBC: 3 years\n- SC/ST: 5 years\n\n💰 IAS Salary: ₹56,100 - ₹2,50,000\n\n🔗 Apply: upsc.gov.in"
+  },
+  {
+    "instruction": "BPSC ki eligibility batao",
+    "response": "📋 **BPSC (Bihar Public Service Commission):**\n\n✅ **Eligibility:**\n📚 Education: Graduation from recognized university\n🎂 Age: 20-37 years\n🏠 Bihar Domicile required (kuch posts ke liye)\n\n📝 **Posts:** SDM, DSP, BDO, CO, Block Officers\n\n🔗 Apply: bpsc.bih.nic.in"
+  },
+  {
+    "instruction": "Income Certificate kaise banwaye?",
+    "response": "📄 **Income Certificate Banwane ka Tarika:**\n\n**Offline:**\n1️⃣ Block/Tehsil office jaye\n2️⃣ Application form bhare\n3️⃣ Documents attach kare:\n   - Aadhar Card\n   - Ration Card\n   - Employer ka Income Proof ya Affidavit\n4️⃣ Fee pay kare\n5️⃣ 7-15 din mein certificate milega\n\n**Online (State portal se):**\n- Bihar: serviceonline.bihar.gov.in\n- UP: edistrict.up.gov.in\n- MP: mpedistrict.gov.in"
+  },
+  {
+    "instruction": "Caste Certificate kaise banwaye?",
+    "response": "📄 **Caste Certificate (Jati Praman Patra):**\n\n**Documents Required:**\n- Aadhar Card\n- Ration Card\n- Family ke kisi member ka purana caste certificate\n- School certificate\n\n**Process:**\n1️⃣ Tehsil/Block office ya online portal jaye\n2️⃣ Application form bhare\n3️⃣ Documents attach kare\n4️⃣ Verification hoga\n5️⃣ 15-30 din mein certificate\n\n**Online portals:**\n- Bihar: serviceonline.bihar.gov.in\n- UP: edistrict.up.gov.in"
+  },
+  {
+    "instruction": "JEE Main kya hai?",
+    "response": "🎯 **JEE Main (Joint Entrance Examination):**\n\n📝 Conducted by: NTA (National Testing Agency)\n🎓 For: NITs, IIITs, GFTIs admission\n\n✅ **Eligibility:**\n- 12th Pass with Physics, Chemistry, Maths\n- No age limit\n\n📅 Exam: 2 times per year (Jan & April)\n\n📊 **Pattern:**\n- Paper 1 (B.E./B.Tech): 90 Qs, 300 marks\n- Paper 2 (B.Arch/B.Planning)\n\n🔗 Website: jeemain.nta.nic.in"
+  },
+  {
+    "instruction": "NEET kya hai?",
+    "response": "🎯 **NEET (National Eligibility cum Entrance Test):**\n\n📝 Conducted by: NTA\n🎓 For: MBBS, BDS, AYUSH admissions\n\n✅ **Eligibility:**\n- 12th Pass with PCB (Physics, Chemistry, Biology)\n- Min 50% marks (40% for reserved)\n- Age: 17-25 years\n\n📊 **Pattern:**\n- 200 Qs, 720 marks\n- Physics: 45, Chemistry: 45, Biology: 90\n- Duration: 3 hours 20 min\n\n🔗 Website: neet.nta.nic.in"
+  },
+  {
+    "instruction": "Bank PO kaise bane?",
+    "response": "🏦 **Bank PO (Probationary Officer) Kaise Bane:**\n\n**Exams:**\n- IBPS PO (19 PSU Banks)\n- SBI PO (State Bank)\n\n✅ **Eligibility:**\n📚 Education: Graduation in any stream\n🎂 Age: 20-30 years\n\n📊 **Selection Process:**\n1. Prelims (100 marks)\n2. Mains (200 marks)\n3. Interview (100 marks)\n\n💰 Salary: ₹52,000 - ₹65,000 (in-hand)\n\n🔗 Apply: ibps.in, sbi.co.in"
+  },
+  {
+    "instruction": "Domicile certificate kaise banwaye?",
+    "response": "📄 **Domicile Certificate (Mool Niwas Praman Patra):**\n\n**Documents:**\n- Aadhar Card\n- Birth Certificate\n- 10th Marksheet\n- Ration Card\n- Address Proof\n\n**Process:**\n1️⃣ Tehsil office ya online portal\n2️⃣ Application form + documents\n3️⃣ Verification\n4️⃣ 15-30 din mein certificate\n\n**Online:**\n- Bihar: serviceonline.bihar.gov.in\n- UP: edistrict.up.gov.in\n- MP: mpedistrict.gov.in"
+  },
+  {
+    "instruction": "PM Ujjwala Yojana kya hai?",
+    "response": "🔥 **PM Ujjwala Yojana:**\n\n📅 Shuruat: 1 May 2016 (Ballia, UP se)\n💰 Labh: Free LPG Connection\n\n✅ **Patrata:**\n- BPL parivaar ki mahila\n- 18+ age\n- Ghar mein pehle se LPG na ho\n\n📄 **Documents:**\n- Aadhar Card\n- BPL Card/Ration Card\n- Bank Account\n- Passport Photo\n\n🔗 Website: pmuy.gov.in"
+  },
+  {
+    "instruction": "NDA exam ki eligibility kya hai?",
+    "response": "🎖️ **NDA (National Defence Academy):**\n\n📝 Conducted by: UPSC\n🎓 For: Army, Navy, Air Force\n\n✅ **Eligibility:**\n📚 Education: 12th Pass (Science for Navy/Air Force)\n🎂 Age: 16.5 - 19.5 years\n👤 Only Unmarried candidates\n👫 Male & Female both eligible\n\n📊 **Selection:**\n1. Written Exam (900 marks)\n2. SSB Interview (5 days)\n\n💰 Salary: ₹56,100 (during training)\n\n🔗 Apply: upsc.gov.in"
+  },
+  {
+    "instruction": "CBSE kya hai?",
+    "response": "📚 **CBSE (Central Board of Secondary Education):**\n\n🏛️ Type: Central Government Board\n📍 HQ: Delhi\n\n📝 **Exams:**\n- Class 10 Board Exam\n- Class 12 Board Exam\n\n🌐 **Medium:** English & Hindi\n📊 **Affiliation:** 27,000+ schools\n\n🔗 Websites:\n- cbse.gov.in\n- cbseresults.nic.in (results)"
+  },
+  {
+    "instruction": "Bihar Board result kab aayega?",
+    "response": "📊 **Bihar Board (BSEB) Result:**\n\nResult ki exact date announce hone ke baad BSEB ki official website par check karein:\n\n🔗 **Official Sites:**\n- biharboardonline.bihar.gov.in\n- biharboardonline.com\n- bsebresult.online\n\n⚠️ Latest updates ke liye official website check karte rahein.\n\n💡 Result check karne ke liye Roll Number aur Roll Code chahiye hoga."
+  },
+  {
+    "instruction": "Thank you",
+    "response": "🙏 Aapka swagat hai! Agar aur koi sawal ho toh zaroor poochiye. Digital Sahayak AI hamesha aapki madad ke liye tayyar hai! 😊"
+  },
+  {
+    "instruction": "Bye",
+    "response": "👋 Alvida! Digital Sahayak par aane ke liye dhanyavaad. Jab bhi zarurat ho, wapas aaiye! Shubh din! 🙏"
+  }
+]
